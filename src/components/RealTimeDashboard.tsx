@@ -1,9 +1,18 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Activity, Zap, Eye, Database, Shield, AlertTriangle, TrendingUp, Clock } from "lucide-react";
+
+interface ActivityItem {
+  id: number;
+  type: string;
+  plate: string;
+  camera: string;
+  time: string;
+  confidence?: number;
+  reason?: string;
+}
 
 const RealTimeDashboard = () => {
   const [liveStats, setLiveStats] = useState({
@@ -21,7 +30,7 @@ const RealTimeDashboard = () => {
     flaggedVehicles: 8
   });
 
-  const [realtimeActivity, setRealtimeActivity] = useState([
+  const [realtimeActivity, setRealtimeActivity] = useState<ActivityItem[]>([
     { id: 1, type: "detection", plate: "DL-01-AB-1234", camera: "CAM-02", time: "10:45:32", confidence: 98 },
     { id: 2, type: "alert", plate: "MH-09-XY-9999", camera: "CAM-01", time: "10:45:28", reason: "Blacklisted" },
     { id: 3, type: "detection", plate: "UP-14-CD-5678", camera: "CAM-04", time: "10:45:25", confidence: 94 },
@@ -64,15 +73,19 @@ const RealTimeDashboard = () => {
       ];
 
       const activity = activities[Math.floor(Math.random() * activities.length)];
-      const newActivity = {
+      const newActivity: ActivityItem = {
         id: Date.now(),
         type: activity.type,
         plate: `${['DL', 'MH', 'UP', 'GJ', 'KA'][Math.floor(Math.random() * 5)]}-${String(Math.floor(10 + Math.random() * 89)).padStart(2, '0')}-${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${String.fromCharCode(65 + Math.floor(Math.random() * 26))}-${Math.floor(1000 + Math.random() * 9000)}`,
         camera: `CAM-${String(Math.floor(Math.random() * 8) + 1).padStart(2, '0')}`,
         time: new Date().toLocaleTimeString(),
-        confidence: activity.type === 'detection' ? Math.floor(85 + Math.random() * 15) : undefined,
-        reason: activity.reason
       };
+
+      if (activity.type === 'detection') {
+        newActivity.confidence = Math.floor(85 + Math.random() * 15);
+      } else if (activity.reason) {
+        newActivity.reason = activity.reason;
+      }
 
       setRealtimeActivity(prev => [newActivity, ...prev.slice(0, 19)]);
     }, 3000);
@@ -80,6 +93,7 @@ const RealTimeDashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
+  
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'detection': return <Eye className="w-4 h-4 text-blue-400" />;

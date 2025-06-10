@@ -5,56 +5,59 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Car, Shield, Calendar, FileText, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { Search, Car, Shield, AlertTriangle, Clock, MapPin } from "lucide-react";
+import { getVehicleByPlate } from "@/lib/supabase";
+import VehicleDetailsInfo from "@/components/VehicleDetailsInfo";
 
 const VehicleDetails = () => {
   const [searchPlate, setSearchPlate] = useState("");
   const [searchResults, setSearchResults] = useState<any>(null);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Mock vehicle database with comprehensive details
+  // Mock vehicle database for demo purposes until Supabase is connected
   const vehicleDatabase = {
     "DL-01-AB-1234": {
       plateNumber: "DL-01-AB-1234",
       vinNumber: "1HGBH41JXMN109186",
-      registrationDetails: {
-        ownerName: "Rajesh Kumar",
-        ownerAddress: "123 Sector 15, Noida, UP 201301",
-        registrationDate: "2020-03-15",
-        registrationState: "Delhi",
-        registrationRTO: "DL-01"
+      registration_details: {
+        owner_name: "Rajesh Kumar",
+        owner_address: "123 Sector 15, Noida, UP 201301",
+        registration_date: "2020-03-15",
+        registration_state: "Delhi",
+        registration_rto: "DL-01"
       },
-      vehicleDetails: {
+      vehicle_details: {
         make: "Honda",
         model: "City",
         year: 2020,
         color: "White",
-        fuelType: "Petrol",
-        engineNumber: "HC20E123456",
-        chassisNumber: "MA3FCEB1S00123456",
-        seatingCapacity: 5,
-        class: "Motor Car"
+        fuel_type: "Petrol",
+        engine_number: "HC20E123456",
+        chassis_number: "MA3FCEB1S00123456",
+        seating_capacity: 5,
+        class: "Motor Car",
+        vin_number: "1HGBH41JXMN109186"
       },
       insurance: {
         provider: "HDFC ERGO",
-        policyNumber: "HD/VEH/2023/0012345",
-        validFrom: "2023-06-01",
-        validTo: "2024-05-31",
+        policy_number: "HD/VEH/2023/0012345",
+        valid_from: "2023-06-01",
+        valid_to: "2024-05-31",
         status: "active",
         premium: "₹8,500",
         idv: "₹6,50,000"
       },
       puc: {
-        certificateNumber: "PUC/DL/2024/001234",
-        validFrom: "2024-01-15",
-        validTo: "2024-07-14",
+        certificate_number: "PUC/DL/2024/001234",
+        valid_from: "2024-01-15",
+        valid_to: "2024-07-14",
         status: "valid",
-        testCenter: "Delhi Pollution Control Center"
+        test_center: "Delhi Pollution Control Center"
       },
       fitness: {
-        certificateNumber: "FIT/DL/2024/001234",
-        validFrom: "2024-02-01",
-        validTo: "2025-01-31",
+        certificate_number: "FIT/DL/2024/001234",
+        valid_from: "2024-02-01",
+        valid_to: "2025-01-31",
         status: "valid"
       },
       permits: [
@@ -93,44 +96,45 @@ const VehicleDetails = () => {
     "MH-12-CD-5678": {
       plateNumber: "MH-12-CD-5678",
       vinNumber: "2HGFA16528H123456",
-      registrationDetails: {
-        ownerName: "Priya Sharma",
-        ownerAddress: "456 Bandra West, Mumbai, MH 400050",
-        registrationDate: "2019-08-22",
-        registrationState: "Maharashtra",
-        registrationRTO: "MH-12"
+      registration_details: {
+        owner_name: "Priya Sharma",
+        owner_address: "456 Bandra West, Mumbai, MH 400050",
+        registration_date: "2019-08-22",
+        registration_state: "Maharashtra",
+        registration_rto: "MH-12"
       },
-      vehicleDetails: {
+      vehicle_details: {
         make: "Maruti Suzuki",
         model: "Swift",
         year: 2019,
         color: "Red",
-        fuelType: "Petrol",
-        engineNumber: "K12M789012",
-        chassisNumber: "MA3EJEBL000789012",
-        seatingCapacity: 5,
-        class: "Motor Car"
+        fuel_type: "Petrol",
+        engine_number: "K12M789012",
+        chassis_number: "MA3EJEBL000789012",
+        seating_capacity: 5,
+        class: "Motor Car",
+        vin_number: "2HGFA16528H123456"
       },
       insurance: {
         provider: "ICICI Lombard",
-        policyNumber: "IC/VEH/2023/0056789",
-        validFrom: "2023-08-01",
-        validTo: "2024-07-31",
+        policy_number: "IC/VEH/2023/0056789",
+        valid_from: "2023-08-01",
+        valid_to: "2024-07-31",
         status: "active",
         premium: "₹7,200",
         idv: "₹4,80,000"
       },
       puc: {
-        certificateNumber: "PUC/MH/2024/005678",
-        validFrom: "2024-02-10",
-        validTo: "2024-08-09",
+        certificate_number: "PUC/MH/2024/005678",
+        valid_from: "2024-02-10",
+        valid_to: "2024-08-09",
         status: "valid",
-        testCenter: "Mumbai Pollution Control Center"
+        test_center: "Mumbai Pollution Control Center"
       },
       fitness: {
-        certificateNumber: "FIT/MH/2024/005678",
-        validFrom: "2024-01-15",
-        validTo: "2024-12-14",
+        certificate_number: "FIT/MH/2024/005678",
+        valid_from: "2024-01-15",
+        valid_to: "2024-12-14",
         status: "valid"
       },
       permits: [],
@@ -149,28 +153,24 @@ const VehicleDetails = () => {
     
     setIsSearching(true);
     
-    // Simulate API call delay
-    setTimeout(() => {
-      const result = vehicleDatabase[searchPlate.toUpperCase() as keyof typeof vehicleDatabase];
-      setSearchResults(result || null);
+    try {
+      // Try to get data from Supabase first
+      const supabaseData = await getVehicleByPlate(searchPlate.toUpperCase());
+      
+      if (supabaseData) {
+        setSearchResults(supabaseData);
+      } else {
+        // Fall back to mock data for demo purposes
+        const mockResult = vehicleDatabase[searchPlate.toUpperCase() as keyof typeof vehicleDatabase];
+        setSearchResults(mockResult || null);
+      }
+    } catch (error) {
+      console.error("Error searching for vehicle:", error);
+      // Fall back to mock data
+      const mockResult = vehicleDatabase[searchPlate.toUpperCase() as keyof typeof vehicleDatabase];
+      setSearchResults(mockResult || null);
+    } finally {
       setIsSearching(false);
-    }, 1500);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'active':
-      case 'valid':
-      case 'paid':
-        return 'bg-green-500/20 text-green-400 border-green-500/30';
-      case 'pending':
-      case 'expired':
-        return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-      case 'inactive':
-      case 'invalid':
-        return 'bg-red-500/20 text-red-400 border-red-500/30';
-      default:
-        return 'bg-slate-500/20 text-slate-400 border-slate-500/30';
     }
   };
 
@@ -229,14 +229,14 @@ const VehicleDetails = () => {
             <div className="flex items-center justify-between">
               <CardTitle className="text-white flex items-center">
                 <Car className="w-5 h-5 mr-2" />
-                Vehicle Information: {searchResults.plateNumber}
+                Vehicle Information: {searchResults.plateNumber || searchResults.plate_number}
               </CardTitle>
               <div className="flex items-center space-x-2">
-                <Badge className={getRiskScoreColor(searchResults.riskScore)}>
-                  Risk Score: {searchResults.riskScore}
+                <Badge className={getRiskScoreColor(searchResults.riskScore || searchResults.risk_score || 0)}>
+                  Risk Score: {searchResults.riskScore || searchResults.risk_score || 0}
                 </Badge>
                 <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                  {searchResults.vehicleDetails.make} {searchResults.vehicleDetails.model}
+                  {searchResults.vehicle_details?.make || "Unknown"} {searchResults.vehicle_details?.model || ""}
                 </Badge>
               </div>
             </div>
@@ -245,241 +245,22 @@ const VehicleDetails = () => {
             <Tabs defaultValue="basic" className="space-y-4">
               <TabsList className="grid w-full grid-cols-5 bg-slate-700/50">
                 <TabsTrigger value="basic" className="data-[state=active]:bg-blue-600">Basic Info</TabsTrigger>
-                <TabsTrigger value="insurance" className="data-[state=active]:bg-blue-600">Insurance</TabsTrigger>
                 <TabsTrigger value="documents" className="data-[state=active]:bg-blue-600">Documents</TabsTrigger>
                 <TabsTrigger value="violations" className="data-[state=active]:bg-blue-600">Violations</TabsTrigger>
                 <TabsTrigger value="tracking" className="data-[state=active]:bg-blue-600">Tracking</TabsTrigger>
+                <TabsTrigger value="history" className="data-[state=active]:bg-blue-600">History</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="basic" className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card className="bg-slate-700/30 border-slate-600">
-                    <CardHeader>
-                      <CardTitle className="text-white text-lg">Vehicle Details</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div>
-                          <span className="text-slate-400">VIN:</span>
-                          <div className="text-white font-mono">{searchResults.vinNumber}</div>
-                        </div>
-                        <div>
-                          <span className="text-slate-400">Year:</span>
-                          <div className="text-white">{searchResults.vehicleDetails.year}</div>
-                        </div>
-                        <div>
-                          <span className="text-slate-400">Color:</span>
-                          <div className="text-white">{searchResults.vehicleDetails.color}</div>
-                        </div>
-                        <div>
-                          <span className="text-slate-400">Fuel:</span>
-                          <div className="text-white">{searchResults.vehicleDetails.fuelType}</div>
-                        </div>
-                        <div>
-                          <span className="text-slate-400">Engine No:</span>
-                          <div className="text-white font-mono">{searchResults.vehicleDetails.engineNumber}</div>
-                        </div>
-                        <div>
-                          <span className="text-slate-400">Chassis No:</span>
-                          <div className="text-white font-mono">{searchResults.vehicleDetails.chassisNumber}</div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-slate-700/30 border-slate-600">
-                    <CardHeader>
-                      <CardTitle className="text-white text-lg">Registration Details</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="space-y-2 text-sm">
-                        <div>
-                          <span className="text-slate-400">Owner:</span>
-                          <div className="text-white">{searchResults.registrationDetails.ownerName}</div>
-                        </div>
-                        <div>
-                          <span className="text-slate-400">Address:</span>
-                          <div className="text-white">{searchResults.registrationDetails.ownerAddress}</div>
-                        </div>
-                        <div>
-                          <span className="text-slate-400">Registration Date:</span>
-                          <div className="text-white">{searchResults.registrationDetails.registrationDate}</div>
-                        </div>
-                        <div>
-                          <span className="text-slate-400">RTO:</span>
-                          <div className="text-white">{searchResults.registrationDetails.registrationRTO}</div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
+              <TabsContent value="basic">
+                <VehicleDetailsInfo vehicleData={searchResults} />
               </TabsContent>
 
-              <TabsContent value="insurance" className="space-y-4">
-                <Card className="bg-slate-700/30 border-slate-600">
-                  <CardHeader>
-                    <CardTitle className="text-white text-lg flex items-center">
-                      <Shield className="w-5 h-5 mr-2" />
-                      Insurance Information
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-3">
-                        <div>
-                          <span className="text-slate-400 text-sm">Provider:</span>
-                          <div className="text-white font-semibold">{searchResults.insurance.provider}</div>
-                        </div>
-                        <div>
-                          <span className="text-slate-400 text-sm">Policy Number:</span>
-                          <div className="text-white font-mono">{searchResults.insurance.policyNumber}</div>
-                        </div>
-                        <div>
-                          <span className="text-slate-400 text-sm">Status:</span>
-                          <div>
-                            <Badge className={getStatusColor(searchResults.insurance.status)}>
-                              {searchResults.insurance.status}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        <div>
-                          <span className="text-slate-400 text-sm">Valid From:</span>
-                          <div className="text-white">{searchResults.insurance.validFrom}</div>
-                        </div>
-                        <div>
-                          <span className="text-slate-400 text-sm">Valid To:</span>
-                          <div className="text-white">{searchResults.insurance.validTo}</div>
-                        </div>
-                        <div>
-                          <span className="text-slate-400 text-sm">Premium:</span>
-                          <div className="text-white font-semibold">{searchResults.insurance.premium}</div>
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        <div>
-                          <span className="text-slate-400 text-sm">IDV:</span>
-                          <div className="text-white font-semibold">{searchResults.insurance.idv}</div>
-                        </div>
-                        <div className="flex items-center">
-                          {searchResults.insurance.status === 'active' ? (
-                            <CheckCircle className="w-5 h-5 text-green-400 mr-2" />
-                          ) : (
-                            <AlertTriangle className="w-5 h-5 text-red-400 mr-2" />
-                          )}
-                          <span className="text-slate-300">Insurance {searchResults.insurance.status}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+              <TabsContent value="documents">
+                <VehicleDetailsInfo vehicleData={searchResults} />
               </TabsContent>
 
-              <TabsContent value="documents" className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Card className="bg-slate-700/30 border-slate-600">
-                    <CardHeader>
-                      <CardTitle className="text-white text-lg flex items-center">
-                        <FileText className="w-5 h-5 mr-2" />
-                        PUC Certificate
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-400">Status:</span>
-                        <Badge className={getStatusColor(searchResults.puc.status)}>
-                          {searchResults.puc.status}
-                        </Badge>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 text-sm">Certificate No:</span>
-                        <div className="text-white font-mono">{searchResults.puc.certificateNumber}</div>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 text-sm">Valid Until:</span>
-                        <div className="text-white">{searchResults.puc.validTo}</div>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 text-sm">Test Center:</span>
-                        <div className="text-white">{searchResults.puc.testCenter}</div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-slate-700/30 border-slate-600">
-                    <CardHeader>
-                      <CardTitle className="text-white text-lg flex items-center">
-                        <Calendar className="w-5 h-5 mr-2" />
-                        Fitness Certificate
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-400">Status:</span>
-                        <Badge className={getStatusColor(searchResults.fitness.status)}>
-                          {searchResults.fitness.status}
-                        </Badge>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 text-sm">Certificate No:</span>
-                        <div className="text-white font-mono">{searchResults.fitness.certificateNumber}</div>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 text-sm">Valid Until:</span>
-                        <div className="text-white">{searchResults.fitness.validTo}</div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="violations" className="space-y-4">
-                <Card className="bg-slate-700/30 border-slate-600">
-                  <CardHeader>
-                    <CardTitle className="text-white text-lg">Traffic Violations</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {searchResults.violations.length > 0 ? (
-                      <div className="space-y-3">
-                        {searchResults.violations.map((violation: any, index: number) => (
-                          <div key={index} className="p-3 bg-slate-600/30 rounded border border-slate-500/30">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="font-mono text-white">{violation.id}</div>
-                              <Badge className={getStatusColor(violation.status)}>
-                                {violation.status}
-                              </Badge>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2 text-sm">
-                              <div>
-                                <span className="text-slate-400">Date:</span>
-                                <div className="text-white">{violation.date}</div>
-                              </div>
-                              <div>
-                                <span className="text-slate-400">Fine:</span>
-                                <div className="text-white font-semibold">{violation.fine}</div>
-                              </div>
-                              <div className="col-span-2">
-                                <span className="text-slate-400">Violation:</span>
-                                <div className="text-white">{violation.violation}</div>
-                              </div>
-                              <div className="col-span-2">
-                                <span className="text-slate-400">Location:</span>
-                                <div className="text-white">{violation.location}</div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8">
-                        <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-3" />
-                        <div className="text-white">No violations found</div>
-                        <div className="text-slate-400 text-sm">This vehicle has a clean record</div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+              <TabsContent value="violations">
+                <VehicleDetailsInfo vehicleData={searchResults} />
               </TabsContent>
 
               <TabsContent value="tracking" className="space-y-4">
@@ -497,15 +278,15 @@ const VehicleDetails = () => {
                         <div className="grid grid-cols-3 gap-4 text-sm">
                           <div>
                             <span className="text-slate-400">Location:</span>
-                            <div className="text-white">{searchResults.lastSeen.location}</div>
+                            <div className="text-white">{searchResults.lastSeen?.location || "Unknown"}</div>
                           </div>
                           <div>
                             <span className="text-slate-400">Time:</span>
-                            <div className="text-white">{searchResults.lastSeen.timestamp}</div>
+                            <div className="text-white">{searchResults.lastSeen?.timestamp || "Unknown"}</div>
                           </div>
                           <div>
                             <span className="text-slate-400">Camera:</span>
-                            <div className="text-white">{searchResults.lastSeen.camera}</div>
+                            <div className="text-white">{searchResults.lastSeen?.camera || "Unknown"}</div>
                           </div>
                         </div>
                       </div>
@@ -516,6 +297,51 @@ const VehicleDetails = () => {
                           View Full Tracking History
                         </Button>
                       </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="history" className="space-y-4">
+                <Card className="bg-slate-700/30 border-slate-600">
+                  <CardHeader>
+                    <CardTitle className="text-white text-lg flex items-center">
+                      <MapPin className="w-5 h-5 mr-2" />
+                      Detection History
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {[1, 2, 3].map((_, index) => (
+                        <div key={index} className="p-3 bg-slate-600/30 rounded border border-slate-500/30">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="text-white font-semibold">
+                              {new Date(Date.now() - (index * 24 * 60 * 60 * 1000)).toLocaleDateString()}
+                            </div>
+                            <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                              {3 - index} detections
+                            </Badge>
+                          </div>
+                          <div className="text-xs text-slate-400 space-y-1">
+                            <div className="flex justify-between">
+                              <span>CAM-02 • Highway Junction</span>
+                              <span>14:25:12</span>
+                            </div>
+                            {index < 2 && (
+                              <div className="flex justify-between">
+                                <span>CAM-04 • Toll Plaza</span>
+                                <span>09:12:45</span>
+                              </div>
+                            )}
+                            {index === 0 && (
+                              <div className="flex justify-between">
+                                <span>CAM-01 • Main Gate</span>
+                                <span>19:54:31</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
