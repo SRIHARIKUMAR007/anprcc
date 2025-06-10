@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { Camera, Database, Network, Shield, BarChart3, Settings, AlertTriangle } from "lucide-react";
+import { Camera, Database, Network, Shield, BarChart3, Settings, AlertTriangle, Car, Activity } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,11 +7,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LiveFeed from "@/components/LiveFeed";
 import NetworkTopology from "@/components/NetworkTopology";
 import VehicleDatabase from "@/components/VehicleDatabase";
+import VehicleDetails from "@/components/VehicleDetails";
 import AlertsPanel from "@/components/AlertsPanel";
 import TrafficAnalytics from "@/components/TrafficAnalytics";
 import SystemControls from "@/components/SystemControls";
+import RealTimeDashboard from "@/components/RealTimeDashboard";
 
 const Index = () => {
+  // ... keep existing code (systemStatus state and recentDetections)
+
   const [systemStatus, setSystemStatus] = useState({
     cameras: 8,
     activeCameras: 7,
@@ -66,12 +69,15 @@ const Index = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-white">ANPR Control Center</h1>
-                <p className="text-slate-400 text-sm">Automated Number Plate Recognition with SDN</p>
+                <p className="text-slate-400 text-sm">Automated Number Plate Recognition with SDN • Real-time Intelligence</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
+              <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 animate-pulse">
                 System Online
+              </Badge>
+              <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                SDN Active
               </Badge>
               <Button variant="outline" size="sm">
                 <Settings className="w-4 h-4 mr-2" />
@@ -132,15 +138,21 @@ const Index = () => {
         </div>
 
         {/* Main Dashboard Tabs */}
-        <Tabs defaultValue="live" className="space-y-6">
-          <TabsList className="grid w-full lg:w-auto lg:grid-cols-6 bg-slate-800/50 border-slate-700">
+        <Tabs defaultValue="dashboard" className="space-y-6">
+          <TabsList className="grid w-full lg:w-auto lg:grid-cols-8 bg-slate-800/50 border-slate-700">
+            <TabsTrigger value="dashboard" className="data-[state=active]:bg-blue-600">Dashboard</TabsTrigger>
             <TabsTrigger value="live" className="data-[state=active]:bg-blue-600">Live Feed</TabsTrigger>
+            <TabsTrigger value="vehicle-details" className="data-[state=active]:bg-blue-600">Vehicle Lookup</TabsTrigger>
             <TabsTrigger value="network" className="data-[state=active]:bg-blue-600">SDN Network</TabsTrigger>
             <TabsTrigger value="database" className="data-[state=active]:bg-blue-600">Database</TabsTrigger>
             <TabsTrigger value="alerts" className="data-[state=active]:bg-blue-600">Alerts</TabsTrigger>
             <TabsTrigger value="analytics" className="data-[state=active]:bg-blue-600">Analytics</TabsTrigger>
             <TabsTrigger value="controls" className="data-[state=active]:bg-blue-600">Controls</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="dashboard">
+            <RealTimeDashboard />
+          </TabsContent>
 
           <TabsContent value="live" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -175,6 +187,10 @@ const Index = () => {
                 </Card>
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="vehicle-details">
+            <VehicleDetails />
           </TabsContent>
 
           <TabsContent value="network">
