@@ -9,7 +9,144 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      cameras: {
+        Row: {
+          camera_id: string
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          last_heartbeat: string | null
+          location: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          camera_id: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          last_heartbeat?: string | null
+          location: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          camera_id?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          last_heartbeat?: string | null
+          location?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      detections: {
+        Row: {
+          camera_id: string
+          confidence: number
+          created_at: string | null
+          id: string
+          image_url: string | null
+          location: string
+          plate_number: string
+          status: string | null
+          timestamp: string
+          user_id: string | null
+        }
+        Insert: {
+          camera_id: string
+          confidence: number
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          location: string
+          plate_number: string
+          status?: string | null
+          timestamp?: string
+          user_id?: string | null
+        }
+        Update: {
+          camera_id?: string
+          confidence?: number
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string
+          plate_number?: string
+          status?: string | null
+          timestamp?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          full_name: string | null
+          id: string
+          role: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          full_name?: string | null
+          id: string
+          role?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          role?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      system_stats: {
+        Row: {
+          accuracy_rate: number
+          active_cameras: number
+          cpu_usage: number
+          detections_hour: number
+          detections_today: number
+          id: string
+          memory_usage: number
+          network_latency: number
+          timestamp: string
+          total_cameras: number
+        }
+        Insert: {
+          accuracy_rate?: number
+          active_cameras?: number
+          cpu_usage?: number
+          detections_hour?: number
+          detections_today?: number
+          id?: string
+          memory_usage?: number
+          network_latency?: number
+          timestamp?: string
+          total_cameras?: number
+        }
+        Update: {
+          accuracy_rate?: number
+          active_cameras?: number
+          cpu_usage?: number
+          detections_hour?: number
+          detections_today?: number
+          id?: string
+          memory_usage?: number
+          network_latency?: number
+          timestamp?: string
+          total_cameras?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
