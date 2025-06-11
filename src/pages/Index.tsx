@@ -17,6 +17,9 @@ import RealTimeDashboard from "@/components/RealTimeDashboard";
 import { useSupabaseRealTimeData } from "@/hooks/useSupabaseRealTimeData";
 import { useAuth } from "@/hooks/useAuth";
 import VehicleUpdates from "@/components/VehicleUpdates";
+import ImageProcessingPipeline from "@/components/ImageProcessingPipeline";
+import SDNNetworkManager from "@/components/SDNNetworkManager";
+import ParkingManagement from "@/components/ParkingManagement";
 
 const Index = () => {
   const { user, userProfile } = useAuth();
@@ -150,12 +153,15 @@ const Index = () => {
 
           {/* Main Dashboard Tabs */}
           <Tabs defaultValue="dashboard" className="space-y-6">
-            <TabsList className="grid w-full lg:w-auto lg:grid-cols-9 bg-slate-800/50 border-slate-700">
+            <TabsList className="grid w-full lg:w-auto lg:grid-cols-12 bg-slate-800/50 border-slate-700">
               <TabsTrigger value="dashboard" className="data-[state=active]:bg-blue-600">Dashboard</TabsTrigger>
               <TabsTrigger value="live" className="data-[state=active]:bg-blue-600">Live Feed</TabsTrigger>
+              <TabsTrigger value="image-processing" className="data-[state=active]:bg-blue-600">Image Processing</TabsTrigger>
               <TabsTrigger value="vehicle-updates" className="data-[state=active]:bg-blue-600">Vehicle Updates</TabsTrigger>
               <TabsTrigger value="vehicle-details" className="data-[state=active]:bg-blue-600">Vehicle Lookup</TabsTrigger>
               <TabsTrigger value="network" className="data-[state=active]:bg-blue-600">SDN Network</TabsTrigger>
+              <TabsTrigger value="sdn-manager" className="data-[state=active]:bg-blue-600">SDN Manager</TabsTrigger>
+              <TabsTrigger value="parking" className="data-[state=active]:bg-blue-600">Parking</TabsTrigger>
               <TabsTrigger value="database" className="data-[state=active]:bg-blue-600">Database</TabsTrigger>
               <TabsTrigger value="alerts" className="data-[state=active]:bg-blue-600">Alerts</TabsTrigger>
               <TabsTrigger value="analytics" className="data-[state=active]:bg-blue-600">Analytics</TabsTrigger>
@@ -205,6 +211,10 @@ const Index = () => {
               </div>
             </TabsContent>
 
+            <TabsContent value="image-processing">
+              <ImageProcessingPipeline />
+            </TabsContent>
+
             <TabsContent value="vehicle-updates">
               <VehicleUpdates />
             </TabsContent>
@@ -215,6 +225,14 @@ const Index = () => {
 
             <TabsContent value="network">
               <NetworkTopology />
+            </TabsContent>
+
+            <TabsContent value="sdn-manager">
+              <SDNNetworkManager />
+            </TabsContent>
+
+            <TabsContent value="parking">
+              <ParkingManagement />
             </TabsContent>
 
             <TabsContent value="database">
