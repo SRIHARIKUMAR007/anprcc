@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -45,9 +45,11 @@ export const useSupabaseRealTimeData = () => {
   const [cameras, setCameras] = useState<Camera[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const { user } = useAuth();
+  const channelsRef = useRef<any[]>([]);
+  const isSubscribedRef = useRef(false);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || isSubscribedRef.current) return;
 
     // Load initial data
     const loadInitialData = async () => {
@@ -57,10 +59,14 @@ export const useSupabaseRealTimeData = () => {
           .from('detections')
           .select('*')
           .order('timestamp', { ascending: false })
-          .limit(10);
+          .limit(50);
         
         if (detectionsData) {
-          setDetections(detectionsData as Detection[]);
+          const typedDetections = detectionsData.map(detection => ({
+            ...detection,
+            status: detection.status as 'cleared' | 'flagged' | 'processing'
+          }));
+          setDetections(typedDetections);
         }
 
         // Load latest system stats
@@ -72,7 +78,7 @@ export const useSupabaseRealTimeData = () => {
           .single();
         
         if (statsData) {
-          setSystemStats(statsData as SystemStats);
+          setSystemStats(statsData);
         }
 
         // Load cameras
@@ -82,7 +88,11 @@ export const useSupabaseRealTimeData = () => {
           .order('camera_id');
         
         if (camerasData) {
-          setCameras(camerasData as Camera[]);
+          const typedCameras = camerasData.map(camera => ({
+            ...camera,
+            status: camera.status as 'active' | 'inactive' | 'maintenance'
+          }));
+          setCameras(typedCameras);
         }
 
         setIsConnected(true);
@@ -93,20 +103,23 @@ export const useSupabaseRealTimeData = () => {
 
     loadInitialData();
 
-    // Set up real-time subscriptions
+    // Set up real-time subscriptions with unique channel names
     const detectionsChannel = supabase
-      .channel('detections')
+      .channel(`detections_${Date.now()}`)
       .on('postgres_changes', 
         { event: 'INSERT', schema: 'public', table: 'detections' }, 
         (payload) => {
-          const newDetection = payload.new as Detection;
-          setDetections(prev => [newDetection, ...prev.slice(0, 9)]);
+          const newDetection = {
+            ...payload.new,
+            status: payload.new.status as 'cleared' | 'flagged' | 'processing'
+          } as Detection;
+          setDetections(prev => [newDetection, ...prev.slice(0, 49)]);
         }
       )
       .subscribe();
 
     const statsChannel = supabase
-      .channel('system_stats')
+      .channel(`system_stats_${Date.now()}`)
       .on('postgres_changes', 
         { event: 'INSERT', schema: 'public', table: 'system_stats' }, 
         (payload) => {
@@ -116,20 +129,24 @@ export const useSupabaseRealTimeData = () => {
       .subscribe();
 
     const camerasChannel = supabase
-      .channel('cameras')
+      .channel(`cameras_${Date.now()}`)
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'cameras' }, 
         () => {
-          // Reload cameras on any change
           loadInitialData();
         }
       )
       .subscribe();
 
+    channelsRef.current = [detectionsChannel, statsChannel, camerasChannel];
+    isSubscribedRef.current = true;
+
     return () => {
-      supabase.removeChannel(detectionsChannel);
-      supabase.removeChannel(statsChannel);
-      supabase.removeChannel(camerasChannel);
+      channelsRef.current.forEach(channel => {
+        supabase.removeChannel(channel);
+      });
+      channelsRef.current = [];
+      isSubscribedRef.current = false;
     };
   }, [user]);
 
