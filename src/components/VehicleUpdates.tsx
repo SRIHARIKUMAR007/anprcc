@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Car, MapPin, Clock, Shield, Eye, AlertTriangle, Activity, Zap } from "lucide-react";
+import { Car, MapPin, Clock, Shield, Eye, AlertTriangle, Activity, Zap, RefreshCw } from "lucide-react";
 import { useSupabaseRealTimeData } from "@/hooks/useSupabaseRealTimeData";
 
 const VehicleUpdates = () => {
@@ -12,6 +12,7 @@ const VehicleUpdates = () => {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("All Locations");
+  const [lastUpdate, setLastUpdate] = useState(new Date());
 
   // Get unique locations for filtering
   const uniqueLocations = ["All Locations", ...Array.from(new Set(detections.map(d => d.location)))];
@@ -37,21 +38,29 @@ const VehicleUpdates = () => {
       status: Math.random() > 0.85 ? 'flagged' : 'cleared' as 'cleared' | 'flagged' | 'processing'
     };
 
-    await addDetection(mockDetection);
+    const success = await addDetection(mockDetection);
+    if (success) {
+      setLastUpdate(new Date());
+    }
   };
 
-  // Auto-refresh simulation
+  // Auto-refresh simulation - more frequent updates
   useEffect(() => {
     if (!autoRefresh) return;
     
     const interval = setInterval(() => {
-      if (Math.random() > 0.6) { // 40% chance to add new detection
+      if (Math.random() > 0.4) { // 60% chance to add new detection
         simulateDetection();
       }
-    }, 8000);
+    }, 3000); // Update every 3 seconds instead of 8
 
     return () => clearInterval(interval);
   }, [autoRefresh]);
+
+  // Update last update time when detections change
+  useEffect(() => {
+    setLastUpdate(new Date());
+  }, [detections]);
 
   const formatTime = (timestamp: string) => {
     return new Date(timestamp).toLocaleString();
@@ -60,7 +69,7 @@ const VehicleUpdates = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'flagged':
-        return <Badge variant="destructive" className="bg-red-500 text-white">Alert</Badge>;
+        return <Badge variant="destructive" className="bg-red-500 text-white animate-pulse">Alert</Badge>;
       case 'processing':
         return <Badge variant="secondary" className="bg-yellow-500 text-white">Processing</Badge>;
       default:
@@ -76,7 +85,9 @@ const VehicleUpdates = () => {
           <Eye className="w-6 h-6 text-blue-400" />
           <div>
             <h2 className="text-xl font-bold text-white">Live Vehicle Updates</h2>
-            <p className="text-slate-400 text-sm">Real-time ANPR detections and vehicle tracking</p>
+            <p className="text-slate-400 text-sm">
+              Real-time ANPR detections and vehicle tracking • Last update: {lastUpdate.toLocaleTimeString()}
+            </p>
           </div>
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
@@ -87,7 +98,7 @@ const VehicleUpdates = () => {
             className="flex items-center space-x-2"
           >
             <Activity className={`w-4 h-4 ${autoRefresh ? 'animate-pulse' : ''}`} />
-            <span>{autoRefresh ? 'Live' : 'Paused'}</span>
+            <span>{autoRefresh ? 'Auto-Updating' : 'Paused'}</span>
           </Button>
           <Button
             variant="outline"
@@ -97,6 +108,15 @@ const VehicleUpdates = () => {
           >
             <Zap className="w-4 h-4" />
             <span>Add Detection</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setLastUpdate(new Date())}
+            className="flex items-center space-x-2"
+          >
+            <RefreshCw className="w-4 h-4" />
+            <span>Refresh</span>
           </Button>
         </div>
       </div>
@@ -145,10 +165,10 @@ const VehicleUpdates = () => {
           <CardTitle className="text-white flex items-center justify-between">
             <span className="flex items-center">
               <Car className="w-5 h-5 mr-2" />
-              Vehicle Detection Log
+              Vehicle Detection Log ({filteredDetections.length} entries)
             </span>
-            <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 animate-pulse">
-              {autoRefresh ? 'LIVE' : 'PAUSED'}
+            <Badge variant="secondary" className={`${autoRefresh ? 'bg-green-500/20 text-green-400 border-green-500/30 animate-pulse' : 'bg-gray-500/20 text-gray-400 border-gray-500/30'}`}>
+              {autoRefresh ? 'LIVE AUTO-UPDATE' : 'PAUSED'}
             </Badge>
           </CardTitle>
         </CardHeader>
@@ -174,8 +194,11 @@ const VehicleUpdates = () => {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredDetections.map((detection) => (
-                    <TableRow key={detection.id} className="border-slate-700 hover:bg-slate-700/30">
+                  filteredDetections.map((detection, index) => (
+                    <TableRow 
+                      key={detection.id} 
+                      className={`border-slate-700 hover:bg-slate-700/30 ${index === 0 && autoRefresh ? 'animate-pulse bg-blue-500/10' : ''}`}
+                    >
                       <TableCell className="font-mono text-white font-bold">{detection.plate_number}</TableCell>
                       <TableCell className="text-slate-300">{detection.location}</TableCell>
                       <TableCell className="text-slate-300">{formatTime(detection.timestamp)}</TableCell>
