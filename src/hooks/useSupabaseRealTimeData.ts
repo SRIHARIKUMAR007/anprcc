@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -33,10 +32,10 @@ export interface Camera {
   camera_id: string;
   location: string;
   status: 'active' | 'inactive' | 'maintenance';
-  ip_address?: string;
-  last_heartbeat?: string;
-  created_at: string;
-  updated_at: string;
+  ip_address?: string | null;
+  last_heartbeat?: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 export const useSupabaseRealTimeData = () => {
@@ -46,10 +45,15 @@ export const useSupabaseRealTimeData = () => {
   const [isConnected, setIsConnected] = useState(false);
   const { user } = useAuth();
   const channelsRef = useRef<any[]>([]);
-  const isSubscribedRef = useRef(false);
 
   useEffect(() => {
-    if (!user || isSubscribedRef.current) return;
+    if (!user) return;
+
+    // Clean up any existing channels first
+    channelsRef.current.forEach(channel => {
+      supabase.removeChannel(channel);
+    });
+    channelsRef.current = [];
 
     // Load initial data
     const loadInitialData = async () => {
@@ -90,7 +94,8 @@ export const useSupabaseRealTimeData = () => {
         if (camerasData) {
           const typedCameras = camerasData.map(camera => ({
             ...camera,
-            status: camera.status as 'active' | 'inactive' | 'maintenance'
+            status: camera.status as 'active' | 'inactive' | 'maintenance',
+            ip_address: camera.ip_address as string | null
           }));
           setCameras(typedCameras);
         }
@@ -105,7 +110,7 @@ export const useSupabaseRealTimeData = () => {
 
     // Set up real-time subscriptions with unique channel names
     const detectionsChannel = supabase
-      .channel(`detections_${Date.now()}`)
+      .channel(`detections_${Date.now()}_${Math.random()}`)
       .on('postgres_changes', 
         { event: 'INSERT', schema: 'public', table: 'detections' }, 
         (payload) => {
@@ -119,7 +124,7 @@ export const useSupabaseRealTimeData = () => {
       .subscribe();
 
     const statsChannel = supabase
-      .channel(`system_stats_${Date.now()}`)
+      .channel(`system_stats_${Date.now()}_${Math.random()}`)
       .on('postgres_changes', 
         { event: 'INSERT', schema: 'public', table: 'system_stats' }, 
         (payload) => {
@@ -129,7 +134,7 @@ export const useSupabaseRealTimeData = () => {
       .subscribe();
 
     const camerasChannel = supabase
-      .channel(`cameras_${Date.now()}`)
+      .channel(`cameras_${Date.now()}_${Math.random()}`)
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'cameras' }, 
         () => {
@@ -139,14 +144,12 @@ export const useSupabaseRealTimeData = () => {
       .subscribe();
 
     channelsRef.current = [detectionsChannel, statsChannel, camerasChannel];
-    isSubscribedRef.current = true;
 
     return () => {
       channelsRef.current.forEach(channel => {
         supabase.removeChannel(channel);
       });
       channelsRef.current = [];
-      isSubscribedRef.current = false;
     };
   }, [user]);
 
