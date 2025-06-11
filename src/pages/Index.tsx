@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Camera, Database, BarChart3, Settings, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +16,7 @@ import SystemControls from "@/components/SystemControls";
 import RealTimeDashboard from "@/components/RealTimeDashboard";
 import { useSupabaseRealTimeData } from "@/hooks/useSupabaseRealTimeData";
 import { useAuth } from "@/hooks/useAuth";
+import VehicleUpdates from "@/components/VehicleUpdates";
 
 const Index = () => {
   const { user, userProfile } = useAuth();
@@ -150,9 +150,10 @@ const Index = () => {
 
           {/* Main Dashboard Tabs */}
           <Tabs defaultValue="dashboard" className="space-y-6">
-            <TabsList className="grid w-full lg:w-auto lg:grid-cols-8 bg-slate-800/50 border-slate-700">
+            <TabsList className="grid w-full lg:w-auto lg:grid-cols-9 bg-slate-800/50 border-slate-700">
               <TabsTrigger value="dashboard" className="data-[state=active]:bg-blue-600">Dashboard</TabsTrigger>
               <TabsTrigger value="live" className="data-[state=active]:bg-blue-600">Live Feed</TabsTrigger>
+              <TabsTrigger value="vehicle-updates" className="data-[state=active]:bg-blue-600">Vehicle Updates</TabsTrigger>
               <TabsTrigger value="vehicle-details" className="data-[state=active]:bg-blue-600">Vehicle Lookup</TabsTrigger>
               <TabsTrigger value="network" className="data-[state=active]:bg-blue-600">SDN Network</TabsTrigger>
               <TabsTrigger value="database" className="data-[state=active]:bg-blue-600">Database</TabsTrigger>
@@ -202,6 +203,10 @@ const Index = () => {
                   </Card>
                 </div>
               </div>
+            </TabsContent>
+
+            <TabsContent value="vehicle-updates">
+              <VehicleUpdates />
             </TabsContent>
 
             <TabsContent value="vehicle-details">

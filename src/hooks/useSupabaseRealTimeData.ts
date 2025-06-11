@@ -60,7 +60,7 @@ export const useSupabaseRealTimeData = () => {
           .limit(10);
         
         if (detectionsData) {
-          setDetections(detectionsData);
+          setDetections(detectionsData as Detection[]);
         }
 
         // Load latest system stats
@@ -72,7 +72,7 @@ export const useSupabaseRealTimeData = () => {
           .single();
         
         if (statsData) {
-          setSystemStats(statsData);
+          setSystemStats(statsData as SystemStats);
         }
 
         // Load cameras
@@ -82,7 +82,7 @@ export const useSupabaseRealTimeData = () => {
           .order('camera_id');
         
         if (camerasData) {
-          setCameras(camerasData);
+          setCameras(camerasData as Camera[]);
         }
 
         setIsConnected(true);
