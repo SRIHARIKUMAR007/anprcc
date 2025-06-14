@@ -26,120 +26,119 @@ export const MobileOptimizedTabs = ({ children, defaultValue }: MobileOptimizedT
   return (
     <Tabs defaultValue={defaultValue} className="w-full">
       <div className="relative mb-8">
-        {/* Gradient fade for overflow */}
-        <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-slate-800/80 to-transparent z-10 pointer-events-none"></div>
-        <div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-slate-800/80 to-transparent z-10 pointer-events-none"></div>
-        
-        <div className="overflow-x-auto pb-2 scrollbar-hide">
-          <TabsList className="flex w-max lg:grid lg:grid-cols-13 lg:w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 p-2 h-auto rounded-xl shadow-lg min-w-max">
-            <TabsTrigger 
-              value="realtime" 
-              className="flex flex-col items-center justify-center space-y-2 p-4 min-w-[90px] rounded-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500/30 data-[state=active]:to-cyan-500/20 data-[state=active]:text-blue-300 data-[state=active]:shadow-lg transition-all duration-300 hover:bg-slate-700/50 text-center"
-            >
-              <Monitor className="w-5 h-5 flex-shrink-0" />
-              <span className="text-xs font-medium">Real-time</span>
-            </TabsTrigger>
-            
-            <TabsTrigger 
-              value="dashboard" 
-              className="flex flex-col items-center justify-center space-y-2 p-4 min-w-[90px] rounded-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500/30 data-[state=active]:to-cyan-500/20 data-[state=active]:text-blue-300 data-[state=active]:shadow-lg transition-all duration-300 hover:bg-slate-700/50 text-center"
-            >
-              <BarChart3 className="w-5 h-5 flex-shrink-0" />
-              <span className="text-xs font-medium">Dashboard</span>
-            </TabsTrigger>
-            
-            <TabsTrigger 
-              value="live" 
-              className="flex flex-col items-center justify-center space-y-2 p-4 min-w-[90px] rounded-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500/30 data-[state=active]:to-cyan-500/20 data-[state=active]:text-blue-300 data-[state=active]:shadow-lg transition-all duration-300 hover:bg-slate-700/50 text-center"
-            >
-              <Camera className="w-5 h-5 flex-shrink-0" />
-              <span className="text-xs font-medium">Live Feed</span>
-            </TabsTrigger>
+        {/* Enhanced horizontal scrolling container */}
+        <div className="overflow-x-auto pb-3 scrollbar-hide">
+          <TabsList className="inline-flex w-max bg-slate-800/80 backdrop-blur-sm border border-slate-700/60 p-2 h-auto rounded-2xl shadow-2xl shadow-black/20 min-w-max">
+            <div className="flex items-center space-x-2">
+              <TabsTrigger 
+                value="realtime" 
+                className="flex items-center space-x-3 px-6 py-4 min-w-[140px] rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/40 data-[state=active]:to-cyan-500/30 data-[state=active]:text-blue-200 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 transition-all duration-300 hover:bg-slate-700/60 text-slate-300 hover:text-white font-medium"
+              >
+                <Monitor className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-semibold whitespace-nowrap">Real-time</span>
+              </TabsTrigger>
+              
+              <TabsTrigger 
+                value="dashboard" 
+                className="flex items-center space-x-3 px-6 py-4 min-w-[140px] rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/40 data-[state=active]:to-cyan-500/30 data-[state=active]:text-blue-200 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 transition-all duration-300 hover:bg-slate-700/60 text-slate-300 hover:text-white font-medium"
+              >
+                <BarChart3 className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-semibold whitespace-nowrap">Dashboard</span>
+              </TabsTrigger>
+              
+              <TabsTrigger 
+                value="live" 
+                className="flex items-center space-x-3 px-6 py-4 min-w-[140px] rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/40 data-[state=active]:to-cyan-500/30 data-[state=active]:text-blue-200 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 transition-all duration-300 hover:bg-slate-700/60 text-slate-300 hover:text-white font-medium"
+              >
+                <Camera className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-semibold whitespace-nowrap">Live Feed</span>
+              </TabsTrigger>
 
-            <TabsTrigger 
-              value="image-processing" 
-              className="flex flex-col items-center justify-center space-y-2 p-4 min-w-[90px] rounded-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500/30 data-[state=active]:to-cyan-500/20 data-[state=active]:text-blue-300 data-[state=active]:shadow-lg transition-all duration-300 hover:bg-slate-700/50 text-center"
-            >
-              <FileImage className="w-5 h-5 flex-shrink-0" />
-              <span className="text-xs font-medium">AI Process</span>
-            </TabsTrigger>
+              <TabsTrigger 
+                value="image-processing" 
+                className="flex items-center space-x-3 px-6 py-4 min-w-[140px] rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/40 data-[state=active]:to-cyan-500/30 data-[state=active]:text-blue-200 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 transition-all duration-300 hover:bg-slate-700/60 text-slate-300 hover:text-white font-medium"
+              >
+                <FileImage className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-semibold whitespace-nowrap">AI Process</span>
+              </TabsTrigger>
 
-            <TabsTrigger 
-              value="vehicle-updates" 
-              className="flex flex-col items-center justify-center space-y-2 p-4 min-w-[90px] rounded-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500/30 data-[state=active]:to-cyan-500/20 data-[state=active]:text-blue-300 data-[state=active]:shadow-lg transition-all duration-300 hover:bg-slate-700/50 text-center"
-            >
-              <Activity className="w-5 h-5 flex-shrink-0" />
-              <span className="text-xs font-medium">Updates</span>
-            </TabsTrigger>
+              <TabsTrigger 
+                value="vehicle-updates" 
+                className="flex items-center space-x-3 px-6 py-4 min-w-[140px] rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/40 data-[state=active]:to-cyan-500/30 data-[state=active]:text-blue-200 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 transition-all duration-300 hover:bg-slate-700/60 text-slate-300 hover:text-white font-medium"
+              >
+                <Activity className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-semibold whitespace-nowrap">Updates</span>
+              </TabsTrigger>
 
-            <TabsTrigger 
-              value="vehicle-details" 
-              className="flex flex-col items-center justify-center space-y-2 p-4 min-w-[90px] rounded-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500/30 data-[state=active]:to-cyan-500/20 data-[state=active]:text-blue-300 data-[state=active]:shadow-lg transition-all duration-300 hover:bg-slate-700/50 text-center"
-            >
-              <Car className="w-5 h-5 flex-shrink-0" />
-              <span className="text-xs font-medium">Details</span>
-            </TabsTrigger>
+              <TabsTrigger 
+                value="vehicle-details" 
+                className="flex items-center space-x-3 px-6 py-4 min-w-[140px] rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/40 data-[state=active]:to-cyan-500/30 data-[state=active]:text-blue-200 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 transition-all duration-300 hover:bg-slate-700/60 text-slate-300 hover:text-white font-medium"
+              >
+                <Car className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-semibold whitespace-nowrap">Details</span>
+              </TabsTrigger>
 
-            <TabsTrigger 
-              value="network" 
-              className="flex flex-col items-center justify-center space-y-2 p-4 min-w-[90px] rounded-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500/30 data-[state=active]:to-cyan-500/20 data-[state=active]:text-blue-300 data-[state=active]:shadow-lg transition-all duration-300 hover:bg-slate-700/50 text-center"
-            >
-              <Network className="w-5 h-5 flex-shrink-0" />
-              <span className="text-xs font-medium">Network</span>
-            </TabsTrigger>
+              <TabsTrigger 
+                value="network" 
+                className="flex items-center space-x-3 px-6 py-4 min-w-[140px] rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/40 data-[state=active]:to-cyan-500/30 data-[state=active]:text-blue-200 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 transition-all duration-300 hover:bg-slate-700/60 text-slate-300 hover:text-white font-medium"
+              >
+                <Network className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-semibold whitespace-nowrap">Network</span>
+              </TabsTrigger>
 
-            <TabsTrigger 
-              value="sdn-manager" 
-              className="flex flex-col items-center justify-center space-y-2 p-4 min-w-[90px] rounded-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500/30 data-[state=active]:to-cyan-500/20 data-[state=active]:text-blue-300 data-[state=active]:shadow-lg transition-all duration-300 hover:bg-slate-700/50 text-center"
-            >
-              <Layers className="w-5 h-5 flex-shrink-0" />
-              <span className="text-xs font-medium">SDN</span>
-            </TabsTrigger>
+              <TabsTrigger 
+                value="sdn-manager" 
+                className="flex items-center space-x-3 px-6 py-4 min-w-[140px] rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/40 data-[state=active]:to-cyan-500/30 data-[state=active]:text-blue-200 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 transition-all duration-300 hover:bg-slate-700/60 text-slate-300 hover:text-white font-medium"
+              >
+                <Layers className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-semibold whitespace-nowrap">SDN</span>
+              </TabsTrigger>
 
-            <TabsTrigger 
-              value="parking" 
-              className="flex flex-col items-center justify-center space-y-2 p-4 min-w-[90px] rounded-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500/30 data-[state=active]:to-cyan-500/20 data-[state=active]:text-blue-300 data-[state=active]:shadow-lg transition-all duration-300 hover:bg-slate-700/50 text-center"
-            >
-              <ParkingCircle className="w-5 h-5 flex-shrink-0" />
-              <span className="text-xs font-medium">Parking</span>
-            </TabsTrigger>
+              <TabsTrigger 
+                value="parking" 
+                className="flex items-center space-x-3 px-6 py-4 min-w-[140px] rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/40 data-[state=active]:to-cyan-500/30 data-[state=active]:text-blue-200 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 transition-all duration-300 hover:bg-slate-700/60 text-slate-300 hover:text-white font-medium"
+              >
+                <ParkingCircle className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-semibold whitespace-nowrap">Parking</span>
+              </TabsTrigger>
 
-            <TabsTrigger 
-              value="database" 
-              className="flex flex-col items-center justify-center space-y-2 p-4 min-w-[90px] rounded-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500/30 data-[state=active]:to-cyan-500/20 data-[state=active]:text-blue-300 data-[state=active]:shadow-lg transition-all duration-300 hover:bg-slate-700/50 text-center"
-            >
-              <Database className="w-5 h-5 flex-shrink-0" />
-              <span className="text-xs font-medium">Database</span>
-            </TabsTrigger>
+              <TabsTrigger 
+                value="database" 
+                className="flex items-center space-x-3 px-6 py-4 min-w-[140px] rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/40 data-[state=active]:to-cyan-500/30 data-[state=active]:text-blue-200 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 transition-all duration-300 hover:bg-slate-700/60 text-slate-300 hover:text-white font-medium"
+              >
+                <Database className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-semibold whitespace-nowrap">Database</span>
+              </TabsTrigger>
 
-            <TabsTrigger 
-              value="alerts" 
-              className="flex flex-col items-center justify-center space-y-2 p-4 min-w-[90px] rounded-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500/30 data-[state=active]:to-cyan-500/20 data-[state=active]:text-blue-300 data-[state=active]:shadow-lg transition-all duration-300 hover:bg-slate-700/50 text-center"
-            >
-              <AlertTriangle className="w-5 h-5 flex-shrink-0" />
-              <span className="text-xs font-medium">Alerts</span>
-            </TabsTrigger>
+              <TabsTrigger 
+                value="alerts" 
+                className="flex items-center space-x-3 px-6 py-4 min-w-[140px] rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/40 data-[state=active]:to-cyan-500/30 data-[state=active]:text-blue-200 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 transition-all duration-300 hover:bg-slate-700/60 text-slate-300 hover:text-white font-medium"
+              >
+                <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-semibold whitespace-nowrap">Alerts</span>
+              </TabsTrigger>
 
-            <TabsTrigger 
-              value="analytics" 
-              className="flex flex-col items-center justify-center space-y-2 p-4 min-w-[90px] rounded-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500/30 data-[state=active]:to-cyan-500/20 data-[state=active]:text-blue-300 data-[state=active]:shadow-lg transition-all duration-300 hover:bg-slate-700/50 text-center"
-            >
-              <BarChart3 className="w-5 h-5 flex-shrink-0" />
-              <span className="text-xs font-medium">Analytics</span>
-            </TabsTrigger>
+              <TabsTrigger 
+                value="analytics" 
+                className="flex items-center space-x-3 px-6 py-4 min-w-[140px] rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/40 data-[state=active]:to-cyan-500/30 data-[state=active]:text-blue-200 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 transition-all duration-300 hover:bg-slate-700/60 text-slate-300 hover:text-white font-medium"
+              >
+                <BarChart3 className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-semibold whitespace-nowrap">Analytics</span>
+              </TabsTrigger>
 
-            <TabsTrigger 
-              value="controls" 
-              className="flex flex-col items-center justify-center space-y-2 p-4 min-w-[90px] rounded-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500/30 data-[state=active]:to-cyan-500/20 data-[state=active]:text-blue-300 data-[state=active]:shadow-lg transition-all duration-300 hover:bg-slate-700/50 text-center"
-            >
-              <Settings className="w-5 h-5 flex-shrink-0" />
-              <span className="text-xs font-medium">Controls</span>
-            </TabsTrigger>
+              <TabsTrigger 
+                value="controls" 
+                className="flex items-center space-x-3 px-6 py-4 min-w-[140px] rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/40 data-[state=active]:to-cyan-500/30 data-[state=active]:text-blue-200 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 transition-all duration-300 hover:bg-slate-700/60 text-slate-300 hover:text-white font-medium"
+              >
+                <Settings className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-semibold whitespace-nowrap">Controls</span>
+              </TabsTrigger>
+            </div>
           </TabsList>
         </div>
       </div>
 
-      <div>
+      <div className="w-full">
         {children}
       </div>
     </Tabs>

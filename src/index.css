@@ -95,14 +95,20 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
   
-  /* Custom scrollbar */
+  /* Enhanced scrollbar styling */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+    scroll-behavior: smooth;
   }
   
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+  
+  /* Smooth horizontal scrolling */
+  .scrollbar-hide {
+    scroll-snap-type: x mandatory;
   }
   
   /* Smooth scrolling */
@@ -166,6 +172,16 @@
   .status-info {
     @apply bg-blue-500/20 text-blue-400 border-blue-500/30;
   }
+  
+  /* Horizontal tab improvements */
+  .horizontal-tabs {
+    @apply flex items-center space-x-2 overflow-x-auto pb-2;
+    scroll-snap-type: x mandatory;
+  }
+  
+  .horizontal-tabs > * {
+    scroll-snap-align: start;
+  }
 }
 
 @layer utilities {
@@ -182,6 +198,10 @@
     animation: pulseGlow 2s ease-in-out infinite;
   }
   
+  .animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+  
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
@@ -190,6 +210,11 @@
   @keyframes slideUp {
     from { transform: translateY(100%); }
     to { transform: translateY(0); }
+  }
+  
+  @keyframes slideIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
   }
   
   @keyframes pulseGlow {
@@ -204,5 +229,14 @@
   
   .text-shadow-lg {
     text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Responsive utilities */
+  .responsive-text {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+  
+  .responsive-padding {
+    @apply px-4 sm:px-6 lg:px-8;
   }
 }
