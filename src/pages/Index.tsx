@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Camera, Database, BarChart3, Settings, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +24,7 @@ import { MobileOptimizedTabs } from "@/components/MobileOptimizedTabs";
 import { useSupabaseRealTimeData } from "@/hooks/useSupabaseRealTimeData";
 import { useBackendIntegration } from "@/hooks/useBackendIntegration";
 import { useAuth } from "@/hooks/useAuth";
+import RealTimeMonitor from "@/components/RealTimeMonitor";
 
 const Index = () => {
   const { user, userProfile } = useAuth();
@@ -160,7 +160,11 @@ const Index = () => {
         </ResponsiveGrid>
 
         {/* Main Dashboard Tabs */}
-        <MobileOptimizedTabs defaultValue="dashboard">
+        <MobileOptimizedTabs defaultValue="realtime">
+          <TabsContent value="realtime">
+            <RealTimeMonitor />
+          </TabsContent>
+
           <TabsContent value="dashboard">
             <RealTimeDashboard />
           </TabsContent>

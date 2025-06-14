@@ -1,100 +1,141 @@
 
 import { ReactNode } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from '@/lib/utils';
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  BarChart3, 
+  Camera, 
+  Database, 
+  Settings, 
+  AlertTriangle, 
+  Network,
+  Car,
+  FileImage,
+  Activity,
+  ParkingCircle,
+  Layers,
+  Monitor,
+  Zap
+} from "lucide-react";
 
 interface MobileOptimizedTabsProps {
   children: ReactNode;
   defaultValue: string;
-  className?: string;
 }
 
-export const MobileOptimizedTabs = ({ children, defaultValue, className }: MobileOptimizedTabsProps) => {
+export const MobileOptimizedTabs = ({ children, defaultValue }: MobileOptimizedTabsProps) => {
   return (
-    <Tabs defaultValue={defaultValue} className={cn("space-y-4 sm:space-y-6", className)}>
-      <ScrollArea className="w-full">
-        <TabsList className={cn(
-          "inline-flex h-auto p-1 bg-slate-800/50 border-slate-700",
-          "grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12",
-          "gap-1 sm:gap-2",
-          "w-full min-w-max"
-        )}>
+    <Tabs defaultValue={defaultValue} className="w-full">
+      <div className="overflow-x-auto pb-2">
+        <TabsList className="grid w-max grid-cols-13 lg:w-full bg-slate-800/50 border border-slate-700 p-1 h-auto">
+          <TabsTrigger 
+            value="realtime" 
+            className="flex flex-col items-center space-y-1 p-2 lg:p-3 min-w-[80px] data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
+          >
+            <Monitor className="w-4 h-4" />
+            <span className="text-xs hidden sm:block">Real-time</span>
+          </TabsTrigger>
+          
           <TabsTrigger 
             value="dashboard" 
-            className="data-[state=active]:bg-blue-600 text-xs sm:text-sm px-2 py-2"
+            className="flex flex-col items-center space-y-1 p-2 lg:p-3 min-w-[80px] data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
           >
-            Dashboard
+            <BarChart3 className="w-4 h-4" />
+            <span className="text-xs hidden sm:block">Dashboard</span>
           </TabsTrigger>
+          
           <TabsTrigger 
             value="live" 
-            className="data-[state=active]:bg-blue-600 text-xs sm:text-sm px-2 py-2"
+            className="flex flex-col items-center space-y-1 p-2 lg:p-3 min-w-[80px] data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
           >
-            Live Feed
+            <Camera className="w-4 h-4" />
+            <span className="text-xs hidden sm:block">Live Feed</span>
           </TabsTrigger>
+
           <TabsTrigger 
             value="image-processing" 
-            className="data-[state=active]:bg-blue-600 text-xs sm:text-sm px-2 py-2"
+            className="flex flex-col items-center space-y-1 p-2 lg:p-3 min-w-[80px] data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
           >
-            Image AI
+            <FileImage className="w-4 h-4" />
+            <span className="text-xs hidden sm:block">AI Process</span>
           </TabsTrigger>
+
           <TabsTrigger 
             value="vehicle-updates" 
-            className="data-[state=active]:bg-blue-600 text-xs sm:text-sm px-2 py-2"
+            className="flex flex-col items-center space-y-1 p-2 lg:p-3 min-w-[80px] data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
           >
-            Updates
+            <Activity className="w-4 h-4" />
+            <span className="text-xs hidden sm:block">Updates</span>
           </TabsTrigger>
+
           <TabsTrigger 
             value="vehicle-details" 
-            className="data-[state=active]:bg-blue-600 text-xs sm:text-sm px-2 py-2"
+            className="flex flex-col items-center space-y-1 p-2 lg:p-3 min-w-[80px] data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
           >
-            Lookup
+            <Car className="w-4 h-4" />
+            <span className="text-xs hidden sm:block">Details</span>
           </TabsTrigger>
+
           <TabsTrigger 
             value="network" 
-            className="data-[state=active]:bg-blue-600 text-xs sm:text-sm px-2 py-2"
+            className="flex flex-col items-center space-y-1 p-2 lg:p-3 min-w-[80px] data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
           >
-            Network
+            <Network className="w-4 h-4" />
+            <span className="text-xs hidden sm:block">Network</span>
           </TabsTrigger>
+
           <TabsTrigger 
             value="sdn-manager" 
-            className="data-[state=active]:bg-blue-600 text-xs sm:text-sm px-2 py-2"
+            className="flex flex-col items-center space-y-1 p-2 lg:p-3 min-w-[80px] data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
           >
-            SDN
+            <Layers className="w-4 h-4" />
+            <span className="text-xs hidden sm:block">SDN</span>
           </TabsTrigger>
+
           <TabsTrigger 
             value="parking" 
-            className="data-[state=active]:bg-blue-600 text-xs sm:text-sm px-2 py-2"
+            className="flex flex-col items-center space-y-1 p-2 lg:p-3 min-w-[80px] data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
           >
-            Parking
+            <ParkingCircle className="w-4 h-4" />
+            <span className="text-xs hidden sm:block">Parking</span>
           </TabsTrigger>
+
           <TabsTrigger 
             value="database" 
-            className="data-[state=active]:bg-blue-600 text-xs sm:text-sm px-2 py-2"
+            className="flex flex-col items-center space-y-1 p-2 lg:p-3 min-w-[80px] data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
           >
-            Database
+            <Database className="w-4 h-4" />
+            <span className="text-xs hidden sm:block">Database</span>
           </TabsTrigger>
+
           <TabsTrigger 
             value="alerts" 
-            className="data-[state=active]:bg-blue-600 text-xs sm:text-sm px-2 py-2"
+            className="flex flex-col items-center space-y-1 p-2 lg:p-3 min-w-[80px] data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
           >
-            Alerts
+            <AlertTriangle className="w-4 h-4" />
+            <span className="text-xs hidden sm:block">Alerts</span>
           </TabsTrigger>
+
           <TabsTrigger 
             value="analytics" 
-            className="data-[state=active]:bg-blue-600 text-xs sm:text-sm px-2 py-2"
+            className="flex flex-col items-center space-y-1 p-2 lg:p-3 min-w-[80px] data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
           >
-            Analytics
+            <BarChart3 className="w-4 h-4" />
+            <span className="text-xs hidden sm:block">Analytics</span>
           </TabsTrigger>
+
           <TabsTrigger 
             value="controls" 
-            className="data-[state=active]:bg-blue-600 text-xs sm:text-sm px-2 py-2"
+            className="flex flex-col items-center space-y-1 p-2 lg:p-3 min-w-[80px] data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
           >
-            Controls
+            <Settings className="w-4 h-4" />
+            <span className="text-xs hidden sm:block">Controls</span>
           </TabsTrigger>
         </TabsList>
-      </ScrollArea>
-      {children}
+      </div>
+
+      <div className="mt-4 lg:mt-6">
+        {children}
+      </div>
     </Tabs>
   );
 };
