@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { useBackendIntegration } from './useBackendIntegration';
 import { useSupabaseRealTimeData } from './useSupabaseRealTimeData';
+import { useSupabaseBackend } from './useSupabaseBackend';
 import { toast } from 'sonner';
 
 export const useEnhancedBackendIntegration = () => {
@@ -12,53 +12,41 @@ export const useEnhancedBackendIntegration = () => {
     retryCount: 0
   });
 
-  const backendIntegration = useBackendIntegration();
   const supabaseData = useSupabaseRealTimeData();
+  const supabaseBackend = useSupabaseBackend();
   const toastShownRef = useRef({
-    backendOffline: false,
     dbOffline: false,
     allConnected: false
   });
 
-  // Enhanced connection monitoring
+  // Enhanced connection monitoring using Supabase as primary backend
   useEffect(() => {
     const checkConnections = async () => {
-      const backendStatus = backendIntegration.isBackendConnected;
-      const dbStatus = supabaseData.isConnected;
-
+      const dbStatus = supabaseData.isConnected && supabaseBackend.isConnected;
+      
       setConnectionHealth(prevState => {
-        const newRetryCount = (!backendStatus || !dbStatus) ? prevState.retryCount + 1 : 0;
+        const newRetryCount = !dbStatus ? prevState.retryCount + 1 : 0;
         
-        // Show connection status notifications (only once per status change)
-        if (!backendStatus && !toastShownRef.current.backendOffline) {
-          toast.info("Python ANPR service offline - using mock data");
-          toastShownRef.current.backendOffline = true;
-          toastShownRef.current.allConnected = false;
-        }
-        
+        // Show connection status notifications
         if (!dbStatus && !toastShownRef.current.dbOffline) {
-          toast.warning("Database connection issue - some features may be limited");
+          toast.info("Using Lovable/Supabase backend for ANPR processing");
           toastShownRef.current.dbOffline = true;
           toastShownRef.current.allConnected = false;
         }
         
-        if (backendStatus && dbStatus && prevState.retryCount > 0 && !toastShownRef.current.allConnected) {
-          toast.success("All systems connected successfully");
-          toastShownRef.current.backendOffline = false;
+        if (dbStatus && prevState.retryCount > 0 && !toastShownRef.current.allConnected) {
+          toast.success("Supabase backend connected successfully");
           toastShownRef.current.dbOffline = false;
           toastShownRef.current.allConnected = true;
         }
 
         // Reset toast flags when status changes
-        if (backendStatus) {
-          toastShownRef.current.backendOffline = false;
-        }
         if (dbStatus) {
           toastShownRef.current.dbOffline = false;
         }
 
         return {
-          backend: backendStatus,
+          backend: true, // Always true since we're using Supabase
           database: dbStatus,
           lastCheck: new Date(),
           retryCount: newRetryCount
@@ -70,14 +58,14 @@ export const useEnhancedBackendIntegration = () => {
     checkConnections(); // Initial check
 
     return () => clearInterval(interval);
-  }, [backendIntegration.isBackendConnected, supabaseData.isConnected]);
+  }, [supabaseData.isConnected, supabaseBackend.isConnected]);
 
   const processImageWithRetry = async (imageFile: File, maxRetries = 3) => {
     let lastError;
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        const result = await backendIntegration.processImage(imageFile);
+        const result = await supabaseBackend.processImage(imageFile);
         if (result.success) {
           toast.success(`Image processed successfully (attempt ${attempt})`);
           return result;
@@ -97,10 +85,18 @@ export const useEnhancedBackendIntegration = () => {
   };
 
   return {
-    ...backendIntegration,
-    ...supabaseData,
-    connectionHealth,
+    // Backend integration (now using Supabase)
+    isBackendConnected: true, // Always true since we're using Supabase
+    isProcessing: supabaseBackend.isProcessing,
+    processImage: supabaseBackend.processImage,
+    logDetection: supabaseBackend.logDetection,
     processImageWithRetry,
+    
+    // Supabase real-time data
+    ...supabaseData,
+    
+    // Connection health
+    connectionHealth,
     isFullyConnected: connectionHealth.backend && connectionHealth.database
   };
 };

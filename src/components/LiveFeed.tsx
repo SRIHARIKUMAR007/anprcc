@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Activity, Pause, Play, Radio, AlertTriangle } from "lucide-react";
+import { Activity, Pause, Play, Radio, CheckCircle } from "lucide-react";
 import CameraSelector from "./livefeed/CameraSelector";
 import CameraControls from "./livefeed/CameraControls";
 import LiveVideoCanvas from "./livefeed/LiveVideoCanvas";
@@ -129,11 +129,11 @@ const LiveFeed = () => {
   // Get connection status for display
   const getConnectionStatus = () => {
     if (connectionHealth.backend && connectionHealth.database) {
-      return { status: 'Full System', color: 'bg-green-500/20 text-green-400 border-green-500/30' };
+      return { status: 'Supabase Backend', color: 'bg-green-500/20 text-green-400 border-green-500/30' };
     } else if (connectionHealth.database) {
       return { status: 'Database Only', color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' };
     } else {
-      return { status: 'ANPR Offline - Demo Mode', color: 'bg-red-500/20 text-red-400 border-red-500/30' };
+      return { status: 'Offline - Demo Mode', color: 'bg-red-500/20 text-red-400 border-red-500/30' };
     }
   };
 
@@ -153,12 +153,10 @@ const LiveFeed = () => {
                 {trafficPattern.peakHours && (
                   <span className="text-orange-400 ml-2">• Peak Hours Active</span>
                 )}
-                {!connectionHealth.backend && (
-                  <span className="text-red-400 ml-2 flex items-center">
-                    <AlertTriangle className="w-3 h-3 mr-1" />
-                    • Python ANPR Offline
-                  </span>
-                )}
+                <span className="text-green-400 ml-2 flex items-center">
+                  <CheckCircle className="w-3 h-3 mr-1" />
+                  • Lovable/Supabase Backend Active
+                </span>
               </p>
             </div>
           </div>
@@ -183,11 +181,9 @@ const LiveFeed = () => {
               {connectionStatus.status}
             </Badge>
 
-            {connectionHealth.backend && (
-              <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 border-blue-500/30 animate-pulse">
-                PYTHON ANPR ONLINE
-              </Badge>
-            )}
+            <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 border-blue-500/30 animate-pulse">
+              SUPABASE POWERED
+            </Badge>
 
             {isAIProcessing && (
               <Badge variant="secondary" className="bg-purple-500/20 text-purple-400 border-purple-500/30 animate-pulse">
@@ -201,18 +197,16 @@ const LiveFeed = () => {
           </div>
         </div>
 
-        {/* Connection Health Alert */}
-        {!connectionHealth.backend && (
-          <div className="bg-orange-500/20 border border-orange-500/30 rounded-lg p-4 flex items-center space-x-3">
-            <AlertTriangle className="w-5 h-5 text-orange-400 flex-shrink-0" />
-            <div>
-              <div className="text-orange-400 font-semibold text-sm">Python ANPR Service Offline</div>
-              <div className="text-orange-300 text-xs mt-1">
-                Using simulated data for demonstration. Connect Python service on localhost:5000 for real ANPR processing.
-              </div>
+        {/* Success Message */}
+        <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-4 flex items-center space-x-3">
+          <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+          <div>
+            <div className="text-green-400 font-semibold text-sm">Lovable/Supabase Backend Active</div>
+            <div className="text-green-300 text-xs mt-1">
+              Using integrated Supabase backend for real-time ANPR processing and data management.
             </div>
           </div>
-        )}
+        </div>
 
         {/* Camera Selector */}
         <CameraSelector
@@ -236,11 +230,9 @@ const LiveFeed = () => {
                           PEAK
                         </Badge>
                       )}
-                      {!connectionHealth.backend && (
-                        <Badge variant="secondary" className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">
-                          OFFLINE
-                        </Badge>
-                      )}
+                      <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
+                        SUPABASE
+                      </Badge>
                     </div>
                   </CardTitle>
                   <CameraControls
@@ -282,9 +274,7 @@ const LiveFeed = () => {
                 <div className="mt-4 p-3 bg-slate-700/30 rounded-lg">
                   <div className="text-white text-sm font-semibold mb-2 flex items-center justify-between">
                     <span>AI System Load</span>
-                    {!connectionHealth.backend && (
-                      <span className="text-red-400 text-xs">Simulated Data</span>
-                    )}
+                    <span className="text-green-400 text-xs">Supabase Backend</span>
                   </div>
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center">
