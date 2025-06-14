@@ -22,30 +22,67 @@ const AdvancedSearch = () => {
   const [confidenceMin, setConfidenceMin] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
   
-  const { detections, cameras } = useSupabaseRealTimeData();
+  const { detections, cameras, isConnected } = useSupabaseRealTimeData();
 
-  const handleSearch = async () => {
+  console.log('AdvancedSearch - Available detections:', detections.length);
+  console.log('AdvancedSearch - Available cameras:', cameras.length);
+
+  const handleSearch = () => {
     setIsSearching(true);
+    setHasSearched(true);
     
-    // Simulate search with filtering
-    let results = detections.filter(detection => {
-      const matchesPlate = !plateSearch || detection.plate_number.toLowerCase().includes(plateSearch.toLowerCase());
-      const matchesLocation = !locationFilter || detection.location.toLowerCase().includes(locationFilter.toLowerCase());
-      const matchesCamera = !cameraFilter || detection.camera_id === cameraFilter;
-      const matchesStatus = !statusFilter || detection.status === statusFilter;
-      const matchesConfidence = !confidenceMin || detection.confidence >= parseInt(confidenceMin);
-      
-      let matchesDate = true;
-      if (dateFrom || dateTo) {
-        const detectionDate = new Date(detection.timestamp);
-        if (dateFrom && detectionDate < dateFrom) matchesDate = false;
-        if (dateTo && detectionDate > dateTo) matchesDate = false;
-      }
-      
-      return matchesPlate && matchesLocation && matchesCamera && matchesStatus && matchesConfidence && matchesDate;
+    console.log('Starting search with filters:', {
+      plateSearch,
+      locationFilter,
+      cameraFilter,
+      statusFilter,
+      confidenceMin,
+      dateFrom,
+      dateTo
     });
     
+    // Filter detections based on search criteria
+    let results = detections.filter(detection => {
+      let matches = true;
+      
+      // Plate number filter
+      if (plateSearch.trim()) {
+        matches = matches && detection.plate_number.toLowerCase().includes(plateSearch.toLowerCase());
+      }
+      
+      // Location filter
+      if (locationFilter.trim()) {
+        matches = matches && detection.location.toLowerCase().includes(locationFilter.toLowerCase());
+      }
+      
+      // Camera filter
+      if (cameraFilter && cameraFilter !== '') {
+        matches = matches && detection.camera_id === cameraFilter;
+      }
+      
+      // Status filter
+      if (statusFilter && statusFilter !== '') {
+        matches = matches && detection.status === statusFilter;
+      }
+      
+      // Confidence filter
+      if (confidenceMin && confidenceMin !== '') {
+        matches = matches && detection.confidence >= parseInt(confidenceMin);
+      }
+      
+      // Date range filter
+      if (dateFrom || dateTo) {
+        const detectionDate = new Date(detection.timestamp);
+        if (dateFrom && detectionDate < dateFrom) matches = false;
+        if (dateTo && detectionDate > dateTo) matches = false;
+      }
+      
+      return matches;
+    });
+    
+    console.log('Search completed. Found results:', results.length);
     setSearchResults(results);
     setIsSearching(false);
   };
@@ -59,6 +96,7 @@ const AdvancedSearch = () => {
     setDateTo(undefined);
     setConfidenceMin('');
     setSearchResults([]);
+    setHasSearched(false);
   };
 
   const getStatusColor = (status: string) => {
@@ -69,13 +107,28 @@ const AdvancedSearch = () => {
     }
   };
 
+  // Auto-search functionality - search when any filter changes and there's input
+  const autoSearch = () => {
+    if (plateSearch || locationFilter || cameraFilter || statusFilter || confidenceMin || dateFrom || dateTo) {
+      handleSearch();
+    }
+  };
+
   return (
     <Card className="bg-slate-800/50 border-slate-700">
       <CardHeader>
         <CardTitle className="text-white flex items-center">
           <Search className="w-5 h-5 mr-2" />
           Advanced Search & Filtering
+          {isConnected && (
+            <Badge className="ml-2 bg-green-500/20 text-green-400 border-green-500/30 animate-pulse">
+              LIVE
+            </Badge>
+          )}
         </CardTitle>
+        <div className="text-sm text-slate-400">
+          Total records available: {detections.length} | Cameras: {cameras.length}
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Search Filters */}
@@ -140,6 +193,8 @@ const AdvancedSearch = () => {
               id="confidence"
               type="number"
               placeholder="0-100"
+              min="0"
+              max="100"
               value={confidenceMin}
               onChange={(e) => setConfidenceMin(e.target.value)}
               className="bg-slate-700/50 border-slate-600 text-white"
@@ -191,65 +246,94 @@ const AdvancedSearch = () => {
             <Search className="w-4 h-4 mr-2" />
             {isSearching ? 'Searching...' : 'Search'}
           </Button>
+          <Button onClick={autoSearch} variant="outline" className="border-blue-600 text-blue-400 hover:bg-blue-700">
+            <Filter className="w-4 h-4 mr-2" />
+            Auto Search
+          </Button>
           <Button variant="outline" onClick={clearFilters} className="border-slate-600 text-slate-300 hover:bg-slate-700">
             <Filter className="w-4 h-4 mr-2" />
-            Clear Filters
+            Clear All
           </Button>
         </div>
 
+        {/* Show all records button when no search has been performed */}
+        {!hasSearched && detections.length > 0 && (
+          <div className="text-center py-4">
+            <Button 
+              onClick={() => {
+                setSearchResults(detections.slice(0, 20)); // Show first 20 records
+                setHasSearched(true);
+              }}
+              variant="outline"
+              className="border-slate-600 text-slate-300 hover:bg-slate-700"
+            >
+              Show Recent Records ({detections.length} available)
+            </Button>
+          </div>
+        )}
+
         {/* Search Results */}
-        {searchResults.length > 0 && (
+        {hasSearched && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Search Results ({searchResults.length})</h3>
+              <h3 className="text-lg font-semibold text-white">Search Results</h3>
               <Badge variant="outline" className="text-blue-400 border-blue-500/30">
                 {searchResults.length} matches found
               </Badge>
             </div>
             
-            <div className="max-h-64 overflow-y-auto space-y-2">
-              {searchResults.map((result) => (
-                <div key={result.id} className="bg-slate-700/30 rounded-lg p-3 border border-slate-600">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center space-x-3">
-                      <span className="font-mono text-white bg-slate-600 px-2 py-1 rounded text-sm">
-                        {result.plate_number}
-                      </span>
-                      <Badge className={getStatusColor(result.status)}>
-                        {result.status.toUpperCase()}
-                      </Badge>
-                      <span className="text-slate-300 text-sm">{result.confidence}% confidence</span>
-                    </div>
-                    <span className="text-slate-400 text-xs">
-                      {new Date(result.timestamp).toLocaleString()}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center space-x-4 text-sm text-slate-400">
-                    <div className="flex items-center">
-                      <Camera className="w-3 h-3 mr-1" />
-                      {result.camera_id}
-                    </div>
-                    <div className="flex items-center">
-                      <MapPin className="w-3 h-3 mr-1" />
-                      {result.location}
-                    </div>
-                    <div className="flex items-center">
-                      <Clock className="w-3 h-3 mr-1" />
-                      {new Date(result.timestamp).toLocaleTimeString()}
-                    </div>
-                  </div>
+            {searchResults.length === 0 ? (
+              <div className="text-center py-8 text-slate-400">
+                <Search className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                <p>No results found matching your search criteria.</p>
+                <p className="text-sm mt-1">Try adjusting your filters or search terms.</p>
+                <div className="text-xs mt-3 text-slate-500">
+                  Available data: {detections.length} total detections
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {searchResults.length === 0 && plateSearch && (
-          <div className="text-center py-8 text-slate-400">
-            <Search className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p>No results found matching your search criteria.</p>
-            <p className="text-sm mt-1">Try adjusting your filters or search terms.</p>
+              </div>
+            ) : (
+              <div className="max-h-96 overflow-y-auto space-y-2">
+                {searchResults.map((result) => (
+                  <div key={result.id} className="bg-slate-700/30 rounded-lg p-3 border border-slate-600 hover:bg-slate-600/30 transition-colors">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-3">
+                        <span className="font-mono text-white bg-slate-600 px-2 py-1 rounded text-sm font-bold">
+                          {result.plate_number}
+                        </span>
+                        <Badge className={getStatusColor(result.status)}>
+                          {result.status.toUpperCase()}
+                        </Badge>
+                        <span className="text-slate-300 text-sm">{result.confidence}% confidence</span>
+                      </div>
+                      <span className="text-slate-400 text-xs">
+                        {new Date(result.timestamp).toLocaleString()}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center space-x-4 text-sm text-slate-400">
+                      <div className="flex items-center">
+                        <Camera className="w-3 h-3 mr-1" />
+                        {result.camera_id}
+                      </div>
+                      <div className="flex items-center">
+                        <MapPin className="w-3 h-3 mr-1" />
+                        {result.location}
+                      </div>
+                      <div className="flex items-center">
+                        <Clock className="w-3 h-3 mr-1" />
+                        {new Date(result.timestamp).toLocaleTimeString()}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {searchResults.length > 0 && (
+              <div className="text-center text-slate-400 text-sm">
+                Showing {searchResults.length} of {detections.length} total records
+              </div>
+            )}
           </div>
         )}
       </CardContent>
