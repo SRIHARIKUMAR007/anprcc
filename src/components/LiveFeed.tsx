@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +15,8 @@ import { mockCameras, processingSteps } from "./livefeed/mockData";
 import { useRealTimeIntegration } from "@/hooks/useRealTimeIntegration";
 import { LiveFeedCamera } from "@/types/camera";
 import { Camera } from "@/types/supabase";
+import AIRealTimeAnalytics from "./livefeed/AIRealTimeAnalytics";
+import { useAIRealTimeEngine } from "@/hooks/useAIRealTimeEngine";
 
 const LiveFeed = () => {
   const [selectedCamera, setSelectedCamera] = useState("CAM-01");
@@ -30,6 +31,12 @@ const LiveFeed = () => {
   const [isLiveMode, setIsLiveMode] = useState(true);
 
   const { liveData, cameras: realCameras } = useRealTimeIntegration();
+  const { 
+    isAIProcessing, 
+    trafficPattern, 
+    systemLoad, 
+    processAIDetection 
+  } = useAIRealTimeEngine();
 
   // Transform real cameras to match the expected format
   const transformedRealCameras: LiveFeedCamera[] = realCameras.map((camera: Camera) => ({
@@ -49,7 +56,7 @@ const LiveFeed = () => {
   const cameras = transformedRealCameras.length > 0 ? transformedRealCameras : mockCameras;
   const currentCamera = cameras.find(cam => cam.id === selectedCamera);
 
-  // Enhanced plate detection simulation
+  // Enhanced plate detection simulation with AI integration
   useEffect(() => {
     if (!isRecording || !isLiveMode) return;
 
@@ -59,33 +66,32 @@ const LiveFeed = () => {
       const nextIndex = (currentIndex + 1) % processingSteps.length;
       setProcessingStep(processingSteps[nextIndex]);
 
-      // Random plate detection with higher frequency for live feel
-      if (Math.random() > 0.6) {
-        const plates = [
-          "TN-01-AB-1234", "TN-09-CD-5678", "TN-33-EF-9012", 
-          "TN-45-GH-3456", "TN-67-IJ-7890", "KA-09-UV-4567", 
-          "AP-16-WX-8901", "KL-07-YZ-2345", "TN-72-KL-2468",
-          "TN-38-MN-1357", "TN-55-PQ-8642", "MH-12-DE-6789"
-        ];
-        const randomPlate = plates[Math.floor(Math.random() * plates.length)];
-        const randomConfidence = Math.floor(85 + Math.random() * 15);
-        
-        setDetectedPlate(randomPlate);
-        setConfidence(randomConfidence);
-        
-        // Add to history
-        setPlateHistory(prev => [randomPlate, ...prev.slice(0, 19)]);
-        
-        // Clear after 2 seconds for more dynamic feel
-        setTimeout(() => {
-          setDetectedPlate(null);
-          setConfidence(0);
-        }, 2000);
+      // AI-powered detection frequency based on traffic patterns
+      const detectionProbability = trafficPattern.peakHours ? 0.7 : 0.4;
+      
+      if (Math.random() < detectionProbability) {
+        // Use AI engine for more realistic plate generation
+        processAIDetection(selectedCamera).then(aiData => {
+          if (aiData) {
+            setDetectedPlate(aiData.plateNumber);
+            setConfidence(aiData.confidence);
+            
+            // Add to history
+            setPlateHistory(prev => [aiData.plateNumber, ...prev.slice(0, 19)]);
+            
+            // Clear after dynamic time based on confidence
+            const displayTime = aiData.confidence > 90 ? 3000 : 1500;
+            setTimeout(() => {
+              setDetectedPlate(null);
+              setConfidence(0);
+            }, displayTime);
+          }
+        });
       }
-    }, 1000); // Faster updates for live feel
+    }, isAIProcessing ? 2000 : 1500); // Slower during AI processing
 
-    return () => clearInterval(interval);
-  }, [isRecording, isLiveMode, processingStep]);
+  return () => clearInterval(interval);
+  }, [isRecording, isLiveMode, processingStep, trafficPattern.peakHours, isAIProcessing, processAIDetection, selectedCamera]);
 
   const handleCameraSelect = (cameraId: string) => {
     setSelectedCamera(cameraId);
@@ -114,14 +120,17 @@ const LiveFeed = () => {
 
   return (
     <div className="space-y-6">
-      {/* Enhanced Header with Live Controls */}
+      {/* Enhanced Header with AI Status */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div className="flex items-center space-x-3">
           <Activity className="w-6 h-6 text-blue-400" />
           <div>
-            <h2 className="text-xl font-bold text-white">Live Camera Feed System</h2>
+            <h2 className="text-xl font-bold text-white">AI-Powered Live Camera Feed System</h2>
             <p className="text-slate-400 text-sm">
-              Real-time monitoring • {cameras.filter(c => c.status === 'active').length} active cameras
+              Real-time AI monitoring • {cameras.filter(c => c.status === 'active').length} active cameras
+              {trafficPattern.peakHours && (
+                <span className="text-orange-400 ml-2">• Peak Hours Active</span>
+              )}
             </p>
           </div>
         </div>
@@ -134,12 +143,18 @@ const LiveFeed = () => {
             className="flex items-center space-x-2"
           >
             <Radio className={`w-4 h-4 ${isLiveMode ? 'animate-pulse' : ''}`} />
-            <span>{isLiveMode ? 'LIVE MODE' : 'DEMO MODE'}</span>
+            <span>{isLiveMode ? 'AI LIVE MODE' : 'DEMO MODE'}</span>
           </Button>
           
           <Badge variant="secondary" className={`${isLiveMode ? 'bg-green-500/20 text-green-400 border-green-500/30 animate-pulse' : 'bg-gray-500/20 text-gray-400 border-gray-500/30'}`}>
-            {isLiveMode ? 'REAL-TIME ACTIVE' : 'SIMULATION MODE'}
+            {isLiveMode ? 'AI REAL-TIME ACTIVE' : 'SIMULATION MODE'}
           </Badge>
+
+          {isAIProcessing && (
+            <Badge variant="secondary" className="bg-purple-500/20 text-purple-400 border-purple-500/30 animate-pulse">
+              AI PROCESSING
+            </Badge>
+          )}
           
           <Badge variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/30">
             Tamil Nadu Traffic Control
@@ -163,7 +178,12 @@ const LiveFeed = () => {
                 <CardTitle className="text-white text-lg lg:text-xl flex items-center space-x-2">
                   <div className="flex items-center space-x-2">
                     <div className={`w-3 h-3 rounded-full ${isLiveMode && isRecording ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}`}></div>
-                    <span>Live Camera Feed - {currentCamera?.id}</span>
+                    <span>AI Live Camera Feed - {currentCamera?.id}</span>
+                    {trafficPattern.peakHours && (
+                      <Badge variant="secondary" className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
+                        PEAK
+                      </Badge>
+                    )}
                   </div>
                 </CardTitle>
                 <CameraControls
@@ -184,7 +204,7 @@ const LiveFeed = () => {
                 isFullscreen={isFullscreen}
                 currentCamera={currentCamera}
                 frameRate={currentCamera?.fps || 30}
-                vehicleCount={vehicleCount}
+                vehicleCount={trafficPattern.vehicleCount}
                 detectedPlate={detectedPlate}
                 confidence={confidence}
                 processingStep={processingStep}
@@ -200,12 +220,34 @@ const LiveFeed = () => {
                 processingStep={processingStep}
                 processingSteps={processingSteps}
               />
+              
+              {/* AI System Load Indicator */}
+              <div className="mt-4 p-3 bg-slate-700/30 rounded-lg">
+                <div className="text-white text-sm font-semibold mb-2">AI System Load</div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <div className="text-xs text-slate-400">CPU</div>
+                    <div className="text-white font-bold">{systemLoad.cpu}%</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xs text-slate-400">Memory</div>
+                    <div className="text-white font-bold">{systemLoad.memory}%</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xs text-slate-400">Processing</div>
+                    <div className="text-white font-bold">{systemLoad.processing}%</div>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Enhanced Side Panel */}
         <div className="space-y-4">
+          {/* AI Real-Time Analytics */}
+          <AIRealTimeAnalytics cameraId={selectedCamera} />
+          
           {/* Live Alerts */}
           <LiveAlerts 
             selectedCamera={selectedCamera}
