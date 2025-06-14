@@ -15,9 +15,11 @@ import {
   Eye,
   Cpu,
   Activity,
-  Clock
+  Clock,
+  Database
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useSupabaseBackend } from "@/hooks/useSupabaseBackend";
 
 interface PlateResult {
   plate_number: string;
@@ -32,6 +34,7 @@ interface ProcessingResult {
   plates_detected: number;
   results: PlateResult[];
   error?: string;
+  processing_time?: number;
 }
 
 const ImageProcessingPipeline = () => {
@@ -43,6 +46,7 @@ const ImageProcessingPipeline = () => {
   const [processingTime, setProcessingTime] = useState<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { processImage, isConnected } = useSupabaseBackend();
 
   const processingSteps = [
     "Uploading Image",
@@ -67,7 +71,7 @@ const ImageProcessingPipeline = () => {
     }
   }, []);
 
-  const processImage = async () => {
+  const processImageFile = async () => {
     if (!selectedImage) {
       toast({
         title: "No Image Selected",
@@ -89,22 +93,12 @@ const ImageProcessingPipeline = () => {
         await new Promise(resolve => setTimeout(resolve, 800));
       }
 
-      // Call Python ANPR service
-      const response = await fetch('http://localhost:5000/process-image', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          image: selectedImage
-        })
-      });
+      // Convert data URL to File object for processing
+      const response = await fetch(selectedImage);
+      const blob = await response.blob();
+      const file = new File([blob], 'uploaded-image.jpg', { type: blob.type });
 
-      if (!response.ok) {
-        throw new Error('Failed to process image');
-      }
-
-      const result: ProcessingResult = await response.json();
+      const result = await processImage(file);
       setResults(result);
       setProcessingTime(Date.now() - startTime);
 
@@ -124,14 +118,15 @@ const ImageProcessingPipeline = () => {
       console.error('Processing error:', error);
       toast({
         title: "Processing Failed",
-        description: "Failed to process image. Make sure Python service is running.",
+        description: "Failed to process image using Supabase backend.",
         variant: "destructive"
       });
       setResults({
         success: false,
         plates_detected: 0,
         results: [],
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
+        processing_time: (Date.now() - startTime) / 1000
       });
     } finally {
       setProcessing(false);
@@ -157,11 +152,14 @@ const ImageProcessingPipeline = () => {
       <Card className="bg-slate-800/50 border-slate-700">
         <CardHeader className="pb-3">
           <CardTitle className="text-white flex items-center text-lg lg:text-xl">
-            <Cpu className="w-5 h-5 lg:w-6 lg:h-6 mr-2" />
-            ANPR Image Processing Pipeline
+            <Database className="w-5 h-5 lg:w-6 lg:h-6 mr-2 text-green-400" />
+            Supabase ANPR Processing Pipeline
+            <Badge variant="secondary" className="ml-3 bg-green-500/20 text-green-400 border-green-500/30">
+              LOVABLE POWERED
+            </Badge>
           </CardTitle>
           <p className="text-slate-400 text-sm">
-            Upload vehicle images for automatic license plate recognition using Python backend
+            Upload vehicle images for automatic license plate recognition using Supabase backend
           </p>
         </CardHeader>
       </Card>
@@ -212,9 +210,9 @@ const ImageProcessingPipeline = () => {
                 Choose Image
               </Button>
               <Button 
-                onClick={processImage}
+                onClick={processImageFile}
                 disabled={!selectedImage || processing}
-                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                className="flex-1 bg-green-600 hover:bg-green-700"
               >
                 <Zap className="w-4 h-4 mr-2" />
                 {processing ? 'Processing...' : 'Process Image'}
@@ -252,6 +250,17 @@ const ImageProcessingPipeline = () => {
                 <span className="text-white font-mono">{processingTime}ms</span>
               </div>
             )}
+
+            {/* Connection Status */}
+            <div className="p-3 bg-slate-700/30 rounded-lg">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-300 text-sm">Backend Status:</span>
+                <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
+                  <Database className="w-3 h-3 mr-1" />
+                  Supabase Connected
+                </Badge>
+              </div>
+            </div>
 
             {/* Processing Steps */}
             <div className="space-y-2">

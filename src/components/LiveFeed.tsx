@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,7 @@ import { Camera } from "@/types/supabase";
 import AIRealTimeAnalytics from "./livefeed/AIRealTimeAnalytics";
 import { useAIRealTimeEngine } from "@/hooks/useAIRealTimeEngine";
 import SDNThreatManager from "./livefeed/SDNThreatManager";
-import PythonServiceMonitor from "./livefeed/PythonServiceMonitor";
+import SupabaseServiceMonitor from "./livefeed/PythonServiceMonitor";
 import { useAIThreatDetection } from "@/hooks/useAIThreatDetection";
 import { useEnhancedBackendIntegration } from "@/hooks/useEnhancedBackendIntegration";
 import LoadingSpinner from "./common/LoadingSpinner";
@@ -129,11 +128,11 @@ const LiveFeed = () => {
   // Get connection status for display
   const getConnectionStatus = () => {
     if (connectionHealth.backend && connectionHealth.database) {
-      return { status: 'Supabase Backend', color: 'bg-green-500/20 text-green-400 border-green-500/30' };
+      return { status: 'Supabase Active', color: 'bg-green-500/20 text-green-400 border-green-500/30' };
     } else if (connectionHealth.database) {
       return { status: 'Database Only', color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' };
     } else {
-      return { status: 'Offline - Demo Mode', color: 'bg-red-500/20 text-red-400 border-red-500/30' };
+      return { status: 'Demo Mode', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' };
     }
   };
 
@@ -155,7 +154,7 @@ const LiveFeed = () => {
                 )}
                 <span className="text-green-400 ml-2 flex items-center">
                   <CheckCircle className="w-3 h-3 mr-1" />
-                  • Lovable/Supabase Backend Active
+                  • Supabase Backend Active
                 </span>
               </p>
             </div>
@@ -181,7 +180,7 @@ const LiveFeed = () => {
               {connectionStatus.status}
             </Badge>
 
-            <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 border-blue-500/30 animate-pulse">
+            <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 animate-pulse">
               SUPABASE POWERED
             </Badge>
 
@@ -201,7 +200,7 @@ const LiveFeed = () => {
         <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-4 flex items-center space-x-3">
           <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
           <div>
-            <div className="text-green-400 font-semibold text-sm">Lovable/Supabase Backend Active</div>
+            <div className="text-green-400 font-semibold text-sm">Supabase Backend Active</div>
             <div className="text-green-300 text-xs mt-1">
               Using integrated Supabase backend for real-time ANPR processing and data management.
             </div>
@@ -297,7 +296,7 @@ const LiveFeed = () => {
 
           {/* Enhanced Side Panel */}
           <div className="space-y-4">
-            <PythonServiceMonitor />
+            <SupabaseServiceMonitor />
             <SDNThreatManager cameraId={selectedCamera} />
             <AIRealTimeAnalytics cameraId={selectedCamera} />
             <LiveAlerts 
