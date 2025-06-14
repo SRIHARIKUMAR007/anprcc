@@ -13,13 +13,13 @@ import {
   CloudSnow,
   Map,
   Coins,
-  Search,
   Heart,
   Download,
   Users,
   Camera,
   Upload,
-  RefreshCw
+  RefreshCw,
+  Radio
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import RoleBasedAccess from "./RoleBasedAccess";
@@ -43,6 +43,14 @@ export const MobileOptimizedTabs = ({ children, defaultValue }: MobileOptimizedT
           >
             <Monitor className="w-4 h-4" />
             <span>Real-time</span>
+          </TabsTrigger>
+
+          <TabsTrigger 
+            value="live-data" 
+            className="data-[state=active]:bg-green-600 data-[state=active]:text-white flex items-center space-x-2 px-3 py-2 text-sm whitespace-nowrap"
+          >
+            <Radio className="w-4 h-4" />
+            <span>Live Data</span>
           </TabsTrigger>
 
           <TabsTrigger 
@@ -86,14 +94,6 @@ export const MobileOptimizedTabs = ({ children, defaultValue }: MobileOptimizedT
           </TabsTrigger>
 
           {/* Enhanced Features Tabs */}
-          <TabsTrigger 
-            value="search" 
-            className="data-[state=active]:bg-green-600 data-[state=active]:text-white flex items-center space-x-2 px-3 py-2 text-sm whitespace-nowrap"
-          >
-            <Search className="w-4 h-4" />
-            <span>Search</span>
-          </TabsTrigger>
-
           <TabsTrigger 
             value="health" 
             className="data-[state=active]:bg-green-600 data-[state=active]:text-white flex items-center space-x-2 px-3 py-2 text-sm whitespace-nowrap"

@@ -19,7 +19,7 @@ import TamilNaduTrafficMap from "@/components/TamilNaduTrafficMap";
 import TollPlazaMonitor from "@/components/TollPlazaMonitor";
 import LiveWeatherWidget from "@/components/LiveWeatherWidget";
 import RealTimeMonitor from "@/components/RealTimeMonitor";
-import AdvancedSearch from "@/components/AdvancedSearch";
+import LiveDataMonitor from "@/components/LiveDataMonitor";
 import SystemHealthMonitor from "@/components/SystemHealthMonitor";
 import DataExportManager from "@/components/DataExportManager";
 import UserActivityTracker from "@/components/UserActivityTracker";
@@ -98,6 +98,10 @@ const Index = () => {
                 <RealTimeMonitor />
               </TabsContent>
 
+              <TabsContent value="live-data">
+                <LiveDataMonitor />
+              </TabsContent>
+
               <TabsContent value="tn-traffic">
                 <TamilNaduTrafficMap />
               </TabsContent>
@@ -128,11 +132,7 @@ const Index = () => {
                 </div>
               </TabsContent>
 
-              {/* Enhanced Features Tabs - Now available on main page */}
-              <TabsContent value="search">
-                <AdvancedSearch />
-              </TabsContent>
-
+              {/* Enhanced Features Tabs */}
               <TabsContent value="health">
                 <SystemHealthMonitor />
               </TabsContent>
