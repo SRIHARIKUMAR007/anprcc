@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Camera, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Camera, Eye, EyeOff, AlertCircle, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,6 +17,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [error, setError] = useState("");
+  const [accountExistsMessage, setAccountExistsMessage] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -57,6 +58,7 @@ const Auth = () => {
 
     setIsLoading(true);
     setError("");
+    setAccountExistsMessage("");
 
     try {
       // Clear any existing auth state first
@@ -109,6 +111,7 @@ const Auth = () => {
 
     setIsLoading(true);
     setError("");
+    setAccountExistsMessage("");
 
     try {
       // Clear any existing auth state first
@@ -127,11 +130,28 @@ const Auth = () => {
 
       if (error) {
         console.error('Sign up error:', error);
+        
+        // Check if the error is due to account already existing
+        if (error.message.includes("already registered") || 
+            error.message.includes("already exists") ||
+            error.message.includes("duplicate")) {
+          setAccountExistsMessage(`An account with email ${email} already exists. Please sign in instead or use a different email address.`);
+          setError("");
+          return;
+        }
+        
         throw error;
       }
 
       if (data.user) {
         console.log('Sign up successful:', data.user.id);
+        
+        // Check if user was created but already existed
+        if (data.user && !data.session) {
+          setAccountExistsMessage(`An account with email ${email} already exists. Please check your email for a confirmation link or sign in instead.`);
+          return;
+        }
+        
         toast({
           title: "Account created!",
           description: data.user.email_confirmed_at 
@@ -157,6 +177,11 @@ const Auth = () => {
     }
   };
 
+  const switchToSignIn = () => {
+    setAccountExistsMessage("");
+    setError("");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -178,10 +203,18 @@ const Auth = () => {
           <CardContent>
             <Tabs defaultValue="signin" className="space-y-4">
               <TabsList className="grid w-full grid-cols-2 bg-slate-700/50">
-                <TabsTrigger value="signin" className="data-[state=active]:bg-blue-600">
+                <TabsTrigger 
+                  value="signin" 
+                  className="data-[state=active]:bg-blue-600"
+                  onClick={switchToSignIn}
+                >
                   Sign In
                 </TabsTrigger>
-                <TabsTrigger value="signup" className="data-[state=active]:bg-blue-600">
+                <TabsTrigger 
+                  value="signup" 
+                  className="data-[state=active]:bg-blue-600"
+                  onClick={switchToSignIn}
+                >
                   Sign Up
                 </TabsTrigger>
               </TabsList>
@@ -190,6 +223,15 @@ const Auth = () => {
                 <div className="bg-red-500/10 border border-red-500/30 rounded p-3 flex items-center space-x-2">
                   <AlertCircle className="w-4 h-4 text-red-400" />
                   <span className="text-red-400 text-sm">{error}</span>
+                </div>
+              )}
+
+              {accountExistsMessage && (
+                <div className="bg-blue-500/10 border border-blue-500/30 rounded p-3 flex items-start space-x-2">
+                  <Info className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                  <div className="text-blue-400 text-sm">
+                    <p>{accountExistsMessage}</p>
+                  </div>
                 </div>
               )}
 
