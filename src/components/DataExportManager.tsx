@@ -113,6 +113,14 @@ const DataExportManager = () => {
     }
   };
 
+  const handleImagesChange = (checked: boolean | "indeterminate") => {
+    setIncludeImages(checked === true);
+  };
+
+  const handleAnalyticsChange = (checked: boolean | "indeterminate") => {
+    setIncludeAnalytics(checked === true);
+  };
+
   return (
     <Card className="bg-slate-800/50 border-slate-700">
       <CardHeader>
@@ -181,7 +189,7 @@ const DataExportManager = () => {
                 <Checkbox 
                   id="images" 
                   checked={includeImages}
-                  onCheckedChange={setIncludeImages}
+                  onCheckedChange={handleImagesChange}
                 />
                 <Label htmlFor="images" className="text-slate-400 flex items-center">
                   <Image className="w-4 h-4 mr-1" />
@@ -192,7 +200,7 @@ const DataExportManager = () => {
                 <Checkbox 
                   id="analytics" 
                   checked={includeAnalytics}
-                  onCheckedChange={setIncludeAnalytics}
+                  onCheckedChange={handleAnalyticsChange}
                 />
                 <Label htmlFor="analytics" className="text-slate-400 flex items-center">
                   <Calendar className="w-4 h-4 mr-1" />
