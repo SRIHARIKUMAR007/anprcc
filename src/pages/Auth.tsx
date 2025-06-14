@@ -21,7 +21,7 @@ const Auth = () => {
   // Determine role based on email
   const determineUserRole = (email: string) => {
     if (email === "sharisan2005@gmail.com") {
-      return "operator";
+      return "admin";
     }
     return "viewer";
   };
@@ -72,8 +72,8 @@ const Auth = () => {
           }
         } else {
           toast.success(`Account created successfully! You have been assigned ${userRole} role.`);
-          if (userRole === "operator") {
-            toast.info("You have operator privileges with enhanced system access.");
+          if (userRole === "admin") {
+            toast.info("You have administrator privileges with full system access.");
           }
           navigate("/");
         }
@@ -89,12 +89,12 @@ const Auth = () => {
   const getRoleInfo = (email: string) => {
     const role = determineUserRole(email);
     switch (role) {
-      case 'operator':
+      case 'admin':
         return {
-          role: 'Operator',
-          icon: <Settings className="w-4 h-4" />,
-          color: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-          description: 'Enhanced system access with detection and monitoring capabilities'
+          role: 'Administrator',
+          icon: <Shield className="w-4 h-4" />,
+          color: 'bg-red-500/20 text-red-400 border-red-500/30',
+          description: 'Full system access with all administrative capabilities'
         };
       default:
         return {
@@ -161,9 +161,9 @@ const Auth = () => {
                 </div>
                 <p className="text-xs text-slate-400">{roleInfo.description}</p>
                 {email === "sharisan2005@gmail.com" && (
-                  <div className="mt-2 flex items-center text-xs text-blue-400">
+                  <div className="mt-2 flex items-center text-xs text-red-400">
                     <AlertCircle className="w-3 h-3 mr-1" />
-                    Special operator privileges detected
+                    Administrator privileges detected
                   </div>
                 )}
               </div>
@@ -222,17 +222,17 @@ const Auth = () => {
             <div className="space-y-2 text-xs">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <Settings className="w-3 h-3 mr-2 text-blue-400" />
-                  <span className="text-slate-300">Operator</span>
+                  <Shield className="w-3 h-3 mr-2 text-red-400" />
+                  <span className="text-slate-300">Administrator</span>
                 </div>
-                <span className="text-slate-500">Special Access</span>
+                <span className="text-slate-500">Full Access</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <Eye className="w-3 h-3 mr-2 text-green-400" />
                   <span className="text-slate-300">Viewer</span>
                 </div>
-                <span className="text-slate-500">Standard Access</span>
+                <span className="text-slate-500">View Only</span>
               </div>
             </div>
             <p className="text-xs text-slate-500 mt-2">
