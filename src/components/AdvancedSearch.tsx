@@ -15,8 +15,8 @@ import { useSupabaseRealTimeData } from '@/hooks/useSupabaseRealTimeData';
 const AdvancedSearch = () => {
   const [plateSearch, setPlateSearch] = useState('');
   const [locationFilter, setLocationFilter] = useState('');
-  const [cameraFilter, setCameraFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [cameraFilter, setCameraFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [dateFrom, setDateFrom] = useState<Date>();
   const [dateTo, setDateTo] = useState<Date>();
   const [confidenceMin, setConfidenceMin] = useState('');
@@ -58,12 +58,12 @@ const AdvancedSearch = () => {
       }
       
       // Camera filter
-      if (cameraFilter && cameraFilter !== '') {
+      if (cameraFilter && cameraFilter !== 'all') {
         matches = matches && detection.camera_id === cameraFilter;
       }
       
       // Status filter
-      if (statusFilter && statusFilter !== '') {
+      if (statusFilter && statusFilter !== 'all') {
         matches = matches && detection.status === statusFilter;
       }
       
@@ -90,8 +90,8 @@ const AdvancedSearch = () => {
   const clearFilters = () => {
     setPlateSearch('');
     setLocationFilter('');
-    setCameraFilter('');
-    setStatusFilter('');
+    setCameraFilter('all');
+    setStatusFilter('all');
     setDateFrom(undefined);
     setDateTo(undefined);
     setConfidenceMin('');
@@ -109,7 +109,7 @@ const AdvancedSearch = () => {
 
   // Auto-search functionality - search when any filter changes and there's input
   const autoSearch = () => {
-    if (plateSearch || locationFilter || cameraFilter || statusFilter || confidenceMin || dateFrom || dateTo) {
+    if (plateSearch || locationFilter || cameraFilter !== 'all' || statusFilter !== 'all' || confidenceMin || dateFrom || dateTo) {
       handleSearch();
     }
   };
@@ -162,7 +162,7 @@ const AdvancedSearch = () => {
                 <SelectValue placeholder="Select camera..." />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-600">
-                <SelectItem value="">All Cameras</SelectItem>
+                <SelectItem value="all">All Cameras</SelectItem>
                 {cameras.map((camera) => (
                   <SelectItem key={camera.id} value={camera.camera_id}>
                     {camera.camera_id} - {camera.location}
@@ -179,7 +179,7 @@ const AdvancedSearch = () => {
                 <SelectValue placeholder="Select status..." />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-600">
-                <SelectItem value="">All Status</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="cleared">Cleared</SelectItem>
                 <SelectItem value="flagged">Flagged</SelectItem>
                 <SelectItem value="processing">Processing</SelectItem>
