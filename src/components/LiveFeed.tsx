@@ -17,6 +17,9 @@ import { LiveFeedCamera } from "@/types/camera";
 import { Camera } from "@/types/supabase";
 import AIRealTimeAnalytics from "./livefeed/AIRealTimeAnalytics";
 import { useAIRealTimeEngine } from "@/hooks/useAIRealTimeEngine";
+import SDNThreatManager from "./livefeed/SDNThreatManager";
+import PythonServiceMonitor from "./livefeed/PythonServiceMonitor";
+import { useAIThreatDetection } from "@/hooks/useAIThreatDetection";
 
 const LiveFeed = () => {
   const [selectedCamera, setSelectedCamera] = useState("CAM-01");
@@ -37,6 +40,8 @@ const LiveFeed = () => {
     systemLoad, 
     processAIDetection 
   } = useAIRealTimeEngine();
+
+  const { isBackendConnected } = useAIThreatDetection();
 
   // Transform real cameras to match the expected format
   const transformedRealCameras: LiveFeedCamera[] = realCameras.map((camera: Camera) => ({
@@ -131,6 +136,9 @@ const LiveFeed = () => {
               {trafficPattern.peakHours && (
                 <span className="text-orange-400 ml-2">• Peak Hours Active</span>
               )}
+              {isBackendConnected && (
+                <span className="text-green-400 ml-2">• Python ANPR Active</span>
+              )}
             </p>
           </div>
         </div>
@@ -149,6 +157,12 @@ const LiveFeed = () => {
           <Badge variant="secondary" className={`${isLiveMode ? 'bg-green-500/20 text-green-400 border-green-500/30 animate-pulse' : 'bg-gray-500/20 text-gray-400 border-gray-500/30'}`}>
             {isLiveMode ? 'AI REAL-TIME ACTIVE' : 'SIMULATION MODE'}
           </Badge>
+
+          {isBackendConnected && (
+            <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 border-blue-500/30 animate-pulse">
+              PYTHON ANPR ONLINE
+            </Badge>
+          )}
 
           {isAIProcessing && (
             <Badge variant="secondary" className="bg-purple-500/20 text-purple-400 border-purple-500/30 animate-pulse">
@@ -245,6 +259,12 @@ const LiveFeed = () => {
 
         {/* Enhanced Side Panel */}
         <div className="space-y-4">
+          {/* Python Service Monitor */}
+          <PythonServiceMonitor />
+          
+          {/* SDN Threat Manager */}
+          <SDNThreatManager cameraId={selectedCamera} />
+          
           {/* AI Real-Time Analytics */}
           <AIRealTimeAnalytics cameraId={selectedCamera} />
           
