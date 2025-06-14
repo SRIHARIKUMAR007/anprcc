@@ -8,6 +8,7 @@ import AdvancedSearch from "@/components/AdvancedSearch";
 import SystemHealthMonitor from "@/components/SystemHealthMonitor";
 import DataExportManager from "@/components/DataExportManager";
 import UserActivityTracker from "@/components/UserActivityTracker";
+import AlertsPanel from "@/components/AlertsPanel";
 import RoleBasedAccess from "@/components/RoleBasedAccess";
 import { useEnhancedBackendIntegration } from "@/hooks/useEnhancedBackendIntegration";
 
@@ -44,6 +45,10 @@ const Features = () => {
                 <UserActivityTracker />
               </TabsContent>
             </RoleBasedAccess>
+
+            <TabsContent value="alerts">
+              <AlertsPanel />
+            </TabsContent>
 
           </MobileOptimizedTabs>
         </div>
