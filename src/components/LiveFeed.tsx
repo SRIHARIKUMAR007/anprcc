@@ -133,28 +133,29 @@ const LiveFeed = () => {
   }, [isRecording]);
 
   return (
-    <div className="space-y-6">
-      {/* Main Feed */}
+    <div className="space-y-4 lg:space-y-6">
+      {/* Main Feed - Responsive */}
       <Card className="bg-slate-800/50 border-slate-700">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-white flex items-center">
-              <Camera className="w-5 h-5 mr-2" />
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <CardTitle className="text-white flex items-center text-base lg:text-lg">
+              <Camera className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
               Live Camera Feed - CAM-02
             </CardTitle>
-            <div className="flex items-center space-x-2">
-              <Badge variant={isRecording ? "default" : "secondary"} className="bg-red-500/20 text-red-400 border-red-500/30">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge variant={isRecording ? "default" : "secondary"} className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">
                 {isRecording ? "LIVE" : "PAUSED"}
               </Badge>
-              <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
+              <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
                 {frameRate} FPS
               </Badge>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setIsRecording(!isRecording)}
+                className="text-xs"
               >
-                {isRecording ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                {isRecording ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
               </Button>
             </div>
           </div>
@@ -168,55 +169,56 @@ const LiveFeed = () => {
               className="w-full h-full"
             />
             
-            {/* Camera info overlay */}
-            <div className="absolute top-4 left-4 space-y-1">
-              <div className="text-white text-sm font-mono bg-black/50 px-2 py-1 rounded">
+            {/* Camera info overlay - Responsive positioning */}
+            <div className="absolute top-2 left-2 lg:top-4 lg:left-4 space-y-1">
+              <div className="text-white text-xs lg:text-sm font-mono bg-black/50 px-2 py-1 rounded">
                 CAM-02 • Highway Junction • 1920x1080
               </div>
-              <div className="text-white text-sm font-mono bg-black/50 px-2 py-1 rounded flex items-center">
+              <div className="text-white text-xs lg:text-sm font-mono bg-black/50 px-2 py-1 rounded flex items-center">
                 <MapPin className="w-3 h-3 mr-1" />
                 {currentLocation.lat}, {currentLocation.lng}
               </div>
             </div>
             
-            <div className="absolute top-4 right-4 space-y-1">
-              <div className="text-white text-sm bg-black/50 px-2 py-1 rounded">
+            <div className="absolute top-2 right-2 lg:top-4 lg:right-4 space-y-1">
+              <div className="text-white text-xs lg:text-sm bg-black/50 px-2 py-1 rounded">
                 {new Date().toLocaleTimeString()}
               </div>
-              <div className="text-white text-sm bg-black/50 px-2 py-1 rounded flex items-center">
+              <div className="text-white text-xs lg:text-sm bg-black/50 px-2 py-1 rounded flex items-center">
                 <Cpu className="w-3 h-3 mr-1" />
                 Vehicles: {detectedVehicles}
               </div>
             </div>
 
-            {/* Plate detection overlay */}
+            {/* Plate detection overlay - Responsive */}
             {detectedPlate && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-green-500/20 border-2 border-green-500 rounded-lg p-6 backdrop-blur-sm animate-pulse">
-                  <div className="text-green-400 text-sm mb-2 flex items-center">
-                    <Zap className="w-4 h-4 mr-1" />
+              <div className="absolute inset-0 flex items-center justify-center p-4">
+                <div className="bg-green-500/20 border-2 border-green-500 rounded-lg p-3 lg:p-6 backdrop-blur-sm animate-pulse max-w-full">
+                  <div className="text-green-400 text-xs lg:text-sm mb-2 flex items-center">
+                    <Zap className="w-3 h-3 lg:w-4 lg:h-4 mr-1" />
                     Plate Detected
                   </div>
-                  <div className="text-white text-2xl font-mono font-bold">{detectedPlate}</div>
-                  <div className="text-green-400 text-sm mt-2">Confidence: {confidence}%</div>
+                  <div className="text-white text-lg lg:text-2xl font-mono font-bold break-all">{detectedPlate}</div>
+                  <div className="text-green-400 text-xs lg:text-sm mt-2">Confidence: {confidence}%</div>
                   <div className="text-blue-400 text-xs mt-1">Processing vehicle details...</div>
                 </div>
               </div>
             )}
 
-            {/* Processing indicator */}
-            <div className="absolute bottom-4 left-4 bg-blue-500/20 border border-blue-500/30 rounded px-3 py-2">
-              <div className="flex items-center text-blue-400 text-sm">
-                <RotateCw className="w-3 h-3 mr-2 animate-spin" />
-                {processingStep}
+            {/* Processing indicator - Responsive positioning */}
+            <div className="absolute bottom-2 left-2 lg:bottom-4 lg:left-4 bg-blue-500/20 border border-blue-500/30 rounded px-2 lg:px-3 py-1 lg:py-2">
+              <div className="flex items-center text-blue-400 text-xs lg:text-sm">
+                <RotateCw className="w-3 h-3 mr-1 lg:mr-2 animate-spin" />
+                <span className="hidden sm:inline">{processingStep}</span>
+                <span className="sm:hidden">Processing...</span>
               </div>
             </div>
 
-            {/* Performance metrics */}
-            <div className="absolute bottom-4 right-4 space-y-1">
+            {/* Performance metrics - Responsive */}
+            <div className="absolute bottom-2 right-2 lg:bottom-4 lg:right-4 space-y-1">
               <div className="bg-black/50 text-white text-xs px-2 py-1 rounded flex items-center">
                 <Clock className="w-3 h-3 mr-1" />
-                Latency: {Math.floor(15 + Math.random() * 10)}ms
+                {Math.floor(15 + Math.random() * 10)}ms
               </div>
               <div className="bg-black/50 text-white text-xs px-2 py-1 rounded">
                 Quality: {Math.floor(92 + Math.random() * 8)}%
@@ -224,20 +226,20 @@ const LiveFeed = () => {
             </div>
           </div>
 
-          {/* Enhanced Processing Pipeline */}
-          <div className="mt-4 p-4 bg-slate-700/30 rounded-lg">
+          {/* Enhanced Processing Pipeline - Responsive Grid */}
+          <div className="mt-4 p-3 lg:p-4 bg-slate-700/30 rounded-lg">
             <div className="text-white text-sm font-semibold mb-3">Real-time ANPR Processing Pipeline</div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 lg:gap-3">
               {processingSteps.map((step, index) => (
                 <div 
                   key={step}
-                  className={`p-3 rounded text-xs text-center transition-all ${
+                  className={`p-2 lg:p-3 rounded text-xs text-center transition-all ${
                     processingStep === step 
                       ? "bg-blue-500/30 text-blue-400 border border-blue-500/50 scale-105" 
                       : "bg-slate-600/30 text-slate-400"
                   }`}
                 >
-                  <div className="font-semibold">{step}</div>
+                  <div className="font-semibold truncate" title={step}>{step}</div>
                   {processingStep === step && (
                     <div className="text-xs mt-1 text-blue-300">Active</div>
                   )}
@@ -248,29 +250,29 @@ const LiveFeed = () => {
         </CardContent>
       </Card>
 
-      {/* Enhanced Camera Grid */}
+      {/* Enhanced Camera Grid - Responsive */}
       <Card className="bg-slate-800/50 border-slate-700">
         <CardHeader>
-          <CardTitle className="text-white">Live Camera Network Status</CardTitle>
+          <CardTitle className="text-white text-base lg:text-lg">Live Camera Network Status</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
             {mockCameras.map((camera) => (
               <div 
                 key={camera.id}
-                className="p-4 bg-slate-700/30 rounded-lg border border-slate-600/50 hover:border-blue-500/50 transition-all"
+                className="p-3 lg:p-4 bg-slate-700/30 rounded-lg border border-slate-600/50 hover:border-blue-500/50 transition-all"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="font-mono text-white font-semibold">{camera.id}</div>
+                <div className="flex items-center justify-between mb-2 lg:mb-3">
+                  <div className="font-mono text-white font-semibold text-sm lg:text-base">{camera.id}</div>
                   <Badge 
                     variant={camera.status === "active" ? "default" : "secondary"}
-                    className={camera.status === "active" ? "bg-green-500/20 text-green-400 border-green-500/30" : ""}
+                    className={camera.status === "active" ? "bg-green-500/20 text-green-400 border-green-500/30 text-xs" : "text-xs"}
                   >
                     {camera.status}
                   </Badge>
                 </div>
-                <div className="text-slate-400 text-sm mb-2">{camera.location}</div>
-                <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="text-slate-400 text-xs lg:text-sm mb-2">{camera.location}</div>
+                <div className="grid grid-cols-2 gap-1 lg:gap-2 text-xs">
                   <div className="text-slate-300">
                     <span className="text-slate-400">Vehicles:</span> {camera.vehicles}
                   </div>

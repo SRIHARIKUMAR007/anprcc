@@ -1,338 +1,392 @@
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { 
-  Camera, 
   Upload, 
+  Camera, 
   Image as ImageIcon, 
-  Eye, 
-  Cpu, 
-  Search, 
+  Zap, 
   CheckCircle, 
   AlertCircle,
-  Play,
-  Pause,
-  Settings
+  Download,
+  Eye,
+  Cpu,
+  Activity,
+  Clock
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
-interface ProcessingStep {
-  id: string;
-  name: string;
-  status: 'pending' | 'processing' | 'completed' | 'error';
-  progress: number;
-  description: string;
+interface PlateResult {
+  plate_number: string;
+  confidence: number;
+  is_valid: boolean;
+  bbox: { x: number; y: number; width: number; height: number };
+  raw_text: string;
+}
+
+interface ProcessingResult {
+  success: boolean;
+  plates_detected: number;
+  results: PlateResult[];
+  error?: string;
 }
 
 const ImageProcessingPipeline = () => {
-  const [isProcessing, setIsProcessing] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [extractedPlate, setExtractedPlate] = useState<string | null>(null);
-  const [confidence, setConfidence] = useState(0);
-  const [processingSteps, setProcessingSteps] = useState<ProcessingStep[]>([
-    { id: 'capture', name: 'Image Capture', status: 'pending', progress: 0, description: 'Capturing vehicle image from camera' },
-    { id: 'preprocess', name: 'Image Pre-processing', status: 'pending', progress: 0, description: 'Noise reduction, contrast enhancement, sharpening' },
-    { id: 'detection', name: 'Plate Detection', status: 'pending', progress: 0, description: 'Identifying license plate region using edge detection' },
-    { id: 'segmentation', name: 'Plate Segmentation', status: 'pending', progress: 0, description: 'Extracting plate region from image' },
-    { id: 'ocr', name: 'Character Extraction (OCR)', status: 'pending', progress: 0, description: 'Using Tesseract OCR for character recognition' },
-    { id: 'verification', name: 'Character Verification', status: 'pending', progress: 0, description: 'ML model verification and database lookup' }
-  ]);
-  
+  const [processing, setProcessing] = useState(false);
+  const [currentStep, setCurrentStep] = useState<string>("Idle");
+  const [progress, setProgress] = useState(0);
+  const [results, setResults] = useState<ProcessingResult | null>(null);
+  const [processingTime, setProcessingTime] = useState<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { toast } = useToast();
 
-  const mockPlates = [
-    "DL 01 AB 1234", "MH 12 CD 5678", "UP 16 EF 9012", 
-    "GJ 05 GH 3456", "KA 03 IJ 7890", "TN 09 KL 2345"
+  const processingSteps = [
+    "Uploading Image",
+    "Preprocessing Image",
+    "Detecting Plate Regions", 
+    "Extracting Characters",
+    "Validating Results",
+    "Complete"
   ];
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
         setSelectedImage(e.target?.result as string);
-        resetProcessing();
+        setResults(null);
+        setProgress(0);
+        setCurrentStep("Ready");
       };
       reader.readAsDataURL(file);
     }
-  };
-
-  const resetProcessing = () => {
-    setProcessingSteps(steps => steps.map(step => ({
-      ...step,
-      status: 'pending',
-      progress: 0
-    })));
-    setExtractedPlate(null);
-    setConfidence(0);
-  };
-
-  const simulateProcessingStep = (stepId: string, duration: number) => {
-    return new Promise<void>((resolve) => {
-      setProcessingSteps(steps => steps.map(step => 
-        step.id === stepId ? { ...step, status: 'processing' } : step
-      ));
-
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += Math.random() * 20;
-        if (progress >= 100) {
-          progress = 100;
-          clearInterval(interval);
-          setProcessingSteps(steps => steps.map(step => 
-            step.id === stepId ? { ...step, status: 'completed', progress: 100 } : step
-          ));
-          resolve();
-        } else {
-          setProcessingSteps(steps => steps.map(step => 
-            step.id === stepId ? { ...step, progress } : step
-          ));
-        }
-      }, duration / 10);
-    });
-  };
+  }, []);
 
   const processImage = async () => {
-    if (!selectedImage) return;
-    
-    setIsProcessing(true);
-    resetProcessing();
+    if (!selectedImage) {
+      toast({
+        title: "No Image Selected",
+        description: "Please upload an image first",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setProcessing(true);
+    setProgress(0);
+    const startTime = Date.now();
 
     try {
-      // Step 1: Image Capture (already done via upload)
-      await simulateProcessingStep('capture', 500);
-      
-      // Step 2: Image Pre-processing
-      await simulateProcessingStep('preprocess', 1500);
-      
-      // Step 3: Plate Detection
-      await simulateProcessingStep('detection', 2000);
-      
-      // Step 4: Plate Segmentation
-      await simulateProcessingStep('segmentation', 1000);
-      
-      // Step 5: OCR
-      await simulateProcessingStep('ocr', 2500);
-      
-      // Step 6: Verification
-      await simulateProcessingStep('verification', 1500);
-      
-      // Simulate successful extraction
-      const randomPlate = mockPlates[Math.floor(Math.random() * mockPlates.length)];
-      setExtractedPlate(randomPlate);
-      setConfidence(Math.floor(85 + Math.random() * 15));
-      
+      // Simulate processing steps
+      for (let i = 0; i < processingSteps.length; i++) {
+        setCurrentStep(processingSteps[i]);
+        setProgress((i + 1) * (100 / processingSteps.length));
+        await new Promise(resolve => setTimeout(resolve, 800));
+      }
+
+      // Call Python ANPR service
+      const response = await fetch('http://localhost:5000/process-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          image: selectedImage
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to process image');
+      }
+
+      const result: ProcessingResult = await response.json();
+      setResults(result);
+      setProcessingTime(Date.now() - startTime);
+
+      if (result.success && result.plates_detected > 0) {
+        toast({
+          title: "Processing Complete",
+          description: `Found ${result.plates_detected} license plate(s)`,
+        });
+      } else {
+        toast({
+          title: "No Plates Detected", 
+          description: "No valid license plates found in the image",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
       console.error('Processing error:', error);
+      toast({
+        title: "Processing Failed",
+        description: "Failed to process image. Make sure Python service is running.",
+        variant: "destructive"
+      });
+      setResults({
+        success: false,
+        plates_detected: 0,
+        results: [],
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     } finally {
-      setIsProcessing(false);
+      setProcessing(false);
+      setCurrentStep("Complete");
     }
   };
 
-  const drawImageToCanvas = () => {
-    if (!selectedImage || !canvasRef.current) return;
-    
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const img = new Image();
-    img.onload = () => {
-      canvas.width = 400;
-      canvas.height = 300;
-      ctx.drawImage(img, 0, 0, 400, 300);
-      
-      // Draw detection box if processing completed
-      if (processingSteps.find(s => s.id === 'detection')?.status === 'completed') {
-        ctx.strokeStyle = '#10b981';
-        ctx.lineWidth = 3;
-        ctx.strokeRect(120, 200, 160, 40);
-        
-        // Draw extracted plate text
-        if (extractedPlate) {
-          ctx.fillStyle = 'rgba(16, 185, 129, 0.2)';
-          ctx.fillRect(120, 200, 160, 40);
-          ctx.fillStyle = '#10b981';
-          ctx.font = '14px monospace';
-          ctx.fillText(extractedPlate, 125, 225);
-        }
-      }
-    };
-    img.src = selectedImage;
+  const downloadResults = () => {
+    if (results) {
+      const dataStr = JSON.stringify(results, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'anpr-results.json';
+      link.click();
+    }
   };
 
-  useEffect(() => {
-    drawImageToCanvas();
-  }, [selectedImage, processingSteps, extractedPlate]);
-
   return (
-    <div className="space-y-6">
-      {/* Image Input Section */}
+    <div className="space-y-4 lg:space-y-6">
+      {/* Header */}
       <Card className="bg-slate-800/50 border-slate-700">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center">
-            <Camera className="w-5 h-5 mr-2" />
+        <CardHeader className="pb-3">
+          <CardTitle className="text-white flex items-center text-lg lg:text-xl">
+            <Cpu className="w-5 h-5 lg:w-6 lg:h-6 mr-2" />
             ANPR Image Processing Pipeline
           </CardTitle>
+          <p className="text-slate-400 text-sm">
+            Upload vehicle images for automatic license plate recognition using Python backend
+          </p>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Image Upload/Display */}
-            <div className="space-y-4">
-              <div className="border-2 border-dashed border-slate-600 rounded-lg p-6 text-center">
-                {selectedImage ? (
-                  <div className="space-y-4">
-                    <canvas
-                      ref={canvasRef}
-                      className="max-w-full h-auto rounded border border-slate-600"
-                    />
-                    <Button
-                      variant="outline"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="mr-2"
-                    >
-                      <Upload className="w-4 h-4 mr-2" />
-                      Upload New Image
-                    </Button>
-                    <Button
-                      onClick={processImage}
-                      disabled={isProcessing}
-                      className="bg-blue-600 hover:bg-blue-700"
-                    >
-                      {isProcessing ? (
-                        <>
-                          <Pause className="w-4 h-4 mr-2" />
-                          Processing...
-                        </>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+        {/* Image Upload Section */}
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center text-base lg:text-lg">
+              <Upload className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
+              Image Upload
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageUpload}
+              accept="image/*"
+              className="hidden"
+            />
+            
+            <div className="border-2 border-dashed border-slate-600 rounded-lg p-4 lg:p-8 text-center hover:border-blue-500 transition-colors">
+              {selectedImage ? (
+                <div className="space-y-3">
+                  <img 
+                    src={selectedImage} 
+                    alt="Selected" 
+                    className="max-h-32 lg:max-h-48 mx-auto rounded border"
+                  />
+                  <p className="text-slate-300 text-sm">Image ready for processing</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <ImageIcon className="w-12 h-12 lg:w-16 lg:h-16 text-slate-500 mx-auto" />
+                  <p className="text-slate-400 text-sm lg:text-base">Click to upload an image</p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button 
+                onClick={() => fileInputRef.current?.click()}
+                variant="outline" 
+                className="flex-1 bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Choose Image
+              </Button>
+              <Button 
+                onClick={processImage}
+                disabled={!selectedImage || processing}
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
+              >
+                <Zap className="w-4 h-4 mr-2" />
+                {processing ? 'Processing...' : 'Process Image'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Processing Status */}
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center text-base lg:text-lg">
+              <Activity className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
+              Processing Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-300 text-sm">Current Step:</span>
+                <Badge variant={processing ? "default" : "secondary"} className="text-xs">
+                  {currentStep}
+                </Badge>
+              </div>
+              <Progress value={progress} className="w-full h-2" />
+              <div className="text-slate-400 text-xs text-right">{progress}%</div>
+            </div>
+
+            {processingTime > 0 && (
+              <div className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                <div className="flex items-center text-slate-300 text-sm">
+                  <Clock className="w-4 h-4 mr-2" />
+                  Processing Time
+                </div>
+                <span className="text-white font-mono">{processingTime}ms</span>
+              </div>
+            )}
+
+            {/* Processing Steps */}
+            <div className="space-y-2">
+              <div className="text-slate-300 text-sm font-medium">Pipeline Steps:</div>
+              <div className="grid grid-cols-1 gap-1">
+                {processingSteps.map((step, index) => (
+                  <div 
+                    key={step}
+                    className={`p-2 rounded text-xs transition-all ${
+                      currentStep === step 
+                        ? "bg-blue-500/30 text-blue-400 border border-blue-500/50" 
+                        : index < processingSteps.indexOf(currentStep)
+                        ? "bg-green-500/20 text-green-400"
+                        : "bg-slate-600/30 text-slate-400"
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      {index < processingSteps.indexOf(currentStep) ? (
+                        <CheckCircle className="w-3 h-3 mr-2" />
+                      ) : currentStep === step ? (
+                        <Activity className="w-3 h-3 mr-2 animate-spin" />
                       ) : (
-                        <>
-                          <Play className="w-4 h-4 mr-2" />
-                          Process Image
-                        </>
+                        <div className="w-3 h-3 mr-2 rounded-full border border-slate-500" />
                       )}
-                    </Button>
+                      {step}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Results Section */}
+      {results && (
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardHeader>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <CardTitle className="text-white flex items-center text-base lg:text-lg">
+                <Eye className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
+                Detection Results
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                <Badge 
+                  variant={results.success ? "default" : "destructive"}
+                  className={results.success ? "bg-green-500/20 text-green-400" : ""}
+                >
+                  {results.success ? `${results.plates_detected} Plates Found` : 'Failed'}
+                </Badge>
+                {results.success && (
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={downloadResults}
+                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                  >
+                    <Download className="w-3 h-3 mr-1" />
+                    Export
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {results.success ? (
+              <div className="space-y-4">
+                {results.results.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {results.results.map((result, index) => (
+                      <div 
+                        key={index}
+                        className="p-4 bg-slate-700/30 rounded-lg border border-slate-600/50"
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="font-mono text-white font-bold text-lg">
+                            {result.plate_number}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {result.is_valid ? (
+                              <CheckCircle className="w-4 h-4 text-green-400" />
+                            ) : (
+                              <AlertCircle className="w-4 h-4 text-yellow-400" />
+                            )}
+                            <Badge variant="secondary" className="text-xs">
+                              {result.confidence}%
+                            </Badge>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2 text-xs text-slate-400">
+                          <div>
+                            <span className="text-slate-300">Raw Text:</span>
+                            <div className="font-mono text-slate-200">{result.raw_text}</div>
+                          </div>
+                          <div>
+                            <span className="text-slate-300">Position:</span>
+                            <div className="font-mono text-slate-200">
+                              {result.bbox.x}, {result.bbox.y}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-slate-300">Size:</span>
+                            <div className="font-mono text-slate-200">
+                              {result.bbox.width}×{result.bbox.height}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-slate-300">Valid:</span>
+                            <div className={result.is_valid ? "text-green-400" : "text-yellow-400"}>
+                              {result.is_valid ? "Yes" : "No"}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : (
-                  <div className="text-slate-400">
-                    <ImageIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p className="text-lg mb-2">Upload Vehicle Image</p>
-                    <p className="text-sm mb-4">Select an image containing a vehicle with visible license plate</p>
-                    <Button
-                      variant="outline"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <Upload className="w-4 h-4 mr-2" />
-                      Choose Image
-                    </Button>
+                  <div className="text-center py-8">
+                    <AlertCircle className="w-12 h-12 text-yellow-400 mx-auto mb-3" />
+                    <p className="text-slate-300">No license plates detected in this image</p>
+                    <p className="text-slate-400 text-sm mt-1">Try uploading a clearer image with visible license plates</p>
                   </div>
                 )}
               </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-            </div>
-
-            {/* Processing Results */}
-            <div className="space-y-4">
-              {extractedPlate && (
-                <Card className="bg-green-500/10 border-green-500/30">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-green-400 font-semibold">Extracted Plate:</span>
-                      <Badge className="bg-green-500/20 text-green-400">
-                        {confidence}% Confidence
-                      </Badge>
-                    </div>
-                    <div className="text-2xl font-mono font-bold text-white">{extractedPlate}</div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Processing Techniques */}
-              <Card className="bg-slate-700/30 border-slate-600">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-white text-sm flex items-center">
-                    <Settings className="w-4 h-4 mr-2" />
-                    Applied Techniques
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="text-xs space-y-1">
-                    <div className="text-slate-300">• <span className="text-blue-400">OpenCV</span> for image processing</div>
-                    <div className="text-slate-300">• <span className="text-green-400">Edge Detection</span> for plate localization</div>
-                    <div className="text-slate-300">• <span className="text-purple-400">Tesseract OCR</span> for character extraction</div>
-                    <div className="text-slate-300">• <span className="text-yellow-400">ML Verification</span> for accuracy</div>
-                    <div className="text-slate-300">• <span className="text-cyan-400">Database Lookup</span> for validation</div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Processing Steps */}
-      <Card className="bg-slate-800/50 border-slate-700">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center">
-            <Cpu className="w-5 h-5 mr-2" />
-            Processing Pipeline Status
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {processingSteps.map((step, index) => (
-              <div key={step.id} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      step.status === 'completed' ? 'bg-green-500/20 text-green-400' :
-                      step.status === 'processing' ? 'bg-blue-500/20 text-blue-400' :
-                      step.status === 'error' ? 'bg-red-500/20 text-red-400' :
-                      'bg-slate-600/20 text-slate-400'
-                    }`}>
-                      {step.status === 'completed' ? (
-                        <CheckCircle className="w-4 h-4" />
-                      ) : step.status === 'processing' ? (
-                        <Cpu className="w-4 h-4 animate-spin" />
-                      ) : step.status === 'error' ? (
-                        <AlertCircle className="w-4 h-4" />
-                      ) : (
-                        <span className="text-xs">{index + 1}</span>
-                      )}
-                    </div>
-                    <div>
-                      <div className="text-white font-medium">{step.name}</div>
-                      <div className="text-slate-400 text-sm">{step.description}</div>
-                    </div>
-                  </div>
-                  <Badge variant={
-                    step.status === 'completed' ? 'default' :
-                    step.status === 'processing' ? 'secondary' :
-                    step.status === 'error' ? 'destructive' : 'outline'
-                  } className={
-                    step.status === 'completed' ? 'bg-green-500/20 text-green-400' :
-                    step.status === 'processing' ? 'bg-blue-500/20 text-blue-400 animate-pulse' :
-                    ''
-                  }>
-                    {step.status}
-                  </Badge>
-                </div>
-                {step.status === 'processing' && (
-                  <Progress value={step.progress} className="h-2" />
-                )}
+            ) : (
+              <div className="text-center py-8">
+                <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
+                <p className="text-slate-300">Processing failed</p>
+                <p className="text-slate-400 text-sm mt-1">{results.error}</p>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

@@ -172,74 +172,74 @@ const ParkingManagement = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Parking Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="space-y-4 lg:space-y-6">
+      {/* Parking Overview - Responsive Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
         <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="p-4">
+          <CardContent className="p-3 lg:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-slate-400">Total Spots</div>
-                <div className="text-2xl font-bold text-white">{parkingSpots.length}</div>
+                <div className="text-xs lg:text-sm text-slate-400">Total Spots</div>
+                <div className="text-lg lg:text-2xl font-bold text-white">{parkingSpots.length}</div>
               </div>
-              <Building className="w-8 h-8 text-blue-400" />
+              <Building className="w-6 h-6 lg:w-8 lg:h-8 text-blue-400" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="p-4">
+          <CardContent className="p-3 lg:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-slate-400">Occupancy Rate</div>
-                <div className="text-2xl font-bold text-white">{occupancyRate}%</div>
+                <div className="text-xs lg:text-sm text-slate-400">Occupancy Rate</div>
+                <div className="text-lg lg:text-2xl font-bold text-white">{occupancyRate}%</div>
               </div>
-              <BarChart3 className="w-8 h-8 text-green-400" />
+              <BarChart3 className="w-6 h-6 lg:w-8 lg:h-8 text-green-400" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="p-4">
+          <CardContent className="p-3 lg:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-slate-400">Daily Revenue</div>
-                <div className="text-2xl font-bold text-white">₹{dailyRevenue}</div>
+                <div className="text-xs lg:text-sm text-slate-400">Daily Revenue</div>
+                <div className="text-lg lg:text-2xl font-bold text-white">₹{dailyRevenue}</div>
               </div>
-              <DollarSign className="w-8 h-8 text-purple-400" />
+              <DollarSign className="w-6 h-6 lg:w-8 lg:h-8 text-purple-400" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="p-4">
+          <CardContent className="p-3 lg:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-slate-400">Active Sessions</div>
-                <div className="text-2xl font-bold text-white">{transactions.filter(t => t.status === 'active').length}</div>
+                <div className="text-xs lg:text-sm text-slate-400">Active Sessions</div>
+                <div className="text-lg lg:text-2xl font-bold text-white">{transactions.filter(t => t.status === 'active').length}</div>
               </div>
-              <Timer className="w-8 h-8 text-yellow-400" />
+              <Timer className="w-6 h-6 lg:w-8 lg:h-8 text-yellow-400" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Parking Floor Maps */}
+      {/* Parking Floor Maps - Responsive Layout */}
       <Card className="bg-slate-800/50 border-slate-700">
         <CardHeader>
-          <CardTitle className="text-white flex items-center">
-            <MapPin className="w-5 h-5 mr-2" />
+          <CardTitle className="text-white flex items-center text-base lg:text-lg">
+            <MapPin className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
             Real-time Parking Map
           </CardTitle>
         </CardHeader>
         <CardContent>
           {[1, 2, 3].map(floor => (
-            <div key={floor} className="mb-6">
-              <div className="text-white font-semibold mb-3">Floor {floor}</div>
-              <div className="grid grid-cols-4 gap-4">
+            <div key={floor} className="mb-4 lg:mb-6">
+              <div className="text-white font-semibold mb-2 lg:mb-3 text-sm lg:text-base">Floor {floor}</div>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-4">
                 {['A', 'B', 'C', 'D'].map(section => (
-                  <div key={section} className="bg-slate-700/30 p-3 rounded-lg">
-                    <div className="text-slate-300 font-medium mb-2">Section {section}</div>
+                  <div key={section} className="bg-slate-700/30 p-2 lg:p-3 rounded-lg">
+                    <div className="text-slate-300 font-medium mb-1 lg:mb-2 text-xs lg:text-sm">Section {section}</div>
                     <div className="grid grid-cols-5 gap-1">
                       {parkingSpots
                         .filter(spot => spot.floor === floor && spot.section === section)
@@ -247,7 +247,7 @@ const ParkingManagement = () => {
                         .map(spot => (
                           <div
                             key={spot.id}
-                            className={`w-6 h-4 rounded ${getSpotStatusColor(spot.status)} cursor-pointer`}
+                            className={`w-4 h-3 lg:w-6 lg:h-4 rounded ${getSpotStatusColor(spot.status)} cursor-pointer`}
                             title={`${spot.id} - ${spot.status}${spot.vehiclePlate ? ` (${spot.vehiclePlate})` : ''}`}
                           />
                         ))
@@ -259,55 +259,57 @@ const ParkingManagement = () => {
             </div>
           ))}
           
-          {/* Legend */}
-          <div className="flex items-center space-x-4 mt-4 text-sm">
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-3 bg-green-500 rounded"></div>
+          {/* Legend - Responsive */}
+          <div className="flex flex-wrap items-center gap-2 lg:gap-4 mt-4 text-xs lg:text-sm">
+            <div className="flex items-center gap-1 lg:gap-2">
+              <div className="w-3 h-2 lg:w-4 lg:h-3 bg-green-500 rounded"></div>
               <span className="text-slate-300">Available</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-3 bg-red-500 rounded"></div>
+            <div className="flex items-center gap-1 lg:gap-2">
+              <div className="w-3 h-2 lg:w-4 lg:h-3 bg-red-500 rounded"></div>
               <span className="text-slate-300">Occupied</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-3 bg-yellow-500 rounded"></div>
+            <div className="flex items-center gap-1 lg:gap-2">
+              <div className="w-3 h-2 lg:w-4 lg:h-3 bg-yellow-500 rounded"></div>
               <span className="text-slate-300">Reserved</span>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Recent Transactions */}
+      {/* Recent Transactions - Responsive */}
       <Card className="bg-slate-800/50 border-slate-700">
         <CardHeader>
-          <CardTitle className="text-white flex items-center">
-            <Clock className="w-5 h-5 mr-2" />
+          <CardTitle className="text-white flex items-center text-base lg:text-lg">
+            <Clock className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
             Recent Parking Transactions
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
+          <div className="space-y-2 lg:space-y-3">
             {transactions.slice(0, 10).map(transaction => (
-              <div key={transaction.id} className="p-3 bg-slate-700/30 rounded-lg border border-slate-600/50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Car className="w-5 h-5 text-blue-400" />
+              <div key={transaction.id} className="p-2 lg:p-3 bg-slate-700/30 rounded-lg border border-slate-600/50">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div className="flex items-center space-x-2 lg:space-x-3">
+                    <Car className="w-4 h-4 lg:w-5 lg:h-5 text-blue-400" />
                     <div>
-                      <div className="font-mono text-white font-semibold">{transaction.plateNumber}</div>
-                      <div className="text-slate-400 text-sm">
+                      <div className="font-mono text-white font-semibold text-sm lg:text-base">{transaction.plateNumber}</div>
+                      <div className="text-slate-400 text-xs lg:text-sm">
                         Entry: {new Date(transaction.entryTime).toLocaleString()}
                         {transaction.exitTime && (
-                          <> • Exit: {new Date(transaction.exitTime).toLocaleString()}</>
+                          <span className="hidden sm:inline"> • Exit: {new Date(transaction.exitTime).toLocaleString()}</span>
                         )}
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <Badge className={getTransactionStatusColor(transaction.status)}>
+                  <div className="flex items-center justify-between sm:flex-col sm:items-end sm:text-right">
+                    <Badge className={getTransactionStatusColor(transaction.status) + " text-xs"}>
                       {transaction.status}
                     </Badge>
-                    <div className="text-white font-semibold mt-1">₹{transaction.amount}</div>
-                    <div className="text-slate-400 text-sm">{transaction.duration}</div>
+                    <div className="flex items-center gap-2 sm:flex-col sm:gap-0 sm:mt-1">
+                      <div className="text-white font-semibold text-sm lg:text-base">₹{transaction.amount}</div>
+                      <div className="text-slate-400 text-xs">{transaction.duration}</div>
+                    </div>
                   </div>
                 </div>
               </div>
