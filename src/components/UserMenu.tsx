@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,20 +13,39 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User, LogOut, Settings, Shield } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 const UserMenu = () => {
   const { user, userProfile, signOut } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSignOut = async () => {
     setIsLoading(true);
     try {
       await signOut();
+      toast({
+        title: "Signed out successfully",
+        description: "You have been logged out of your account.",
+      });
     } catch (error) {
       console.error('Error signing out:', error);
+      toast({
+        title: "Sign out failed",
+        description: "There was an error signing out. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSettings = () => {
+    toast({
+      title: "Settings",
+      description: "Settings panel coming soon!",
+    });
   };
 
   const getRoleBadgeColor = (role: string) => {
@@ -67,7 +87,10 @@ const UserMenu = () => {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-slate-600" />
-        <DropdownMenuItem className="text-slate-300 hover:bg-slate-700 hover:text-white">
+        <DropdownMenuItem 
+          className="text-slate-300 hover:bg-slate-700 hover:text-white"
+          onClick={handleSettings}
+        >
           <Settings className="w-4 h-4 mr-2" />
           Settings
         </DropdownMenuItem>

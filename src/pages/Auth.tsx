@@ -21,13 +21,30 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Clear any existing auth state when component mounts
+    const clearAuthState = () => {
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          localStorage.removeItem(key);
+        }
+      });
+    };
+
     // Check if user is already logged in
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate("/");
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          console.log('User already authenticated, redirecting to home');
+          navigate("/", { replace: true });
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+        clearAuthState();
       }
     };
+    
     checkUser();
   }, [navigate]);
 
@@ -42,21 +59,31 @@ const Auth = () => {
     setError("");
 
     try {
+      // Clear any existing auth state first
+      await supabase.auth.signOut();
+      
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Sign in error:', error);
+        throw error;
+      }
 
       if (data.user) {
+        console.log('Sign in successful:', data.user.id);
         toast({
           title: "Welcome back!",
           description: "You have been successfully signed in.",
         });
-        navigate("/");
+        
+        // Use replace to prevent back navigation to auth page
+        navigate("/", { replace: true });
       }
     } catch (error: any) {
+      console.error('Sign in error:', error);
       setError(error.message || "An error occurred during sign in");
       toast({
         title: "Sign in failed",
@@ -75,12 +102,20 @@ const Auth = () => {
       return;
     }
 
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
     try {
+      // Clear any existing auth state first
+      await supabase.auth.signOut();
+      
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: email.trim(),
         password,
         options: {
           data: {
@@ -90,16 +125,27 @@ const Auth = () => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Sign up error:', error);
+        throw error;
+      }
 
       if (data.user) {
+        console.log('Sign up successful:', data.user.id);
         toast({
           title: "Account created!",
-          description: "Please check your email to verify your account.",
+          description: data.user.email_confirmed_at 
+            ? "Your account has been created successfully!" 
+            : "Please check your email to verify your account.",
         });
-        // Don't redirect immediately, let them verify email first
+        
+        // If email is already confirmed, redirect to home
+        if (data.user.email_confirmed_at) {
+          navigate("/", { replace: true });
+        }
       }
     } catch (error: any) {
+      console.error('Sign up error:', error);
       setError(error.message || "An error occurred during sign up");
       toast({
         title: "Sign up failed",
@@ -159,6 +205,7 @@ const Auth = () => {
                       onChange={(e) => setEmail(e.target.value)}
                       className="bg-slate-700/50 border-slate-600 text-white"
                       disabled={isLoading}
+                      autoComplete="email"
                     />
                   </div>
                   <div className="space-y-2">
@@ -172,6 +219,7 @@ const Auth = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         className="bg-slate-700/50 border-slate-600 text-white pr-10"
                         disabled={isLoading}
+                        autoComplete="current-password"
                       />
                       <Button
                         type="button"
@@ -214,6 +262,7 @@ const Auth = () => {
                       onChange={(e) => setFullName(e.target.value)}
                       className="bg-slate-700/50 border-slate-600 text-white"
                       disabled={isLoading}
+                      autoComplete="name"
                     />
                   </div>
                   <div className="space-y-2">
@@ -226,6 +275,7 @@ const Auth = () => {
                       onChange={(e) => setEmail(e.target.value)}
                       className="bg-slate-700/50 border-slate-600 text-white"
                       disabled={isLoading}
+                      autoComplete="email"
                     />
                   </div>
                   <div className="space-y-2">
@@ -234,11 +284,12 @@ const Auth = () => {
                       <Input
                         id="signup-password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="Create a password"
+                        placeholder="Create a password (min 6 characters)"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="bg-slate-700/50 border-slate-600 text-white pr-10"
                         disabled={isLoading}
+                        autoComplete="new-password"
                       />
                       <Button
                         type="button"

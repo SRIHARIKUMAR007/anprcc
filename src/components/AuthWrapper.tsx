@@ -14,7 +14,8 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate('/auth');
+      console.log('User not authenticated, redirecting to auth page');
+      navigate('/auth', { replace: true });
     }
   }, [user, loading, navigate]);
 
