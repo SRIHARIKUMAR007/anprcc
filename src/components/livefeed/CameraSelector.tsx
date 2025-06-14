@@ -2,18 +2,10 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Camera } from "lucide-react";
+import { CameraSelectorCamera } from "@/types/camera";
 
 interface CameraSelectorProps {
-  cameras: Array<{
-    id: string;
-    location: string;
-    status: string;
-    vehicles: number;
-    fps: number;
-    resolution: string;
-    coordinates: { lat: number; lng: number };
-    direction: string;
-  }>;
+  cameras: CameraSelectorCamera[];
   selectedCamera: string;
   onCameraSelect: (cameraId: string) => void;
 }

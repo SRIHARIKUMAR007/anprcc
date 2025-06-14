@@ -1,19 +1,12 @@
-
 import { useRef, useEffect } from "react";
 import { MapPin, Cpu, Clock } from "lucide-react";
 import DetectionOverlay from "./DetectionOverlay";
+import { LiveFeedCamera } from "@/types/camera";
 
 interface LiveVideoCanvasProps {
   isRecording: boolean;
   isFullscreen: boolean;
-  currentCamera: {
-    id: string;
-    location: string;
-    vehicles: number;
-    direction: string;
-    status: string;
-    coordinates: { lat: number; lng: number };
-  } | undefined;
+  currentCamera: LiveFeedCamera | undefined;
   frameRate: number;
   vehicleCount: number;
   detectedPlate: string | null;
@@ -70,6 +63,7 @@ const LiveVideoCanvas = ({
     }
 
     const animate = () => {
+      // ... keep existing code (canvas animation logic)
       // Clear canvas
       ctx.fillStyle = '#1e293b';
       ctx.fillRect(0, 0, canvas.width, canvas.height);

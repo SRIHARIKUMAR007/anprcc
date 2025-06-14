@@ -1,16 +1,10 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { CameraNetworkCamera } from "@/types/camera";
 
 interface CameraNetworkStatusProps {
-  cameras: Array<{
-    id: string;
-    location: string;
-    status: string;
-    vehicles: number;
-    fps: number;
-    resolution: string;
-  }>;
+  cameras: CameraNetworkCamera[];
   selectedCamera: string;
   onCameraSelect: (cameraId: string) => void;
 }

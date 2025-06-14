@@ -9,9 +9,11 @@ import CameraNetworkStatus from "./livefeed/CameraNetworkStatus";
 import RecentDetections from "./livefeed/RecentDetections";
 import { mockCameras, processingSteps } from "./livefeed/mockData";
 import { useRealTimeIntegration } from "@/hooks/useRealTimeIntegration";
+import { LiveFeedCamera } from "@/types/camera";
+import { Camera } from "@/types/supabase";
 
 const LiveFeed = () => {
-  const [selectedCamera, setSelectedCamera] = useState("TN-01-NH01");
+  const [selectedCamera, setSelectedCamera] = useState("CAM-01");
   const [isRecording, setIsRecording] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(false);
@@ -22,7 +24,23 @@ const LiveFeed = () => {
   const [plateHistory, setPlateHistory] = useState<string[]>([]);
 
   const { liveData, isLiveMode, cameras: realCameras } = useRealTimeIntegration();
-  const cameras = realCameras.length > 0 ? realCameras : mockCameras;
+
+  // Transform real cameras to match the expected format
+  const transformedRealCameras: LiveFeedCamera[] = realCameras.map((camera: Camera) => ({
+    id: camera.camera_id,
+    location: camera.location,
+    status: (camera.status || 'active') as 'active' | 'inactive' | 'maintenance',
+    vehicles: Math.floor(Math.random() * 15) + 1, // Random vehicle count for demo
+    fps: 30, // Default FPS
+    resolution: "1920x1080", // Default resolution
+    coordinates: { 
+      lat: 13.0827 + (Math.random() - 0.5) * 2, // Random coordinates around Chennai
+      lng: 80.2707 + (Math.random() - 0.5) * 2 
+    },
+    direction: ["North-South", "East-West", "Bidirectional", "Multi-directional"][Math.floor(Math.random() * 4)]
+  }));
+
+  const cameras = transformedRealCameras.length > 0 ? transformedRealCameras : mockCameras;
 
   const currentCamera = cameras.find(cam => cam.id === selectedCamera);
 
