@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useBackendIntegration } from './useBackendIntegration';
 import { useSupabaseRealTimeData } from './useSupabaseRealTimeData';
 import { toast } from 'sonner';
@@ -14,38 +14,63 @@ export const useEnhancedBackendIntegration = () => {
 
   const backendIntegration = useBackendIntegration();
   const supabaseData = useSupabaseRealTimeData();
+  const toastShownRef = useRef({
+    backendOffline: false,
+    dbOffline: false,
+    allConnected: false
+  });
 
   // Enhanced connection monitoring
   useEffect(() => {
     const checkConnections = async () => {
       const backendStatus = backendIntegration.isBackendConnected;
       const dbStatus = supabaseData.isConnected;
-      const prev = connectionHealth; // Move this declaration before usage
 
-      setConnectionHealth(prevState => ({
-        backend: backendStatus,
-        database: dbStatus,
-        lastCheck: new Date(),
-        retryCount: (!backendStatus || !dbStatus) ? prevState.retryCount + 1 : 0
-      }));
+      setConnectionHealth(prevState => {
+        const newRetryCount = (!backendStatus || !dbStatus) ? prevState.retryCount + 1 : 0;
+        
+        // Show connection status notifications (only once per status change)
+        if (!backendStatus && !toastShownRef.current.backendOffline) {
+          toast.info("Python ANPR service offline - using mock data");
+          toastShownRef.current.backendOffline = true;
+          toastShownRef.current.allConnected = false;
+        }
+        
+        if (!dbStatus && !toastShownRef.current.dbOffline) {
+          toast.warning("Database connection issue - some features may be limited");
+          toastShownRef.current.dbOffline = true;
+          toastShownRef.current.allConnected = false;
+        }
+        
+        if (backendStatus && dbStatus && prevState.retryCount > 0 && !toastShownRef.current.allConnected) {
+          toast.success("All systems connected successfully");
+          toastShownRef.current.backendOffline = false;
+          toastShownRef.current.dbOffline = false;
+          toastShownRef.current.allConnected = true;
+        }
 
-      // Show connection status notifications
-      if (!backendStatus && prev.retryCount === 0) {
-        toast.info("Python ANPR service offline - using mock data");
-      }
-      if (!dbStatus && prev.retryCount === 0) {
-        toast.warning("Database connection issue - some features may be limited");
-      }
-      if (backendStatus && dbStatus && prev.retryCount > 0) {
-        toast.success("All systems connected successfully");
-      }
+        // Reset toast flags when status changes
+        if (backendStatus) {
+          toastShownRef.current.backendOffline = false;
+        }
+        if (dbStatus) {
+          toastShownRef.current.dbOffline = false;
+        }
+
+        return {
+          backend: backendStatus,
+          database: dbStatus,
+          lastCheck: new Date(),
+          retryCount: newRetryCount
+        };
+      });
     };
 
     const interval = setInterval(checkConnections, 10000); // Check every 10 seconds
     checkConnections(); // Initial check
 
     return () => clearInterval(interval);
-  }, [backendIntegration.isBackendConnected, supabaseData.isConnected, connectionHealth]);
+  }, [backendIntegration.isBackendConnected, supabaseData.isConnected]);
 
   const processImageWithRetry = async (imageFile: File, maxRetries = 3) => {
     let lastError;
