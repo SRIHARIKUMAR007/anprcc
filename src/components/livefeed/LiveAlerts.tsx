@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, CheckCircle, Clock, X, Bell } from "lucide-react";
+import { useSupabaseRealTimeData } from '@/hooks/useSupabaseRealTimeData';
 
 interface Alert {
   id: string;
@@ -24,60 +25,130 @@ interface LiveAlertsProps {
 const LiveAlerts = ({ selectedCamera, isLive }: LiveAlertsProps) => {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const { detections, isConnected } = useSupabaseRealTimeData();
 
-  const alertTypes = [
-    { type: 'critical', message: 'Suspicious vehicle detected', probability: 0.02 },
-    { type: 'warning', message: 'Vehicle overspeeding', probability: 0.05 },
-    { type: 'warning', message: 'License plate obscured', probability: 0.03 },
-    { type: 'info', message: 'Vehicle count threshold exceeded', probability: 0.08 },
-    { type: 'critical', message: 'Unauthorized vehicle in restricted zone', probability: 0.01 },
-    { type: 'warning', message: 'Vehicle stopped in no-parking zone', probability: 0.04 },
-    { type: 'info', message: 'Peak traffic detected', probability: 0.06 },
-    { type: 'critical', message: 'Emergency vehicle priority needed', probability: 0.01 }
-  ];
-
-  const generatePlate = () => {
-    const formats = ['TN-01-AB-', 'TN-09-CD-', 'KA-05-EF-', 'AP-16-GH-'];
-    const format = formats[Math.floor(Math.random() * formats.length)];
-    const number = String(Math.floor(1000 + Math.random() * 9000));
-    return format + number;
-  };
-
+  // Generate alerts based on live detection data
   useEffect(() => {
-    if (!isLive) return;
+    if (!isLive || !isConnected) return;
 
-    const interval = setInterval(() => {
-      // Generate random alerts based on probability
-      alertTypes.forEach(alertType => {
-        if (Math.random() < alertType.probability) {
+    // Check latest detections for alert conditions
+    const latestDetections = detections.slice(0, 10);
+    
+    latestDetections.forEach(detection => {
+      const existingAlert = alerts.find(alert => 
+        alert.plateNumber === detection.plate_number && 
+        alert.timestamp === detection.timestamp
+      );
+
+      if (!existingAlert) {
+        let alertType: 'critical' | 'warning' | 'info' = 'info';
+        let message = '';
+        
+        // Generate alerts based on detection status and confidence
+        if (detection.status === 'flagged') {
+          alertType = 'critical';
+          message = `Flagged vehicle detected: ${detection.plate_number}`;
+        } else if (detection.confidence < 70) {
+          alertType = 'warning';
+          message = `Low confidence detection: ${detection.plate_number}`;
+        } else if (detection.confidence > 95) {
+          alertType = 'info';
+          message = `High confidence detection: ${detection.plate_number}`;
+        }
+
+        if (message) {
           const newAlert: Alert = {
-            id: `alert-${Date.now()}-${Math.random()}`,
-            type: alertType.type as 'critical' | 'warning' | 'info',
-            message: alertType.message,
-            timestamp: new Date().toISOString(),
-            cameraId: selectedCamera,
-            plateNumber: Math.random() > 0.5 ? generatePlate() : undefined,
+            id: `alert-${detection.id}`,
+            type: alertType,
+            message,
+            timestamp: detection.timestamp,
+            cameraId: detection.camera_id,
+            plateNumber: detection.plate_number,
             acknowledged: false,
-            autoResolve: alertType.type === 'info' || Math.random() > 0.7
+            autoResolve: alertType === 'info'
           };
           
-          setAlerts(prev => [newAlert, ...prev.slice(0, 19)]);
-          setUnreadCount(prev => prev + 1);
+          setAlerts(prev => {
+            const filtered = prev.filter(a => a.id !== newAlert.id);
+            return [newAlert, ...filtered.slice(0, 19)];
+          });
+          
+          if (alertType !== 'info') {
+            setUnreadCount(prev => prev + 1);
+          }
         }
-      });
+      }
+    });
 
-      // Auto-resolve some alerts
+    // Auto-resolve info alerts after 15 seconds
+    const autoResolveTimer = setTimeout(() => {
       setAlerts(prev => prev.map(alert => {
         if (alert.autoResolve && !alert.acknowledged && 
-            Date.now() - new Date(alert.timestamp).getTime() > 10000) {
+            Date.now() - new Date(alert.timestamp).getTime() > 15000) {
           return { ...alert, acknowledged: true };
         }
         return alert;
       }));
-    }, 5000);
+    }, 1000);
+
+    return () => clearTimeout(autoResolveTimer);
+  }, [detections, isLive, isConnected]);
+
+  // Generate additional system alerts based on patterns
+  useEffect(() => {
+    if (!isLive || !isConnected) return;
+
+    const interval = setInterval(() => {
+      const recentDetections = detections.filter(d => 
+        Date.now() - new Date(d.timestamp).getTime() < 60000 // Last minute
+      );
+
+      // Alert if too many flagged vehicles in short time
+      const flaggedCount = recentDetections.filter(d => d.status === 'flagged').length;
+      if (flaggedCount >= 3) {
+        const alertId = `system-alert-${Date.now()}`;
+        const existingAlert = alerts.find(a => a.message.includes('Multiple flagged vehicles'));
+        
+        if (!existingAlert) {
+          const systemAlert: Alert = {
+            id: alertId,
+            type: 'critical',
+            message: `Multiple flagged vehicles detected (${flaggedCount} in last minute)`,
+            timestamp: new Date().toISOString(),
+            cameraId: 'SYSTEM',
+            acknowledged: false,
+            autoResolve: false
+          };
+          
+          setAlerts(prev => [systemAlert, ...prev.slice(0, 19)]);
+          setUnreadCount(prev => prev + 1);
+        }
+      }
+
+      // Alert if detection rate is unusually low
+      if (recentDetections.length < 2 && detections.length > 10) {
+        const alertId = `low-activity-${Date.now()}`;
+        const existingAlert = alerts.find(a => a.message.includes('Low detection activity'));
+        
+        if (!existingAlert) {
+          const activityAlert: Alert = {
+            id: alertId,
+            type: 'warning',
+            message: 'Low detection activity - possible camera issues',
+            timestamp: new Date().toISOString(),
+            cameraId: 'SYSTEM',
+            acknowledged: false,
+            autoResolve: true
+          };
+          
+          setAlerts(prev => [activityAlert, ...prev.slice(0, 19)]);
+          setUnreadCount(prev => prev + 1);
+        }
+      }
+    }, 30000); // Check every 30 seconds
 
     return () => clearInterval(interval);
-  }, [isLive, selectedCamera]);
+  }, [detections, isLive, isConnected, alerts]);
 
   const acknowledgeAlert = (alertId: string) => {
     setAlerts(prev => prev.map(alert => 
@@ -88,6 +159,7 @@ const LiveAlerts = ({ selectedCamera, isLive }: LiveAlertsProps) => {
 
   const clearAlert = (alertId: string) => {
     setAlerts(prev => prev.filter(alert => alert.id !== alertId));
+    setUnreadCount(prev => Math.max(0, prev - 1));
   };
 
   const getAlertColor = (type: string, acknowledged: boolean) => {
@@ -127,9 +199,9 @@ const LiveAlerts = ({ selectedCamera, isLive }: LiveAlertsProps) => {
             )}
           </div>
           <div className="flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${isLive ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`}></div>
+            <div className={`w-2 h-2 rounded-full ${isLive && isConnected ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`}></div>
             <span className="text-xs text-slate-400">
-              {isLive ? 'MONITORING' : 'PAUSED'}
+              {isLive && isConnected ? 'LIVE DATA' : 'PAUSED'}
             </span>
           </div>
         </CardTitle>
@@ -216,7 +288,9 @@ const LiveAlerts = ({ selectedCamera, isLive }: LiveAlertsProps) => {
           <div className="text-center py-6 text-slate-400">
             <AlertTriangle className="w-8 h-8 mx-auto mb-2 opacity-50" />
             <p className="text-sm">No alerts detected</p>
-            <p className="text-xs">System monitoring active</p>
+            <p className="text-xs">
+              {isConnected ? 'System monitoring live data' : 'Waiting for connection'}
+            </p>
           </div>
         )}
       </CardContent>
