@@ -19,6 +19,9 @@ import ImageProcessingPipeline from "@/components/ImageProcessingPipeline";
 import SDNNetworkManager from "@/components/SDNNetworkManager";
 import ParkingManagement from "@/components/ParkingManagement";
 import ImageUploadProcessor from "@/components/ImageUploadProcessor";
+import TamilNaduTrafficMap from "@/components/TamilNaduTrafficMap";
+import TollPlazaMonitor from "@/components/TollPlazaMonitor";
+import LiveWeatherWidget from "@/components/LiveWeatherWidget";
 import { ResponsiveLayout, ResponsiveGrid } from "@/components/ResponsiveLayout";
 import { MobileOptimizedTabs } from "@/components/MobileOptimizedTabs";
 import { useSupabaseRealTimeData } from "@/hooks/useSupabaseRealTimeData";
@@ -67,10 +70,10 @@ const Index = () => {
                 </div>
                 <div>
                   <h1 className="text-2xl lg:text-3xl font-bold gradient-text text-shadow">
-                    ANPR Control Center
+                    Tamil Nadu ANPR Control Center
                   </h1>
                   <p className="text-slate-400 font-medium">
-                    Automated Number Plate Recognition with SDN • Real-time Intelligence
+                    Smart Traffic Management • Real-time Intelligence • Tamil Nadu Highways
                   </p>
                 </div>
               </div>
@@ -88,7 +91,7 @@ const Index = () => {
                   </span>
                 </div>
                 <span className="text-xs font-medium px-3 py-1.5 rounded-full border status-info">
-                  SDN Active
+                  TN Highways
                 </span>
                 <UserMenu />
               </div>
@@ -102,10 +105,11 @@ const Index = () => {
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-bold text-blue-300 mb-2">
-                  Welcome back, {userProfile?.full_name || user.email}!
+                  Welcome to Tamil Nadu Traffic Control, {userProfile?.full_name || user.email}!
                 </h2>
                 <p className="text-blue-200/80">
                   Role: <span className="font-semibold">{userProfile?.role || 'Loading...'}</span> • 
+                  Coverage: <span className="font-semibold">All Major TN Highways & Cities</span> •
                   Access Level: <span className="font-semibold">
                     {userProfile?.role === 'admin' ? 'Full Control' : 
                      userProfile?.role === 'operator' ? 'Operational' : 'View Only'}
@@ -188,10 +192,22 @@ const Index = () => {
 
         {/* Main Dashboard Tabs */}
         <div className="animate-fade-in">
-          <MobileOptimizedTabs defaultValue="realtime">
+          <MobileOptimizedTabs defaultValue="tn-traffic">
             
             <TabsContent value="realtime">
               <RealTimeMonitor />
+            </TabsContent>
+
+            <TabsContent value="tn-traffic">
+              <TamilNaduTrafficMap />
+            </TabsContent>
+
+            <TabsContent value="toll-monitor">
+              <TollPlazaMonitor />
+            </TabsContent>
+
+            <TabsContent value="weather">
+              <LiveWeatherWidget />
             </TabsContent>
 
             <TabsContent value="dashboard">

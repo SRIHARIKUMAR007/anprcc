@@ -14,7 +14,10 @@ import {
   ParkingCircle,
   Layers,
   Monitor,
-  Zap
+  Zap,
+  MapPin,
+  Navigation,
+  Cloud
 } from "lucide-react";
 
 interface MobileOptimizedTabsProps {
@@ -36,6 +39,30 @@ export const MobileOptimizedTabs = ({ children, defaultValue }: MobileOptimizedT
               >
                 <Monitor className="w-5 h-5 flex-shrink-0" />
                 <span className="text-sm font-semibold whitespace-nowrap">Real-time</span>
+              </TabsTrigger>
+              
+              <TabsTrigger 
+                value="tn-traffic" 
+                className="flex items-center space-x-3 px-6 py-4 min-w-[140px] rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/40 data-[state=active]:to-cyan-500/30 data-[state=active]:text-blue-200 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 transition-all duration-300 hover:bg-slate-700/60 text-slate-300 hover:text-white font-medium"
+              >
+                <MapPin className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-semibold whitespace-nowrap">TN Traffic</span>
+              </TabsTrigger>
+
+              <TabsTrigger 
+                value="toll-monitor" 
+                className="flex items-center space-x-3 px-6 py-4 min-w-[140px] rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/40 data-[state=active]:to-cyan-500/30 data-[state=active]:text-blue-200 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 transition-all duration-300 hover:bg-slate-700/60 text-slate-300 hover:text-white font-medium"
+              >
+                <Navigation className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-semibold whitespace-nowrap">Toll Plaza</span>
+              </TabsTrigger>
+
+              <TabsTrigger 
+                value="weather" 
+                className="flex items-center space-x-3 px-6 py-4 min-w-[140px] rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/40 data-[state=active]:to-cyan-500/30 data-[state=active]:text-blue-200 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 transition-all duration-300 hover:bg-slate-700/60 text-slate-300 hover:text-white font-medium"
+              >
+                <Cloud className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-semibold whitespace-nowrap">Weather</span>
               </TabsTrigger>
               
               <TabsTrigger 
