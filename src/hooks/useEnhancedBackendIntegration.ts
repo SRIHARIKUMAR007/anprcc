@@ -20,12 +20,13 @@ export const useEnhancedBackendIntegration = () => {
     const checkConnections = async () => {
       const backendStatus = backendIntegration.isBackendConnected;
       const dbStatus = supabaseData.isConnected;
+      const prev = connectionHealth; // Move this declaration before usage
 
-      setConnectionHealth(prev => ({
+      setConnectionHealth(prevState => ({
         backend: backendStatus,
         database: dbStatus,
         lastCheck: new Date(),
-        retryCount: (!backendStatus || !dbStatus) ? prev.retryCount + 1 : 0
+        retryCount: (!backendStatus || !dbStatus) ? prevState.retryCount + 1 : 0
       }));
 
       // Show connection status notifications
@@ -38,15 +39,13 @@ export const useEnhancedBackendIntegration = () => {
       if (backendStatus && dbStatus && prev.retryCount > 0) {
         toast.success("All systems connected successfully");
       }
-
-      const prev = connectionHealth;
     };
 
     const interval = setInterval(checkConnections, 10000); // Check every 10 seconds
     checkConnections(); // Initial check
 
     return () => clearInterval(interval);
-  }, [backendIntegration.isBackendConnected, supabaseData.isConnected]);
+  }, [backendIntegration.isBackendConnected, supabaseData.isConnected, connectionHealth]);
 
   const processImageWithRetry = async (imageFile: File, maxRetries = 3) => {
     let lastError;
