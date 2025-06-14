@@ -28,6 +28,7 @@ import WelcomeMessage from "@/components/dashboard/WelcomeMessage";
 import StatusCards from "@/components/dashboard/StatusCards";
 import RecentDetectionsList from "@/components/livefeed/RecentDetectionsList";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
+import RoleBasedAccess from "@/components/RoleBasedAccess";
 
 const Index = () => {
   const { user, userProfile } = useAuth();
@@ -123,16 +124,19 @@ const Index = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="image-processing">
-                <div className="space-y-6">
-                  <ImageUploadProcessor />
-                  <ImageProcessingPipeline />
-                </div>
-              </TabsContent>
+              {/* Operator and Admin only features */}
+              <RoleBasedAccess allowedRoles={['admin', 'operator']}>
+                <TabsContent value="image-processing">
+                  <div className="space-y-6">
+                    <ImageUploadProcessor />
+                    <ImageProcessingPipeline />
+                  </div>
+                </TabsContent>
 
-              <TabsContent value="vehicle-updates">
-                <VehicleUpdates />
-              </TabsContent>
+                <TabsContent value="vehicle-updates">
+                  <VehicleUpdates />
+                </TabsContent>
+              </RoleBasedAccess>
 
               <TabsContent value="vehicle-details">
                 <VehicleDetails />
@@ -142,13 +146,20 @@ const Index = () => {
                 <NetworkTopology />
               </TabsContent>
 
-              <TabsContent value="sdn-manager">
-                <SDNNetworkManager />
-              </TabsContent>
+              {/* Admin only features */}
+              <RoleBasedAccess allowedRoles={['admin']}>
+                <TabsContent value="sdn-manager">
+                  <SDNNetworkManager />
+                </TabsContent>
 
-              <TabsContent value="parking">
-                <ParkingManagement />
-              </TabsContent>
+                <TabsContent value="parking">
+                  <ParkingManagement />
+                </TabsContent>
+
+                <TabsContent value="controls">
+                  <SystemControls />
+                </TabsContent>
+              </RoleBasedAccess>
 
               <TabsContent value="database">
                 <VehicleDatabase />
@@ -160,10 +171,6 @@ const Index = () => {
 
               <TabsContent value="analytics">
                 <TrafficAnalytics />
-              </TabsContent>
-
-              <TabsContent value="controls">
-                <SystemControls />
               </TabsContent>
             </MobileOptimizedTabs>
           </div>

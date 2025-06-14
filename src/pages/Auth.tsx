@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Camera, Eye, EyeOff, AlertCircle, Info } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Camera, Eye, EyeOff, AlertCircle, Info, Shield, Settings, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -16,6 +17,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [selectedRole, setSelectedRole] = useState("viewer");
   const [error, setError] = useState("");
   const [accountExistsMessage, setAccountExistsMessage] = useState("");
   const navigate = useNavigate();
@@ -123,6 +125,7 @@ const Auth = () => {
         options: {
           data: {
             full_name: fullName,
+            role: selectedRole,
           },
           emailRedirectTo: `${window.location.origin}/`,
         },
@@ -155,7 +158,7 @@ const Auth = () => {
         toast({
           title: "Account created!",
           description: data.user.email_confirmed_at 
-            ? "Your account has been created successfully!" 
+            ? `Your ${selectedRole} account has been created successfully!` 
             : "Please check your email to verify your account.",
         });
         
@@ -180,6 +183,24 @@ const Auth = () => {
   const switchToSignIn = () => {
     setAccountExistsMessage("");
     setError("");
+  };
+
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case 'admin': return <Shield className="w-4 h-4 text-red-400" />;
+      case 'operator': return <Settings className="w-4 h-4 text-blue-400" />;
+      case 'viewer': return <User className="w-4 h-4 text-green-400" />;
+      default: return <User className="w-4 h-4 text-gray-400" />;
+    }
+  };
+
+  const getRoleDescription = (role: string) => {
+    switch (role) {
+      case 'admin': return 'Full system access - manage users, cameras, and all settings';
+      case 'operator': return 'Operational access - view feeds, create detections, manage traffic data';
+      case 'viewer': return 'Read-only access - view dashboards and reports only';
+      default: return '';
+    }
   };
 
   return (
@@ -349,6 +370,37 @@ const Auth = () => {
                       </Button>
                     </div>
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-role" className="text-slate-200">Account Type</Label>
+                    <Select value={selectedRole} onValueChange={setSelectedRole}>
+                      <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white">
+                        <SelectValue placeholder="Select your role" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-600">
+                        <SelectItem value="viewer" className="text-white hover:bg-slate-700">
+                          <div className="flex items-center space-x-2">
+                            {getRoleIcon('viewer')}
+                            <span>Viewer</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="operator" className="text-white hover:bg-slate-700">
+                          <div className="flex items-center space-x-2">
+                            {getRoleIcon('operator')}
+                            <span>Operator</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="admin" className="text-white hover:bg-slate-700">
+                          <div className="flex items-center space-x-2">
+                            {getRoleIcon('admin')}
+                            <span>Admin</span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-slate-400 mt-1">
+                      {getRoleDescription(selectedRole)}
+                    </p>
+                  </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? (
                       <>
@@ -356,7 +408,10 @@ const Auth = () => {
                         Creating Account...
                       </>
                     ) : (
-                      "Create Account"
+                      <>
+                        {getRoleIcon(selectedRole)}
+                        <span className="ml-2">Create {selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)} Account</span>
+                      </>
                     )}
                   </Button>
                 </form>
@@ -365,9 +420,31 @@ const Auth = () => {
           </CardContent>
         </Card>
 
-        <div className="text-center mt-6 text-slate-400 text-sm">
+        <div className="text-center mt-6 text-slate-400 text-sm space-y-2">
           <p>For demo purposes, you can create an account with any email.</p>
-          <p>Default role: Operator (can view and create detections)</p>
+          <div className="grid grid-cols-1 gap-2 mt-4">
+            <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded border border-slate-700">
+              <div className="flex items-center space-x-2">
+                {getRoleIcon('admin')}
+                <span className="font-semibold text-red-400">Admin</span>
+              </div>
+              <span className="text-xs text-slate-400">Full system control</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded border border-slate-700">
+              <div className="flex items-center space-x-2">
+                {getRoleIcon('operator')}
+                <span className="font-semibold text-blue-400">Operator</span>
+              </div>
+              <span className="text-xs text-slate-400">View & create detections</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded border border-slate-700">
+              <div className="flex items-center space-x-2">
+                {getRoleIcon('viewer')}
+                <span className="font-semibold text-green-400">Viewer</span>
+              </div>
+              <span className="text-xs text-slate-400">Read-only access</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
