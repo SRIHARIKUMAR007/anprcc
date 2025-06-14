@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSupabaseRealTimeData } from './useSupabaseRealTimeData';
-import { useBackendIntegration } from './useBackendIntegration';
+import { useSupabaseBackend } from './useSupabaseBackend';
 
 interface AIGeneratedData {
   plateNumber: string;
@@ -40,7 +40,7 @@ export const useAIRealTimeEngine = () => {
   });
 
   const { addDetection, cameras } = useSupabaseRealTimeData();
-  const { isBackendConnected } = useBackendIntegration();
+  const { isConnected } = useSupabaseBackend();
   const intervalRef = useRef<NodeJS.Timeout>();
 
   // AI-powered plate generation based on Indian patterns

@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { useBackendIntegration } from './useBackendIntegration';
+import { useSupabaseBackend } from './useSupabaseBackend';
 import { useAIRealTimeEngine } from './useAIRealTimeEngine';
 
 interface ThreatLevel {
@@ -21,7 +21,7 @@ export const useAIThreatDetection = () => {
   const [threatAssessments, setThreatAssessments] = useState<Map<string, ThreatLevel>>(new Map());
   const [sdnResponses, setSdnResponses] = useState<SDNResponse[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const { isBackendConnected, processImage } = useBackendIntegration();
+  const { isConnected, processImage } = useSupabaseBackend();
   const { aiGeneratedDetections } = useAIRealTimeEngine();
   const analysisQueueRef = useRef<string[]>([]);
 
@@ -120,9 +120,9 @@ export const useAIThreatDetection = () => {
     setIsAnalyzing(true);
     
     try {
-      // Attempt to process with Python backend
-      if (isBackendConnected) {
-        console.log('Processing image with Python ANPR service...');
+      // Attempt to process with Supabase backend
+      if (isConnected) {
+        console.log('Processing image with Supabase ANPR service...');
         const result = await processImage(imageFile);
         
         if (result.success && result.results.length > 0) {
@@ -142,11 +142,11 @@ export const useAIThreatDetection = () => {
           
           return result;
         } else {
-          console.warn('Python service returned no valid detections');
+          console.warn('Supabase service returned no valid detections');
           return { success: false, error: 'No valid plates detected', results: [] };
         }
       } else {
-        console.error('Python ANPR service not available');
+        console.error('Supabase ANPR service not available');
         return { success: false, error: 'ANPR service unavailable', results: [] };
       }
     } catch (error) {
@@ -190,6 +190,6 @@ export const useAIThreatDetection = () => {
     isAnalyzing,
     processImageWithThreatAnalysis,
     getThreatStats,
-    isBackendConnected
+    isBackendConnected: isConnected
   };
 };

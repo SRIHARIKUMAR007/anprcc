@@ -1,10 +1,15 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { ANPRProcessingResult } from '@/utils/imageProcessing';
+
+interface DetectionResult {
+  plate_number: string;
+  confidence: number;
+  is_valid: boolean;
+}
 
 export const useDetectionLogger = () => {
   const logDetection = async (
-    detection: ANPRProcessingResult['results'][0], 
+    detection: DetectionResult, 
     cameraId: string, 
     location: string
   ): Promise<boolean> => {

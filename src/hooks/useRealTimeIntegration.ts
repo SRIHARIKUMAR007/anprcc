@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { useBackendIntegration } from './useBackendIntegration';
+import { useSupabaseBackend } from './useSupabaseBackend';
 import { useSupabaseRealTimeData } from './useSupabaseRealTimeData';
 
 interface LiveDetectionData {
@@ -12,7 +12,7 @@ interface LiveDetectionData {
 }
 
 export const useRealTimeIntegration = () => {
-  const { isBackendConnected, processImage } = useBackendIntegration();
+  const { isConnected, processImage } = useSupabaseBackend();
   const { detections, addDetection, systemStats, cameras } = useSupabaseRealTimeData();
   const [liveData, setLiveData] = useState<LiveDetectionData[]>([]);
   const [isLiveMode, setIsLiveMode] = useState(true);
@@ -115,6 +115,6 @@ export const useRealTimeIntegration = () => {
     detections,
     cameras,
     systemStats,
-    isBackendConnected
+    isBackendConnected: isConnected
   };
 };
