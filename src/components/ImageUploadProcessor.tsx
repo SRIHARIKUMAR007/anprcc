@@ -30,13 +30,21 @@ const ImageUploadProcessor = () => {
       const result = await processImage(file);
       setProcessingResult(result);
       
-      // Log detection to database
-      const success = await logDetection(result, 'CAM-UPLOAD', 'Manual Upload');
-      
-      if (success) {
+      // Log detection to database - use the first result if available
+      if (result.success && result.results && result.results.length > 0) {
+        const firstResult = result.results[0];
+        const success = await logDetection(firstResult, 'CAM-UPLOAD', 'Manual Upload');
+        
+        if (success) {
+          toast({
+            title: "Processing Complete",
+            description: `Detected ${result.plates_detected} plate(s). Primary: ${firstResult.plate_number} (${firstResult.confidence.toFixed(1)}% confidence)`,
+          });
+        }
+      } else {
         toast({
           title: "Processing Complete",
-          description: `Detected plate: ${result.plate_number} (${result.confidence.toFixed(1)}% confidence)`,
+          description: "No plates detected in the image.",
         });
       }
     } catch (error) {
@@ -146,31 +154,56 @@ const ImageUploadProcessor = () => {
                       <span className="text-sm sm:text-base text-white font-medium">Detection Complete</span>
                     </div>
                     
-                    <div className="space-y-2">
-                      <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
-                        <span className="text-xs sm:text-sm text-slate-400">Plate Number:</span>
-                        <span className="text-sm sm:text-base font-mono text-white font-bold">
-                          {processingResult.plate_number}
-                        </span>
+                    {processingResult.success && processingResult.results && processingResult.results.length > 0 ? (
+                      <div className="space-y-3">
+                        <div className="text-xs sm:text-sm text-slate-400">
+                          Found {processingResult.plates_detected} plate(s)
+                        </div>
+                        
+                        {processingResult.results.map((result: any, index: number) => (
+                          <div key={index} className="space-y-2 p-2 bg-slate-600/30 rounded">
+                            <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
+                              <span className="text-xs sm:text-sm text-slate-400">Plate {index + 1}:</span>
+                              <span className="text-sm sm:text-base font-mono text-white font-bold">
+                                {result.plate_number}
+                              </span>
+                            </div>
+                            
+                            <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
+                              <span className="text-xs sm:text-sm text-slate-400">Confidence:</span>
+                              <Badge 
+                                variant={result.confidence > 90 ? "default" : "secondary"}
+                                className="w-fit"
+                              >
+                                {result.confidence.toFixed(1)}%
+                              </Badge>
+                            </div>
+                            
+                            <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
+                              <span className="text-xs sm:text-sm text-slate-400">Valid:</span>
+                              <Badge 
+                                variant={result.is_valid ? "default" : "secondary"}
+                                className="w-fit"
+                              >
+                                {result.is_valid ? 'Yes' : 'No'}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
+                        
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
+                          <span className="text-xs sm:text-sm text-slate-400">Processing Time:</span>
+                          <span className="text-xs sm:text-sm text-slate-300">
+                            {processingResult.processing_time?.toFixed(2)}s
+                          </span>
+                        </div>
                       </div>
-                      
-                      <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
-                        <span className="text-xs sm:text-sm text-slate-400">Confidence:</span>
-                        <Badge 
-                          variant={processingResult.confidence > 90 ? "default" : "secondary"}
-                          className="w-fit"
-                        >
-                          {processingResult.confidence.toFixed(1)}%
-                        </Badge>
+                    ) : (
+                      <div className="text-center py-4">
+                        <AlertCircle className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-400 mx-auto mb-2" />
+                        <p className="text-xs sm:text-sm text-slate-400">No plates detected in this image</p>
                       </div>
-                      
-                      <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
-                        <span className="text-xs sm:text-sm text-slate-400">Processing Time:</span>
-                        <span className="text-xs sm:text-sm text-slate-300">
-                          {processingResult.processing_time?.toFixed(2)}s
-                        </span>
-                      </div>
-                    </div>
+                    )}
 
                     <Button
                       onClick={() => {
