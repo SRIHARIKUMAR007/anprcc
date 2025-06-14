@@ -35,9 +35,9 @@ export const MobileOptimizedTabs = ({ children, defaultValue }: MobileOptimizedT
             <div className="flex items-center space-x-2">
               <TabsTrigger 
                 value="realtime" 
-                className="flex items-center space-x-3 px-6 py-4 min-w-[140px] rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/40 data-[state=active]:to-cyan-500/30 data-[state=active]:text-blue-200 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 transition-all duration-300 hover:bg-slate-700/60 text-slate-300 hover:text-white font-medium"
+                className="flex items-center space-x-3 px-6 py-4 min-w-[140px] rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500/40 data-[state=active]:to-orange-500/30 data-[state=active]:text-red-200 data-[state=active]:shadow-lg data-[state=active]:shadow-red-500/25 transition-all duration-300 hover:bg-slate-700/60 text-slate-300 hover:text-white font-medium"
               >
-                <Monitor className="w-5 h-5 flex-shrink-0" />
+                <Activity className="w-5 h-5 flex-shrink-0 animate-pulse" />
                 <span className="text-sm font-semibold whitespace-nowrap">Real-time</span>
               </TabsTrigger>
               

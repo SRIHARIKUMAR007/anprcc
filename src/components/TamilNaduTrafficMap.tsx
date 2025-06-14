@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -45,29 +44,51 @@ const TamilNaduTrafficMap = () => {
     'Tirunelveli', 'Vellore', 'Erode', 'Thoothukudi', 'Thanjavur'
   ];
 
-  // Initialize Tamil Nadu traffic cameras
+  // Initialize Tamil Nadu traffic cameras with more specific locations
   useEffect(() => {
     const initializeCameras = () => {
       const tamilNaduCameras: TrafficCamera[] = [
-        // Chennai Cameras
+        // Chennai Metro Area Cameras
         { id: 'TN-CHN-001', location: 'Anna Salai - Mount Road', city: 'Chennai', coordinates: [13.0827, 80.2707], status: 'active', vehicleCount: 45, averageSpeed: 35, congestionLevel: 'medium' },
-        { id: 'TN-CHN-002', location: 'OMR - IT Corridor', city: 'Chennai', coordinates: [12.9716, 80.2431], status: 'active', vehicleCount: 67, averageSpeed: 25, congestionLevel: 'high' },
-        { id: 'TN-CHN-003', location: 'GST Road - Airport', city: 'Chennai', coordinates: [12.9941, 80.1709], status: 'active', vehicleCount: 38, averageSpeed: 45, congestionLevel: 'low' },
-        { id: 'TN-CHN-004', location: 'ECR - East Coast Road', city: 'Chennai', coordinates: [12.9279, 80.2284], status: 'active', vehicleCount: 29, averageSpeed: 55, congestionLevel: 'low' },
+        { id: 'TN-CHN-002', location: 'OMR - IT Corridor (Sholinganallur)', city: 'Chennai', coordinates: [12.9716, 80.2431], status: 'active', vehicleCount: 67, averageSpeed: 25, congestionLevel: 'high' },
+        { id: 'TN-CHN-003', location: 'GST Road - Airport Junction', city: 'Chennai', coordinates: [12.9941, 80.1709], status: 'active', vehicleCount: 38, averageSpeed: 45, congestionLevel: 'low' },
+        { id: 'TN-CHN-004', location: 'ECR - East Coast Road (Mahabalipuram)', city: 'Chennai', coordinates: [12.9279, 80.2284], status: 'active', vehicleCount: 29, averageSpeed: 55, congestionLevel: 'low' },
+        { id: 'TN-CHN-005', location: 'Poonamallee High Road', city: 'Chennai', coordinates: [13.0878, 80.1849], status: 'active', vehicleCount: 52, averageSpeed: 30, congestionLevel: 'high' },
+        { id: 'TN-CHN-006', location: 'Velachery - Tambaram Road', city: 'Chennai', coordinates: [12.9824, 80.2215], status: 'active', vehicleCount: 41, averageSpeed: 38, congestionLevel: 'medium' },
         
-        // Coimbatore Cameras
-        { id: 'TN-CBE-001', location: 'Avinashi Road', city: 'Coimbatore', coordinates: [11.0168, 76.9558], status: 'active', vehicleCount: 32, averageSpeed: 40, congestionLevel: 'medium' },
-        { id: 'TN-CBE-002', location: 'Trichy Road', city: 'Coimbatore', coordinates: [11.0041, 77.0025], status: 'active', vehicleCount: 28, averageSpeed: 35, congestionLevel: 'medium' },
+        // Coimbatore Industrial Area
+        { id: 'TN-CBE-001', location: 'Avinashi Road - Peelamedu', city: 'Coimbatore', coordinates: [11.0168, 76.9558], status: 'active', vehicleCount: 32, averageSpeed: 40, congestionLevel: 'medium' },
+        { id: 'TN-CBE-002', location: 'Trichy Road - Singanallur', city: 'Coimbatore', coordinates: [11.0041, 77.0025], status: 'active', vehicleCount: 28, averageSpeed: 35, congestionLevel: 'medium' },
+        { id: 'TN-CBE-003', location: 'Sathy Road - Industrial Estate', city: 'Coimbatore', coordinates: [11.0590, 76.9194], status: 'active', vehicleCount: 23, averageSpeed: 42, congestionLevel: 'low' },
         
-        // Madurai Cameras
-        { id: 'TN-MDU-001', location: 'Alagarkoil Road', city: 'Madurai', coordinates: [9.9252, 78.1198], status: 'active', vehicleCount: 24, averageSpeed: 42, congestionLevel: 'low' },
-        { id: 'TN-MDU-002', location: 'Bypass Road', city: 'Madurai', coordinates: [9.9197, 78.1378], status: 'active', vehicleCount: 31, averageSpeed: 38, congestionLevel: 'medium' },
+        // Madurai Heritage City
+        { id: 'TN-MDU-001', location: 'Alagarkoil Road - Meenakshi Temple', city: 'Madurai', coordinates: [9.9252, 78.1198], status: 'active', vehicleCount: 24, averageSpeed: 42, congestionLevel: 'low' },
+        { id: 'TN-MDU-002', location: 'Bypass Road - Pasumalai', city: 'Madurai', coordinates: [9.9197, 78.1378], status: 'active', vehicleCount: 31, averageSpeed: 38, congestionLevel: 'medium' },
+        { id: 'TN-MDU-003', location: 'Tirumangalam Road', city: 'Madurai', coordinates: [9.9324, 78.0827], status: 'active', vehicleCount: 19, averageSpeed: 48, congestionLevel: 'low' },
         
-        // Salem Cameras
-        { id: 'TN-SLM-001', location: 'Bangalore Highway', city: 'Salem', coordinates: [11.6643, 78.1460], status: 'active', vehicleCount: 19, averageSpeed: 50, congestionLevel: 'low' },
+        // Salem Junction Hub
+        { id: 'TN-SLM-001', location: 'Bangalore Highway - Toll Plaza', city: 'Salem', coordinates: [11.6643, 78.1460], status: 'active', vehicleCount: 19, averageSpeed: 50, congestionLevel: 'low' },
+        { id: 'TN-SLM-002', location: 'Five Roads Junction', city: 'Salem', coordinates: [11.6585, 78.1555], status: 'active', vehicleCount: 35, averageSpeed: 25, congestionLevel: 'high' },
         
-        // Vellore Cameras
-        { id: 'TN-VLR-001', location: 'Chennai-Bangalore Highway', city: 'Vellore', coordinates: [12.9165, 79.1325], status: 'maintenance', vehicleCount: 0, averageSpeed: 0, congestionLevel: 'low' }
+        // Tiruchirappalli Central
+        { id: 'TN-TCY-001', location: 'Main Junction - Rock Fort', city: 'Tiruchirappalli', coordinates: [10.7905, 78.7047], status: 'active', vehicleCount: 27, averageSpeed: 35, congestionLevel: 'medium' },
+        { id: 'TN-TCY-002', location: 'Bharathidasan University Road', city: 'Tiruchirappalli', coordinates: [10.8231, 78.6856], status: 'active', vehicleCount: 18, averageSpeed: 45, congestionLevel: 'low' },
+        
+        // Vellore Industrial Corridor
+        { id: 'TN-VLR-001', location: 'Chennai-Bangalore Highway', city: 'Vellore', coordinates: [12.9165, 79.1325], status: 'maintenance', vehicleCount: 0, averageSpeed: 0, congestionLevel: 'low' },
+        { id: 'TN-VLR-002', location: 'Katpadi Junction', city: 'Vellore', coordinates: [12.9698, 79.1597], status: 'active', vehicleCount: 22, averageSpeed: 40, congestionLevel: 'low' },
+        
+        // Tirunelveli Highway Entry
+        { id: 'TN-TNV-001', location: 'Highway Entry - Palayamkottai', city: 'Tirunelveli', coordinates: [8.7139, 77.7567], status: 'active', vehicleCount: 18, averageSpeed: 58, congestionLevel: 'low' },
+        
+        // Erode Textile Hub
+        { id: 'TN-ERD-001', location: 'Perundurai Road', city: 'Erode', coordinates: [11.3410, 77.7172], status: 'active', vehicleCount: 25, averageSpeed: 42, congestionLevel: 'medium' },
+        
+        // Thanjavur Rice Bowl Area
+        { id: 'TN-THJ-001', location: 'Kumbakonam Road', city: 'Thanjavur', coordinates: [10.7870, 79.1378], status: 'active', vehicleCount: 15, averageSpeed: 50, congestionLevel: 'low' },
+        
+        // Thoothukudi Port Area
+        { id: 'TN-TUT-001', location: 'Port Access Road', city: 'Thoothukudi', coordinates: [8.7642, 78.1348], status: 'active', vehicleCount: 33, averageSpeed: 35, congestionLevel: 'medium' }
       ];
       
       setCameras(tamilNaduCameras);
@@ -78,26 +99,42 @@ const TamilNaduTrafficMap = () => {
         {
           id: 'INC-001',
           type: 'congestion',
-          location: 'OMR - Sholinganallur',
+          location: 'OMR - Sholinganallur IT Park Exit',
           severity: 'high',
           timestamp: new Date().toISOString(),
-          description: 'Heavy traffic due to office hours rush'
+          description: 'Heavy traffic due to office hours rush - Multiple IT companies'
         },
         {
           id: 'INC-002',
           type: 'roadwork',
-          location: 'Anna Salai - Teynampet',
+          location: 'Anna Salai - Teynampet Metro Station',
           severity: 'medium',
           timestamp: new Date(Date.now() - 30 * 60000).toISOString(),
-          description: 'Metro construction work in progress'
+          description: 'Chennai Metro Phase 2 construction work in progress'
         },
         {
           id: 'INC-003',
           type: 'weather',
-          location: 'ECR - Mahabalipuram',
+          location: 'ECR - Mahabalipuram Tourism Zone',
           severity: 'low',
           timestamp: new Date(Date.now() - 15 * 60000).toISOString(),
-          description: 'Light rain affecting visibility'
+          description: 'Light rain affecting visibility near beach areas'
+        },
+        {
+          id: 'INC-004',
+          type: 'accident',
+          location: 'Salem Five Roads Junction',
+          severity: 'high',
+          timestamp: new Date(Date.now() - 45 * 60000).toISOString(),
+          description: 'Minor vehicle collision blocking one lane'
+        },
+        {
+          id: 'INC-005',
+          type: 'congestion',
+          location: 'Coimbatore Avinashi Road - CODISSIA',
+          severity: 'medium',
+          timestamp: new Date(Date.now() - 20 * 60000).toISOString(),
+          description: 'Trade fair event causing increased traffic volume'
         }
       ];
       
@@ -108,37 +145,62 @@ const TamilNaduTrafficMap = () => {
     initializeIncidents();
   }, []);
 
-  // Live updates simulation
+  // Enhanced live updates simulation with more realistic patterns
   useEffect(() => {
     if (!isLiveMode) return;
 
     const interval = setInterval(() => {
-      setCameras(prev => prev.map(camera => ({
-        ...camera,
-        vehicleCount: Math.max(0, camera.vehicleCount + Math.floor(Math.random() * 10 - 5)),
-        averageSpeed: Math.max(10, Math.min(80, camera.averageSpeed + Math.floor(Math.random() * 20 - 10))),
-        congestionLevel: Math.random() > 0.7 ? 
-          (['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as 'low' | 'medium' | 'high') : 
-          camera.congestionLevel
-      })));
+      setCameras(prev => prev.map(camera => {
+        // Simulate rush hour patterns
+        const currentHour = new Date().getHours();
+        let trafficMultiplier = 1;
+        
+        // Morning rush (7-10 AM) and evening rush (5-8 PM)
+        if ((currentHour >= 7 && currentHour <= 10) || (currentHour >= 17 && currentHour <= 20)) {
+          trafficMultiplier = camera.city === 'Chennai' ? 1.5 : 1.3;
+        }
+        
+        const baseVehicleCount = Math.floor(camera.vehicleCount * trafficMultiplier);
+        
+        return {
+          ...camera,
+          vehicleCount: Math.max(0, baseVehicleCount + Math.floor(Math.random() * 15 - 7)),
+          averageSpeed: camera.status === 'active' ? 
+            Math.max(10, Math.min(80, camera.averageSpeed + Math.floor(Math.random() * 16 - 8))) : 0,
+          congestionLevel: Math.random() > 0.8 ? 
+            (['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as 'low' | 'medium' | 'high') : 
+            camera.congestionLevel
+        };
+      }));
 
-      // Occasionally add new incidents
-      if (Math.random() > 0.9) {
+      // More realistic incident generation
+      if (Math.random() > 0.92) {
+        const incidentTypes = ['congestion', 'roadwork', 'weather', 'accident'] as const;
+        const severityLevels = ['low', 'medium', 'high'] as const;
+        const locations = [
+          'Chennai OMR IT Corridor',
+          'Coimbatore Textile Mills Area', 
+          'Madurai Temple Zone',
+          'Salem Junction Hub',
+          'Trichy Rock Fort Area',
+          'Vellore Industrial Zone'
+        ];
+        
         const newIncident: TrafficIncident = {
           id: `INC-${Date.now()}`,
-          type: ['accident', 'congestion', 'roadwork'][Math.floor(Math.random() * 3)] as 'accident' | 'congestion' | 'roadwork',
-          location: `${tamilNaduCities[Math.floor(Math.random() * tamilNaduCities.length)]} - Random Location`,
-          severity: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as 'low' | 'medium' | 'high',
+          type: incidentTypes[Math.floor(Math.random() * incidentTypes.length)],
+          location: locations[Math.floor(Math.random() * locations.length)],
+          severity: severityLevels[Math.floor(Math.random() * severityLevels.length)],
           timestamp: new Date().toISOString(),
-          description: 'Live incident detected by traffic monitoring system'
+          description: 'Real-time incident detected by Tamil Nadu traffic monitoring system'
         };
         
         setIncidents(prev => [newIncident, ...prev.slice(0, 9)]);
       }
-    }, 3000);
+    }, 2500);
 
     return () => clearInterval(interval);
-  }, [isLiveMode, tamilNaduCities]);
+  }, [isLiveMode]);
 
   const filteredCameras = cameras.filter(camera => 
     selectedCity === 'All Cities' || camera.city === selectedCity

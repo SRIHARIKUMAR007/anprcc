@@ -192,7 +192,7 @@ const Index = () => {
 
         {/* Main Dashboard Tabs */}
         <div className="animate-fade-in">
-          <MobileOptimizedTabs defaultValue="tn-traffic">
+          <MobileOptimizedTabs defaultValue="realtime">
             
             <TabsContent value="realtime">
               <RealTimeMonitor />

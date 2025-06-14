@@ -3,65 +3,213 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { 
-  Activity, 
+  MapPin, 
   Camera, 
-  Zap, 
   AlertTriangle, 
-  CheckCircle, 
+  Activity,
+  Zap,
+  Car,
   Clock,
-  Cpu,
-  Monitor,
-  Play,
-  Pause,
-  RefreshCw
+  Navigation,
+  Radio,
+  Wifi,
+  Database
 } from "lucide-react";
 import { useRealTimeIntegration } from '@/hooks/useRealTimeIntegration';
 
+interface LocationData {
+  id: string;
+  name: string;
+  district: string;
+  coordinates: [number, number];
+  cameras: number;
+  activeCameras: number;
+  vehicleCount: number;
+  incidents: number;
+  averageSpeed: number;
+  congestionLevel: 'low' | 'medium' | 'high';
+  lastUpdate: string;
+}
+
 const RealTimeMonitor = () => {
-  const { 
-    liveData, 
-    isLiveMode, 
-    toggleLiveMode, 
-    getSystemMetrics, 
-    detections,
-    cameras,
-    isBackendConnected 
-  } = useRealTimeIntegration();
+  const { liveData, isLiveMode, toggleLiveMode, getSystemMetrics, detections, cameras } = useRealTimeIntegration();
+  const [selectedDistrict, setSelectedDistrict] = useState('All Districts');
+  const [locationData, setLocationData] = useState<LocationData[]>([]);
+  const [systemMetrics, setSystemMetrics] = useState(getSystemMetrics());
 
-  const [lastUpdate, setLastUpdate] = useState(new Date());
-  const systemMetrics = getSystemMetrics();
+  // Tamil Nadu districts and key locations
+  const tamilNaduLocations: LocationData[] = [
+    {
+      id: 'CHN-001',
+      name: 'Chennai Central - Anna Salai',
+      district: 'Chennai',
+      coordinates: [13.0827, 80.2707],
+      cameras: 8,
+      activeCameras: 7,
+      vehicleCount: 234,
+      incidents: 1,
+      averageSpeed: 35,
+      congestionLevel: 'high',
+      lastUpdate: new Date().toISOString()
+    },
+    {
+      id: 'CHN-002', 
+      name: 'OMR IT Corridor',
+      district: 'Chennai',
+      coordinates: [12.9716, 80.2431],
+      cameras: 12,
+      activeCameras: 11,
+      vehicleCount: 456,
+      incidents: 2,
+      averageSpeed: 28,
+      congestionLevel: 'high',
+      lastUpdate: new Date().toISOString()
+    },
+    {
+      id: 'CBE-001',
+      name: 'Coimbatore - Avinashi Road',
+      district: 'Coimbatore',
+      coordinates: [11.0168, 76.9558],
+      cameras: 6,
+      activeCameras: 6,
+      vehicleCount: 89,
+      incidents: 0,
+      averageSpeed: 45,
+      congestionLevel: 'medium',
+      lastUpdate: new Date().toISOString()
+    },
+    {
+      id: 'MDU-001',
+      name: 'Madurai - Bypass Junction',
+      district: 'Madurai',
+      coordinates: [9.9252, 78.1198],
+      cameras: 5,
+      activeCameras: 4,
+      vehicleCount: 67,
+      incidents: 0,
+      averageSpeed: 52,
+      congestionLevel: 'low',
+      lastUpdate: new Date().toISOString()
+    },
+    {
+      id: 'TCY-001',
+      name: 'Trichy - Main Junction',
+      district: 'Tiruchirappalli',
+      coordinates: [10.7905, 78.7047],
+      cameras: 4,
+      activeCameras: 4,
+      vehicleCount: 45,
+      incidents: 0,
+      averageSpeed: 48,
+      congestionLevel: 'low',
+      lastUpdate: new Date().toISOString()
+    },
+    {
+      id: 'SLM-001',
+      name: 'Salem - Bangalore Highway',
+      district: 'Salem',
+      coordinates: [11.6643, 78.1460],
+      cameras: 3,
+      activeCameras: 3,
+      vehicleCount: 34,
+      incidents: 0,
+      averageSpeed: 65,
+      congestionLevel: 'low',
+      lastUpdate: new Date().toISOString()
+    },
+    {
+      id: 'VLR-001',
+      name: 'Vellore - Chennai Highway',
+      district: 'Vellore',
+      coordinates: [12.9165, 79.1325],
+      cameras: 2,
+      activeCameras: 1,
+      vehicleCount: 23,
+      incidents: 1,
+      averageSpeed: 0,
+      congestionLevel: 'low',
+      lastUpdate: new Date().toISOString()
+    },
+    {
+      id: 'TNV-001',
+      name: 'Tirunelveli - Highway Entry',
+      district: 'Tirunelveli',
+      coordinates: [8.7139, 77.7567],
+      cameras: 2,
+      activeCameras: 2,
+      vehicleCount: 18,
+      incidents: 0,
+      averageSpeed: 58,
+      congestionLevel: 'low',
+      lastUpdate: new Date().toISOString()
+    }
+  ];
 
-  // Update timestamp when data changes
+  const districts = ['All Districts', ...Array.from(new Set(tamilNaduLocations.map(loc => loc.district)))];
+
+  // Initialize location data
   useEffect(() => {
-    setLastUpdate(new Date());
-  }, [detections, liveData]);
+    setLocationData(tamilNaduLocations);
+  }, []);
+
+  // Real-time updates simulation
+  useEffect(() => {
+    if (!isLiveMode) return;
+
+    const interval = setInterval(() => {
+      setLocationData(prev => prev.map(location => ({
+        ...location,
+        vehicleCount: Math.max(0, location.vehicleCount + Math.floor(Math.random() * 20 - 10)),
+        averageSpeed: location.activeCameras > 0 ? 
+          Math.max(15, Math.min(80, location.averageSpeed + Math.floor(Math.random() * 10 - 5))) : 0,
+        incidents: Math.random() > 0.95 ? location.incidents + 1 : 
+                  Math.random() > 0.98 ? Math.max(0, location.incidents - 1) : location.incidents,
+        congestionLevel: Math.random() > 0.8 ? 
+          (['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as 'low' | 'medium' | 'high') : 
+          location.congestionLevel,
+        lastUpdate: new Date().toISOString()
+      })));
+
+      setSystemMetrics(getSystemMetrics());
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [isLiveMode, getSystemMetrics]);
+
+  const filteredLocations = selectedDistrict === 'All Districts' ? 
+    locationData : locationData.filter(loc => loc.district === selectedDistrict);
+
+  const getCongestionColor = (level: string) => {
+    switch (level) {
+      case 'high': return 'bg-red-500/20 text-red-400 border-red-500/30';
+      case 'medium': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+      default: return 'bg-green-500/20 text-green-400 border-green-500/30';
+    }
+  };
 
   return (
-    <div className="space-y-4 lg:space-y-6">
-      {/* Real-time Control Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 bg-slate-800/30 rounded-lg border border-slate-700">
+    <div className="space-y-6">
+      {/* Header with Real-time Controls */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div className="flex items-center space-x-3">
-          <Monitor className="w-5 h-5 text-blue-400" />
+          <Activity className="w-6 h-6 text-blue-400" />
           <div>
-            <h2 className="text-lg font-bold text-white">Real-Time ANPR Monitor</h2>
-            <p className="text-sm text-slate-400">
-              Live processing • Last update: {lastUpdate.toLocaleTimeString()}
-            </p>
+            <h2 className="text-xl font-bold text-white">Tamil Nadu Real-Time Traffic Monitor</h2>
+            <p className="text-slate-400 text-sm">Live data from {locationData.length} key locations across TN</p>
           </div>
         </div>
         
-        <div className="flex items-center gap-2 flex-wrap">
-          <Badge 
-            variant={isBackendConnected ? "default" : "secondary"}
-            className={`${isBackendConnected ? 
-              'bg-green-500/20 text-green-400 border-green-500/30' : 
-              'bg-orange-500/20 text-orange-400 border-orange-500/30'
-            } text-xs`}
+        <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={selectedDistrict}
+            onChange={(e) => setSelectedDistrict(e.target.value)}
+            className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {isBackendConnected ? 'Python AI Online' : 'Mock Mode'}
-          </Badge>
+            {districts.map(district => (
+              <option key={district} value={district}>{district}</option>
+            ))}
+          </select>
           
           <Button
             variant={isLiveMode ? "default" : "outline"}
@@ -69,251 +217,170 @@ const RealTimeMonitor = () => {
             onClick={toggleLiveMode}
             className="flex items-center space-x-2"
           >
-            {isLiveMode ? (
-              <>
-                <Pause className="w-3 h-3" />
-                <span className="hidden sm:inline">Pause Live</span>
-              </>
-            ) : (
-              <>
-                <Play className="w-3 h-3" />
-                <span className="hidden sm:inline">Start Live</span>
-              </>
-            )}
+            <Radio className={`w-4 h-4 ${isLiveMode ? 'animate-pulse' : ''}`} />
+            <span>{isLiveMode ? 'LIVE' : 'PAUSED'}</span>
           </Button>
           
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setLastUpdate(new Date())}
-            className="flex items-center space-x-2"
-          >
-            <RefreshCw className="w-3 h-3" />
-            <span className="hidden sm:inline">Refresh</span>
-          </Button>
+          <Badge variant="secondary" className={`${isLiveMode ? 'bg-green-500/20 text-green-400 border-green-500/30 animate-pulse' : 'bg-gray-500/20 text-gray-400 border-gray-500/30'}`}>
+            {isLiveMode ? 'REAL-TIME ACTIVE' : 'STATIC MODE'}
+          </Badge>
         </div>
       </div>
 
-      {/* System Metrics Grid - Responsive */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 lg:gap-4">
+      {/* System Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="p-3 lg:p-4">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs text-slate-400">Total</div>
-                <div className="text-lg lg:text-xl font-bold text-white">{systemMetrics.totalDetections}</div>
+                <div className="text-sm text-slate-400">Total Detections</div>
+                <div className="text-2xl font-bold text-white">{systemMetrics.totalDetections}</div>
               </div>
-              <Camera className="w-4 h-4 lg:w-5 lg:h-5 text-blue-400" />
+              <Database className="w-8 h-8 text-blue-400" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="p-3 lg:p-4">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs text-slate-400">Alerts</div>
-                <div className="text-lg lg:text-xl font-bold text-white">{systemMetrics.flaggedDetections}</div>
-              </div>
-              <AlertTriangle className="w-4 h-4 lg:w-5 lg:h-5 text-red-400" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="p-3 lg:p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs text-slate-400">Accuracy</div>
-                <div className="text-lg lg:text-xl font-bold text-white">{systemMetrics.avgConfidence}%</div>
-              </div>
-              <CheckCircle className="w-4 h-4 lg:w-5 lg:h-5 text-green-400" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="p-3 lg:p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs text-slate-400">Cameras</div>
-                <div className="text-lg lg:text-xl font-bold text-white">
+                <div className="text-sm text-slate-400">Active Cameras</div>
+                <div className="text-2xl font-bold text-white">
                   {systemMetrics.activeCameras}/{systemMetrics.totalCameras}
                 </div>
               </div>
-              <Activity className="w-4 h-4 lg:w-5 lg:h-5 text-purple-400" />
+              <Camera className="w-8 h-8 text-green-400" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="p-3 lg:p-4">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs text-slate-400">Queue</div>
-                <div className="text-lg lg:text-xl font-bold text-white">{systemMetrics.processingQueue}</div>
+                <div className="text-sm text-slate-400">Flagged Vehicles</div>
+                <div className="text-2xl font-bold text-white">{systemMetrics.flaggedDetections}</div>
               </div>
-              <Clock className="w-4 h-4 lg:w-5 lg:h-5 text-yellow-400" />
+              <AlertTriangle className="w-8 h-8 text-red-400" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="p-3 lg:p-4">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs text-slate-400">Uptime</div>
-                <div className="text-lg lg:text-xl font-bold text-white">{systemMetrics.systemUptime}</div>
+                <div className="text-sm text-slate-400">System Uptime</div>
+                <div className="text-2xl font-bold text-white">{systemMetrics.systemUptime}</div>
               </div>
-              <Cpu className="w-4 h-4 lg:w-5 lg:h-5 text-cyan-400" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardContent className="p-3 lg:p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs text-slate-400">Status</div>
-                <div className="text-sm lg:text-base font-bold text-green-400">
-                  {isLiveMode ? 'LIVE' : 'PAUSED'}
-                </div>
-              </div>
-              <Zap className={`w-4 h-4 lg:w-5 lg:h-5 ${isLiveMode ? 'text-green-400 animate-pulse' : 'text-gray-400'}`} />
+              <Wifi className="w-8 h-8 text-purple-400" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Live Camera Feed Status - Responsive */}
+      {/* Location-Based Real-Time Data */}
       <Card className="bg-slate-800/50 border-slate-700">
         <CardHeader>
-          <CardTitle className="text-white flex items-center justify-between text-base lg:text-lg">
+          <CardTitle className="text-white flex items-center justify-between">
             <span className="flex items-center">
-              <Activity className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
-              Live Camera Analytics
+              <MapPin className="w-5 h-5 mr-2" />
+              Live Location Data ({filteredLocations.length} locations)
             </span>
-            <Badge 
-              variant="secondary" 
-              className={`${isLiveMode ? 
-                'bg-green-500/20 text-green-400 border-green-500/30 animate-pulse' : 
-                'bg-gray-500/20 text-gray-400 border-gray-500/30'
-              } text-xs`}
-            >
-              {isLiveMode ? 'REAL-TIME' : 'PAUSED'}
-            </Badge>
+            <div className="flex items-center space-x-2">
+              <div className={`w-2 h-2 rounded-full ${isLiveMode ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`}></div>
+              <span className="text-sm text-slate-400">
+                Last update: {new Date().toLocaleTimeString()}
+              </span>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="border-slate-700">
-                  <TableHead className="text-slate-300 text-xs lg:text-sm">Camera</TableHead>
-                  <TableHead className="text-slate-300 text-xs lg:text-sm">Location</TableHead>
-                  <TableHead className="text-slate-300 text-xs lg:text-sm">Recent Detections</TableHead>
-                  <TableHead className="text-slate-300 text-xs lg:text-sm">Queue</TableHead>
-                  <TableHead className="text-slate-300 text-xs lg:text-sm">Accuracy</TableHead>
-                  <TableHead className="text-slate-300 text-xs lg:text-sm">Last Detection</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {liveData.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-6 lg:py-8 text-slate-400">
-                      <Camera className="w-8 h-8 lg:w-12 lg:h-12 mx-auto mb-3 opacity-50" />
-                      <p className="text-sm lg:text-base">No camera data available</p>
-                      <p className="text-xs lg:text-sm">Start live mode to see real-time analytics</p>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  liveData.map((cameraData) => {
-                    const camera = cameras.find(c => c.camera_id === cameraData.camera_id);
-                    return (
-                      <TableRow key={cameraData.camera_id} className="border-slate-700 hover:bg-slate-700/30">
-                        <TableCell className="font-mono text-white font-bold text-xs lg:text-sm">
-                          {cameraData.camera_id}
-                        </TableCell>
-                        <TableCell className="text-slate-300 text-xs lg:text-sm">
-                          {camera?.location || 'Unknown'}
-                        </TableCell>
-                        <TableCell className="text-slate-300 text-xs lg:text-sm">
-                          <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                            {cameraData.detection_count}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-slate-300 text-xs lg:text-sm">
-                          {cameraData.processing_queue > 0 ? (
-                            <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
-                              {cameraData.processing_queue}
-                            </Badge>
-                          ) : (
-                            <span className="text-green-400">Clear</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-slate-300 text-xs lg:text-sm">
-                          <Badge 
-                            variant={cameraData.accuracy_rate > 95 ? "default" : "secondary"}
-                            className={cameraData.accuracy_rate > 95 ? 
-                              "bg-green-500/20 text-green-400 border-green-500/30" : 
-                              "bg-orange-500/20 text-orange-400 border-orange-500/30"
-                            }
-                          >
-                            {cameraData.accuracy_rate}%
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-slate-300 text-xs lg:text-sm">
-                          {cameraData.last_detection ? 
-                            new Date(cameraData.last_detection).toLocaleTimeString() : 
-                            'No recent activity'
-                          }
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {filteredLocations.map((location) => (
+              <div key={location.id} className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/50 hover:border-blue-500/30 transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-2">
+                    <Navigation className="w-4 h-4 text-blue-400" />
+                    <span className="font-mono text-sm text-white font-bold">{location.id}</span>
+                  </div>
+                  <Badge variant="secondary" className={getCongestionColor(location.congestionLevel)}>
+                    {location.congestionLevel.toUpperCase()}
+                  </Badge>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="text-sm text-slate-300 font-medium">{location.name}</div>
+                  <div className="text-xs text-slate-400">{location.district} District</div>
+                  
+                  <div className="grid grid-cols-2 gap-2 text-xs pt-2">
+                    <div className="flex items-center space-x-1">
+                      <Camera className="w-3 h-3 text-blue-400" />
+                      <span className="text-slate-300">{location.activeCameras}/{location.cameras}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Car className="w-3 h-3 text-green-400" />
+                      <span className="text-slate-300">{location.vehicleCount}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Zap className="w-3 h-3 text-yellow-400" />
+                      <span className="text-slate-300">{location.averageSpeed} km/h</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <AlertTriangle className="w-3 h-3 text-red-400" />
+                      <span className="text-slate-300">{location.incidents} alerts</span>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-2 text-xs text-slate-400 flex items-center">
+                    <Clock className="w-3 h-3 mr-1" />
+                    Updated: {new Date(location.lastUpdate).toLocaleTimeString()}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
 
-      {/* Recent Real-time Detections */}
+      {/* Recent Real-Time Detections */}
       <Card className="bg-slate-800/50 border-slate-700">
         <CardHeader>
-          <CardTitle className="text-white text-base lg:text-lg">Latest Real-time Detections</CardTitle>
+          <CardTitle className="text-white flex items-center">
+            <Zap className="w-5 h-5 mr-2" />
+            Recent Real-Time Detections (Last 10)
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2 lg:space-y-3 max-h-64 lg:max-h-80 overflow-y-auto">
+          <div className="space-y-2 max-h-60 overflow-y-auto">
             {detections.slice(0, 10).map((detection, index) => (
               <div 
-                key={detection.id}
-                className={`flex items-center justify-between p-2 lg:p-3 bg-slate-700/30 rounded-lg border border-slate-600/50 
-                  ${index === 0 && isLiveMode ? 'animate-pulse bg-blue-500/10 border-blue-500/30' : ''}
-                `}
+                key={detection.id} 
+                className={`flex items-center justify-between p-3 bg-slate-700/30 rounded-lg border border-slate-600/50 ${
+                  index === 0 && isLiveMode ? 'border-green-500/30 bg-green-500/5 animate-pulse' : ''
+                }`}
               >
                 <div className="flex-1">
-                  <div className="font-mono text-white font-bold text-sm lg:text-base">
-                    {detection.plate_number}
+                  <div className="flex items-center space-x-2 mb-1">
+                    <span className="font-mono text-white font-bold text-sm">{detection.plate_number}</span>
+                    <Badge 
+                      variant="secondary"
+                      className={detection.status === 'flagged' ? 
+                        'bg-red-500/20 text-red-400 border-red-500/30' : 
+                        'bg-green-500/20 text-green-400 border-green-500/30'
+                      }
+                    >
+                      {detection.status}
+                    </Badge>
                   </div>
-                  <div className="text-xs lg:text-sm text-slate-400">
-                    {detection.camera_id} • {detection.location}
+                  <div className="text-xs text-slate-400">
+                    {detection.location} • {detection.camera_id} • {detection.confidence}%
                   </div>
                 </div>
                 <div className="text-right">
-                  <Badge 
-                    variant={detection.status === "flagged" ? "destructive" : "secondary"}
-                    className={`mb-1 text-xs ${
-                      detection.status === "flagged" ? 
-                      "animate-pulse" : 
-                      detection.status === "cleared" ? 
-                      "bg-green-500/20 text-green-400 border-green-500/30" : ""
-                    }`}
-                  >
-                    {detection.status}
-                  </Badge>
-                  <div className="text-xs lg:text-sm text-slate-400">
-                    {detection.confidence}% • {new Date(detection.timestamp).toLocaleTimeString()}
+                  <div className="text-xs text-slate-400">
+                    {new Date(detection.timestamp).toLocaleTimeString()}
                   </div>
                 </div>
               </div>
