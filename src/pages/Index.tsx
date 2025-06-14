@@ -19,6 +19,10 @@ import TamilNaduTrafficMap from "@/components/TamilNaduTrafficMap";
 import TollPlazaMonitor from "@/components/TollPlazaMonitor";
 import LiveWeatherWidget from "@/components/LiveWeatherWidget";
 import RealTimeMonitor from "@/components/RealTimeMonitor";
+import AdvancedSearch from "@/components/AdvancedSearch";
+import SystemHealthMonitor from "@/components/SystemHealthMonitor";
+import DataExportManager from "@/components/DataExportManager";
+import UserActivityTracker from "@/components/UserActivityTracker";
 import { ResponsiveLayout } from "@/components/ResponsiveLayout";
 import { MobileOptimizedTabs } from "@/components/MobileOptimizedTabs";
 import { useAuth } from "@/hooks/useAuth";
@@ -124,8 +128,21 @@ const Index = () => {
                 </div>
               </TabsContent>
 
+              {/* Enhanced Features Tabs - Now available on main page */}
+              <TabsContent value="search">
+                <AdvancedSearch />
+              </TabsContent>
+
+              <TabsContent value="health">
+                <SystemHealthMonitor />
+              </TabsContent>
+
               {/* Operator and Admin only features */}
               <RoleBasedAccess allowedRoles={['admin', 'operator']}>
+                <TabsContent value="export">
+                  <DataExportManager />
+                </TabsContent>
+
                 <TabsContent value="image-processing">
                   <div className="space-y-6">
                     <ImageUploadProcessor />
@@ -148,6 +165,10 @@ const Index = () => {
 
               {/* Admin only features */}
               <RoleBasedAccess allowedRoles={['admin']}>
+                <TabsContent value="activity">
+                  <UserActivityTracker />
+                </TabsContent>
+
                 <TabsContent value="sdn-manager">
                   <SDNNetworkManager />
                 </TabsContent>
