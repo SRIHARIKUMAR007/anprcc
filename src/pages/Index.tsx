@@ -57,200 +57,229 @@ const Index = () => {
   return (
     <AuthWrapper>
       <ResponsiveLayout>
-        {/* Header */}
-        <header className="border-b border-slate-700 bg-slate-900/80 backdrop-blur-sm -mx-2 sm:-mx-4 md:-mx-6 lg:-mx-8 px-2 sm:px-4 md:px-6 lg:px-8 mb-4 sm:mb-6 md:mb-8">
-          <div className="py-3 sm:py-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
-                  <Camera className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
+        {/* Enhanced Header */}
+        <header className="border-b border-slate-700/50 bg-slate-900/90 backdrop-blur-xl -mx-2 sm:-mx-4 md:-mx-6 lg:-mx-8 px-2 sm:px-4 md:px-6 lg:px-8 mb-6 sm:mb-8 md:mb-10 shadow-lg">
+          <div className="py-4 sm:py-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center space-x-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 via-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25 animate-pulse-glow">
+                  <Camera className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white">ANPR Control Center</h1>
-                  <p className="text-xs sm:text-sm text-slate-400">Automated Number Plate Recognition with SDN • Real-time Intelligence</p>
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold gradient-text text-shadow">
+                    ANPR Control Center
+                  </h1>
+                  <p className="text-sm sm:text-base text-slate-400 font-medium">
+                    Automated Number Plate Recognition with SDN • Real-time Intelligence
+                  </p>
                 </div>
               </div>
-              <div className="flex items-center space-x-2 sm:space-x-4">
-                <Badge variant="secondary" className={`${isConnected ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'} animate-pulse text-xs px-2 py-1`}>
-                  {isConnected ? 'DB Connected' : 'Mock Data'}
-                </Badge>
-                <Badge variant="secondary" className={`${isBackendConnected ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-orange-500/20 text-orange-400 border-orange-500/30'} text-xs px-2 py-1`}>
-                  {isBackendConnected ? 'AI Online' : 'AI Mock'}
-                </Badge>
-                <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs px-2 py-1">
+              <div className="flex items-center space-x-3 sm:space-x-4">
+                <div className="flex items-center space-x-2">
+                  <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-yellow-400'} animate-pulse`}></div>
+                  <span className={`text-xs font-medium px-3 py-1.5 rounded-full border ${isConnected ? 'status-online' : 'status-warning'}`}>
+                    {isConnected ? 'DB Connected' : 'Mock Data'}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className={`w-2 h-2 rounded-full ${isBackendConnected ? 'bg-green-400' : 'bg-orange-400'} animate-pulse`}></div>
+                  <span className={`text-xs font-medium px-3 py-1.5 rounded-full border ${isBackendConnected ? 'status-online' : 'status-warning'}`}>
+                    {isBackendConnected ? 'AI Online' : 'AI Mock'}
+                  </span>
+                </div>
+                <span className="text-xs font-medium px-3 py-1.5 rounded-full border status-info">
                   SDN Active
-                </Badge>
+                </span>
                 <UserMenu />
               </div>
             </div>
           </div>
         </header>
 
-        {/* Welcome Message */}
+        {/* Enhanced Welcome Message */}
         {user && (
-          <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="mb-6 sm:mb-8 p-4 sm:p-6 enhanced-card animate-fade-in">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h2 className="text-base sm:text-lg font-semibold text-blue-400">
+                <h2 className="text-lg sm:text-xl font-bold text-blue-300">
                   Welcome back, {userProfile?.full_name || user.email}!
                 </h2>
-                <p className="text-xs sm:text-sm text-blue-300">
-                  Role: {userProfile?.role || 'Loading...'} • 
-                  Access Level: {userProfile?.role === 'admin' ? 'Full Control' : 
-                                userProfile?.role === 'operator' ? 'Operational' : 'View Only'}
+                <p className="text-sm sm:text-base text-blue-200/80 mt-1">
+                  Role: <span className="font-semibold">{userProfile?.role || 'Loading...'}</span> • 
+                  Access Level: <span className="font-semibold">
+                    {userProfile?.role === 'admin' ? 'Full Control' : 
+                     userProfile?.role === 'operator' ? 'Operational' : 'View Only'}
+                  </span>
                 </p>
               </div>
-              <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs w-fit">
-                {isConnected && isBackendConnected ? 'Full System' : 
-                 isConnected ? 'Database Only' : 'Demo Mode'}
-              </Badge>
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 rounded-full bg-gradient-to-r from-green-400 to-blue-400 animate-pulse"></div>
+                <span className="text-sm font-medium px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 text-blue-300">
+                  {isConnected && isBackendConnected ? 'Full System' : 
+                   isConnected ? 'Database Only' : 'Demo Mode'}
+                </span>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Status Cards */}
-        <ResponsiveGrid className="mb-6 sm:mb-8">
-          <Card className="bg-slate-800/50 border-slate-700">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium text-slate-200">Active Cameras</CardTitle>
-              <Camera className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg sm:text-2xl font-bold text-white">{systemStatus.activeCameras}/{systemStatus.cameras}</div>
-              <p className="text-xs text-slate-400">
-                {Math.round((systemStatus.activeCameras / systemStatus.cameras) * 100)}% operational
-              </p>
-            </CardContent>
-          </Card>
+        {/* Enhanced Status Cards */}
+        <ResponsiveGrid className="mb-8 sm:mb-10">
+          <div className="enhanced-card animate-fade-in">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm sm:text-base font-semibold text-slate-200">Active Cameras</h3>
+              <Camera className="h-5 w-5 sm:h-6 sm:w-6 text-blue-400" />
+            </div>
+            <div className="text-2xl sm:text-3xl font-bold gradient-text mb-2">
+              {systemStatus.activeCameras}/{systemStatus.cameras}
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="flex-1 bg-slate-700/50 rounded-full h-2">
+                <div 
+                  className="bg-gradient-to-r from-green-400 to-blue-400 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.round((systemStatus.activeCameras / systemStatus.cameras) * 100)}%` }}
+                ></div>
+              </div>
+              <span className="text-xs text-slate-400 font-medium">
+                {Math.round((systemStatus.activeCameras / systemStatus.cameras) * 100)}%
+              </span>
+            </div>
+          </div>
 
-          <Card className="bg-slate-800/50 border-slate-700">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium text-slate-200">Vehicles Detected</CardTitle>
-              <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg sm:text-2xl font-bold text-white">{systemStatus.vehiclesDetected.toLocaleString()}</div>
-              <p className="text-xs text-slate-400">Today's total</p>
-            </CardContent>
-          </Card>
+          <div className="enhanced-card animate-fade-in">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm sm:text-base font-semibold text-slate-200">Vehicles Detected</h3>
+              <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-green-400" />
+            </div>
+            <div className="text-2xl sm:text-3xl font-bold gradient-text mb-2">
+              {systemStatus.vehiclesDetected.toLocaleString()}
+            </div>
+            <p className="text-xs text-slate-400 font-medium">Today's total detections</p>
+          </div>
 
-          <Card className="bg-slate-800/50 border-slate-700">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium text-slate-200">Plate Recognition</CardTitle>
-              <Database className="h-3 w-3 sm:h-4 sm:w-4 text-cyan-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg sm:text-2xl font-bold text-white">{systemStatus.plateRecognitions.toLocaleString()}</div>
-              <p className="text-xs text-slate-400">
-                {systemStats?.accuracy_rate ? `${systemStats.accuracy_rate.toFixed(1)}% accuracy` : '95.3% accuracy'}
-              </p>
-            </CardContent>
-          </Card>
+          <div className="enhanced-card animate-fade-in">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm sm:text-base font-semibold text-slate-200">Plate Recognition</h3>
+              <Database className="h-5 w-5 sm:h-6 sm:w-6 text-cyan-400" />
+            </div>
+            <div className="text-2xl sm:text-3xl font-bold gradient-text mb-2">
+              {systemStatus.plateRecognitions.toLocaleString()}
+            </div>
+            <p className="text-xs text-slate-400 font-medium">
+              {systemStats?.accuracy_rate ? `${systemStats.accuracy_rate.toFixed(1)}% accuracy` : '95.3% accuracy'}
+            </p>
+          </div>
 
-          <Card className="bg-slate-800/50 border-slate-700">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium text-slate-200">Active Alerts</CardTitle>
-              <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 text-orange-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg sm:text-2xl font-bold text-white">{systemStatus.alerts}</div>
-              <p className="text-xs text-slate-400">2 high priority</p>
-            </CardContent>
-          </Card>
+          <div className="enhanced-card animate-fade-in">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm sm:text-base font-semibold text-slate-200">Active Alerts</h3>
+              <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-orange-400" />
+            </div>
+            <div className="text-2xl sm:text-3xl font-bold text-orange-400 mb-2">
+              {systemStatus.alerts}
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs rounded-md border border-red-500/30">
+                2 high priority
+              </span>
+            </div>
+          </div>
         </ResponsiveGrid>
 
         {/* Main Dashboard Tabs */}
-        <MobileOptimizedTabs defaultValue="realtime">
-          <TabsContent value="realtime">
-            <RealTimeMonitor />
-          </TabsContent>
+        <div className="animate-fade-in">
+          <MobileOptimizedTabs defaultValue="realtime">
+            <TabsContent value="realtime">
+              <RealTimeMonitor />
+            </TabsContent>
 
-          <TabsContent value="dashboard">
-            <RealTimeDashboard />
-          </TabsContent>
+            <TabsContent value="dashboard">
+              <RealTimeDashboard />
+            </TabsContent>
 
-          <TabsContent value="live" className="space-y-4 sm:space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-              <div className="lg:col-span-2">
-                <LiveFeed />
-              </div>
-              <div>
-                <Card className="bg-slate-800/50 border-slate-700">
-                  <CardHeader>
-                    <CardTitle className="text-sm sm:text-base text-white">Recent Detections</CardTitle>
-                    <CardDescription className="text-xs sm:text-sm text-slate-400">
-                      {isConnected ? 'Live vehicle plate recognitions from Supabase' : 'Demo data'}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-2 sm:space-y-3">
-                    {detections.slice(0, 5).map((detection) => (
-                      <div key={detection.id} className="flex items-center justify-between p-2 sm:p-3 bg-slate-700/30 rounded-lg">
-                        <div>
-                          <div className="font-mono text-sm sm:text-base text-white font-semibold">{detection.plate_number}</div>
-                          <div className="text-xs text-slate-400">
-                            {new Date(detection.timestamp).toLocaleTimeString()} • {detection.camera_id}
+            <TabsContent value="live" className="space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div className="lg:col-span-2">
+                  <LiveFeed />
+                </div>
+                <div>
+                  <Card className="bg-slate-800/50 border-slate-700">
+                    <CardHeader>
+                      <CardTitle className="text-sm sm:text-base text-white">Recent Detections</CardTitle>
+                      <CardDescription className="text-xs sm:text-sm text-slate-400">
+                        {isConnected ? 'Live vehicle plate recognitions from Supabase' : 'Demo data'}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-2 sm:space-y-3">
+                      {detections.slice(0, 5).map((detection) => (
+                        <div key={detection.id} className="flex items-center justify-between p-2 sm:p-3 bg-slate-700/30 rounded-lg">
+                          <div>
+                            <div className="font-mono text-sm sm:text-base text-white font-semibold">{detection.plate_number}</div>
+                            <div className="text-xs text-slate-400">
+                              {new Date(detection.timestamp).toLocaleTimeString()} • {detection.camera_id}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <Badge 
+                              variant={detection.status === "flagged" ? "destructive" : "secondary"}
+                              className="mb-1 text-xs"
+                            >
+                              {detection.status}
+                            </Badge>
+                            <div className="text-xs text-slate-400">{detection.confidence}%</div>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <Badge 
-                            variant={detection.status === "flagged" ? "destructive" : "secondary"}
-                            className="mb-1 text-xs"
-                          >
-                            {detection.status}
-                          </Badge>
-                          <div className="text-xs text-slate-400">{detection.confidence}%</div>
-                        </div>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
-            </div>
-          </TabsContent>
+            </TabsContent>
 
-          <TabsContent value="image-processing">
-            <div className="space-y-4 sm:space-y-6">
-              <ImageUploadProcessor />
-              <ImageProcessingPipeline />
-            </div>
-          </TabsContent>
+            <TabsContent value="image-processing">
+              <div className="space-y-4 sm:space-y-6">
+                <ImageUploadProcessor />
+                <ImageProcessingPipeline />
+              </div>
+            </TabsContent>
 
-          <TabsContent value="vehicle-updates">
-            <VehicleUpdates />
-          </TabsContent>
+            <TabsContent value="vehicle-updates">
+              <VehicleUpdates />
+            </TabsContent>
 
-          <TabsContent value="vehicle-details">
-            <VehicleDetails />
-          </TabsContent>
+            <TabsContent value="vehicle-details">
+              <VehicleDetails />
+            </TabsContent>
 
-          <TabsContent value="network">
-            <NetworkTopology />
-          </TabsContent>
+            <TabsContent value="network">
+              <NetworkTopology />
+            </TabsContent>
 
-          <TabsContent value="sdn-manager">
-            <SDNNetworkManager />
-          </TabsContent>
+            <TabsContent value="sdn-manager">
+              <SDNNetworkManager />
+            </TabsContent>
 
-          <TabsContent value="parking">
-            <ParkingManagement />
-          </TabsContent>
+            <TabsContent value="parking">
+              <ParkingManagement />
+            </TabsContent>
 
-          <TabsContent value="database">
-            <VehicleDatabase />
-          </TabsContent>
+            <TabsContent value="database">
+              <VehicleDatabase />
+            </TabsContent>
 
-          <TabsContent value="alerts">
-            <AlertsPanel />
-          </TabsContent>
+            <TabsContent value="alerts">
+              <AlertsPanel />
+            </TabsContent>
 
-          <TabsContent value="analytics">
-            <TrafficAnalytics />
-          </TabsContent>
+            <TabsContent value="analytics">
+              <TrafficAnalytics />
+            </TabsContent>
 
-          <TabsContent value="controls">
-            <SystemControls />
-          </TabsContent>
-        </MobileOptimizedTabs>
+            <TabsContent value="controls">
+              <SystemControls />
+            </TabsContent>
+          </MobileOptimizedTabs>
+        </div>
       </ResponsiveLayout>
     </AuthWrapper>
   );

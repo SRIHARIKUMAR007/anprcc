@@ -10,12 +10,16 @@ interface ResponsiveLayoutProps {
 export const ResponsiveLayout = ({ children, className }: ResponsiveLayoutProps) => {
   return (
     <div className={cn(
-      "min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800",
+      "min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900",
       "px-2 sm:px-4 md:px-6 lg:px-8",
       "py-2 sm:py-4 md:py-6 lg:py-8",
+      "relative overflow-x-hidden",
       className
     )}>
-      <div className="max-w-7xl mx-auto">
+      {/* Background effects */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDEwMCwxMTYsMTM5LDAuMDUpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"></div>
+      
+      <div className="relative z-10 max-w-7xl mx-auto">
         {children}
       </div>
     </div>
@@ -25,8 +29,9 @@ export const ResponsiveLayout = ({ children, className }: ResponsiveLayoutProps)
 export const ResponsiveGrid = ({ children, className }: ResponsiveLayoutProps) => {
   return (
     <div className={cn(
-      "grid gap-3 sm:gap-4 md:gap-6",
+      "grid gap-4 sm:gap-6 md:gap-8",
       "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
+      "auto-rows-fr",
       className
     )}>
       {children}
@@ -37,9 +42,12 @@ export const ResponsiveGrid = ({ children, className }: ResponsiveLayoutProps) =
 export const ResponsiveCard = ({ children, className }: ResponsiveLayoutProps) => {
   return (
     <div className={cn(
-      "bg-slate-800/50 border-slate-700 rounded-lg border",
-      "p-3 sm:p-4 md:p-6",
-      "min-h-[120px] sm:min-h-[140px] md:min-h-[160px]",
+      "bg-slate-800/60 backdrop-blur-sm border border-slate-700/50",
+      "rounded-xl shadow-xl shadow-black/10",
+      "p-4 sm:p-6 md:p-8",
+      "min-h-[140px] sm:min-h-[160px] md:min-h-[180px]",
+      "transition-all duration-300 hover:bg-slate-800/80 hover:border-slate-600/50",
+      "hover:shadow-2xl hover:shadow-blue-500/5",
       className
     )}>
       {children}
