@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -58,14 +59,19 @@ export const useSupabaseRealTimeData = () => {
     // Load initial data
     const loadInitialData = async () => {
       try {
+        console.log('Loading initial data...');
+        
         // Load recent detections
-        const { data: detectionsData } = await supabase
+        const { data: detectionsData, error: detectionsError } = await supabase
           .from('detections')
           .select('*')
           .order('timestamp', { ascending: false })
           .limit(50);
         
-        if (detectionsData) {
+        if (detectionsError) {
+          console.error('Error loading detections:', detectionsError);
+        } else if (detectionsData) {
+          console.log('Loaded detections:', detectionsData.length);
           const typedDetections = detectionsData.map(detection => ({
             ...detection,
             status: detection.status as 'cleared' | 'flagged' | 'processing'
@@ -74,24 +80,29 @@ export const useSupabaseRealTimeData = () => {
         }
 
         // Load latest system stats
-        const { data: statsData } = await supabase
+        const { data: statsData, error: statsError } = await supabase
           .from('system_stats')
           .select('*')
           .order('timestamp', { ascending: false })
-          .limit(1)
-          .single();
+          .limit(1);
         
-        if (statsData) {
-          setSystemStats(statsData);
+        if (statsError) {
+          console.error('Error loading system stats:', statsError);
+        } else if (statsData && statsData.length > 0) {
+          console.log('Loaded system stats:', statsData[0]);
+          setSystemStats(statsData[0]);
         }
 
         // Load cameras
-        const { data: camerasData } = await supabase
+        const { data: camerasData, error: camerasError } = await supabase
           .from('cameras')
           .select('*')
           .order('camera_id');
         
-        if (camerasData) {
+        if (camerasError) {
+          console.error('Error loading cameras:', camerasError);
+        } else if (camerasData) {
+          console.log('Loaded cameras:', camerasData.length);
           const typedCameras = camerasData.map(camera => ({
             ...camera,
             status: camera.status as 'active' | 'inactive' | 'maintenance',
@@ -101,8 +112,10 @@ export const useSupabaseRealTimeData = () => {
         }
 
         setIsConnected(true);
+        console.log('Initial data loading complete');
       } catch (error) {
         console.error('Error loading initial data:', error);
+        setIsConnected(false);
       }
     };
 
@@ -110,10 +123,11 @@ export const useSupabaseRealTimeData = () => {
 
     // Set up real-time subscriptions with unique channel names
     const detectionsChannel = supabase
-      .channel(`detections_${Date.now()}_${Math.random()}`)
+      .channel(`detections_realtime_${Date.now()}_${Math.random()}`)
       .on('postgres_changes', 
         { event: 'INSERT', schema: 'public', table: 'detections' }, 
         (payload) => {
+          console.log('New detection received:', payload.new);
           const newDetection = {
             ...payload.new,
             status: payload.new.status as 'cleared' | 'flagged' | 'processing'
@@ -121,23 +135,37 @@ export const useSupabaseRealTimeData = () => {
           setDetections(prev => [newDetection, ...prev.slice(0, 49)]);
         }
       )
+      .on('postgres_changes', 
+        { event: 'UPDATE', schema: 'public', table: 'detections' }, 
+        (payload) => {
+          console.log('Detection updated:', payload.new);
+          const updatedDetection = {
+            ...payload.new,
+            status: payload.new.status as 'cleared' | 'flagged' | 'processing'
+          } as Detection;
+          setDetections(prev => prev.map(d => d.id === updatedDetection.id ? updatedDetection : d));
+        }
+      )
       .subscribe();
 
     const statsChannel = supabase
-      .channel(`system_stats_${Date.now()}_${Math.random()}`)
+      .channel(`system_stats_realtime_${Date.now()}_${Math.random()}`)
       .on('postgres_changes', 
         { event: 'INSERT', schema: 'public', table: 'system_stats' }, 
         (payload) => {
+          console.log('New system stats received:', payload.new);
           setSystemStats(payload.new as SystemStats);
         }
       )
       .subscribe();
 
     const camerasChannel = supabase
-      .channel(`cameras_${Date.now()}_${Math.random()}`)
+      .channel(`cameras_realtime_${Date.now()}_${Math.random()}`)
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'cameras' }, 
-        () => {
+        (payload) => {
+          console.log('Camera update received:', payload);
+          // Reload cameras data
           loadInitialData();
         }
       )
@@ -154,9 +182,13 @@ export const useSupabaseRealTimeData = () => {
   }, [user]);
 
   const addDetection = async (detection: Omit<Detection, 'id' | 'timestamp'>) => {
-    if (!user) return false;
+    if (!user) {
+      console.error('User not authenticated');
+      return false;
+    }
 
     try {
+      console.log('Adding detection:', detection);
       const { error } = await supabase
         .from('detections')
         .insert([{
@@ -169,6 +201,7 @@ export const useSupabaseRealTimeData = () => {
         console.error('Error adding detection:', error);
         return false;
       }
+      console.log('Detection added successfully');
       return true;
     } catch (error) {
       console.error('Error adding detection:', error);
@@ -177,9 +210,13 @@ export const useSupabaseRealTimeData = () => {
   };
 
   const updateSystemStats = async (stats: Partial<Omit<SystemStats, 'id' | 'timestamp'>>) => {
-    if (!user) return false;
+    if (!user) {
+      console.error('User not authenticated');
+      return false;
+    }
 
     try {
+      console.log('Updating system stats:', stats);
       const { error } = await supabase
         .from('system_stats')
         .insert([{
@@ -191,6 +228,7 @@ export const useSupabaseRealTimeData = () => {
         console.error('Error updating system stats:', error);
         return false;
       }
+      console.log('System stats updated successfully');
       return true;
     } catch (error) {
       console.error('Error updating system stats:', error);
