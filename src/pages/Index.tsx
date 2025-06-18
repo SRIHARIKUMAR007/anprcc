@@ -170,10 +170,6 @@ const Index = () => {
                   <SDNNetworkManager />
                 </TabsContent>
 
-                <TabsContent value="parking">
-                  <ParkingManagement />
-                </TabsContent>
-
                 <TabsContent value="controls">
                   <SystemControls />
                 </TabsContent>

@@ -6,7 +6,6 @@ import {
   BarChart3, 
   AlertTriangle, 
   Settings, 
-  Car, 
   MapPin, 
   Shield, 
   Monitor,
@@ -130,14 +129,6 @@ export const MobileOptimizedTabs = ({ children, defaultValue }: MobileOptimizedT
           </RoleBasedAccess>
 
           <TabsTrigger 
-            value="vehicle-details" 
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white flex items-center space-x-2 px-3 py-2 text-sm whitespace-nowrap"
-          >
-            <Car className="w-4 h-4" />
-            <span>Vehicle</span>
-          </TabsTrigger>
-
-          <TabsTrigger 
             value="network" 
             className="data-[state=active]:bg-blue-600 data-[state=active]:text-white flex items-center space-x-2 px-3 py-2 text-sm whitespace-nowrap"
           >
@@ -161,14 +152,6 @@ export const MobileOptimizedTabs = ({ children, defaultValue }: MobileOptimizedT
             >
               <Shield className="w-4 h-4" />
               <span>SDN</span>
-            </TabsTrigger>
-
-            <TabsTrigger 
-              value="parking" 
-              className="data-[state=active]:bg-red-600 data-[state=active]:text-white flex items-center space-x-2 px-3 py-2 text-sm whitespace-nowrap"
-            >
-              <Car className="w-4 h-4" />
-              <span>Parking</span>
             </TabsTrigger>
 
             <TabsTrigger 
