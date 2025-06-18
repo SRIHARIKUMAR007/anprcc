@@ -5,7 +5,6 @@ import AuthWrapper from "@/components/AuthWrapper";
 import LiveFeed from "@/components/LiveFeed";
 import NetworkTopology from "@/components/NetworkTopology";
 import VehicleDatabase from "@/components/VehicleDatabase";
-import VehicleDetails from "@/components/VehicleDetails";
 import AlertsPanel from "@/components/AlertsPanel";
 import TrafficAnalytics from "@/components/TrafficAnalytics";
 import SystemControls from "@/components/SystemControls";
@@ -73,127 +72,125 @@ const Index = () => {
     <AuthWrapper>
       <ErrorBoundary>
         <ResponsiveLayout>
-          <HeaderSection 
-            isConnected={isConnected}
-            isBackendConnected={isBackendConnected}
-          />
+          <div className="w-full max-w-full overflow-x-hidden">
+            <HeaderSection 
+              isConnected={isConnected}
+              isBackendConnected={isBackendConnected}
+            />
 
-          <WelcomeMessage 
-            user={user}
-            userProfile={userProfile}
-            isConnected={isConnected}
-            isBackendConnected={isBackendConnected}
-          />
+            <WelcomeMessage 
+              user={user}
+              userProfile={userProfile}
+              isConnected={isConnected}
+              isBackendConnected={isBackendConnected}
+            />
 
-          <StatusCards 
-            systemStatus={systemStatus}
-            systemStats={systemStats}
-          />
+            <StatusCards 
+              systemStatus={systemStatus}
+              systemStats={systemStats}
+            />
 
-          {/* Main Dashboard Tabs */}
-          <div className="animate-fade-in">
-            <MobileOptimizedTabs defaultValue="realtime">
-              
-              <TabsContent value="realtime">
-                <RealTimeMonitor />
-              </TabsContent>
-
-              <TabsContent value="live-data">
-                <LiveDataMonitor />
-              </TabsContent>
-
-              <TabsContent value="tn-traffic">
-                <TamilNaduTrafficMap />
-              </TabsContent>
-
-              <TabsContent value="toll-monitor">
-                <TollPlazaMonitor />
-              </TabsContent>
-
-              <TabsContent value="weather">
-                <LiveWeatherWidget />
-              </TabsContent>
-
-              <TabsContent value="dashboard">
-                <RealTimeDashboard />
-              </TabsContent>
-
-              <TabsContent value="live" className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2">
-                    <LiveFeed />
-                  </div>
-                  <div>
-                    <RecentDetectionsList 
-                      detections={detections}
-                      isConnected={isConnected}
-                    />
-                  </div>
-                </div>
-              </TabsContent>
-
-              {/* Enhanced Features Tabs */}
-              <TabsContent value="health">
-                <SystemHealthMonitor />
-              </TabsContent>
-
-              {/* Operator and Admin only features */}
-              <RoleBasedAccess allowedRoles={['admin', 'operator']}>
-                <TabsContent value="export">
-                  <DataExportManager />
+            {/* Main Dashboard Tabs */}
+            <div className="animate-fade-in w-full">
+              <MobileOptimizedTabs defaultValue="realtime">
+                
+                <TabsContent value="realtime" className="w-full">
+                  <RealTimeMonitor />
                 </TabsContent>
 
-                <TabsContent value="image-processing">
-                  <div className="space-y-6">
-                    <ImageUploadProcessor />
-                    <ImageProcessingPipeline />
+                <TabsContent value="live-data" className="w-full">
+                  <LiveDataMonitor />
+                </TabsContent>
+
+                <TabsContent value="tn-traffic" className="w-full">
+                  <TamilNaduTrafficMap />
+                </TabsContent>
+
+                <TabsContent value="toll-monitor" className="w-full">
+                  <TollPlazaMonitor />
+                </TabsContent>
+
+                <TabsContent value="weather" className="w-full">
+                  <LiveWeatherWidget />
+                </TabsContent>
+
+                <TabsContent value="dashboard" className="w-full">
+                  <RealTimeDashboard />
+                </TabsContent>
+
+                <TabsContent value="live" className="space-y-4 sm:space-y-6 w-full">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                    <div className="lg:col-span-2">
+                      <LiveFeed />
+                    </div>
+                    <div>
+                      <RecentDetectionsList 
+                        detections={detections}
+                        isConnected={isConnected}
+                      />
+                    </div>
                   </div>
                 </TabsContent>
 
-                <TabsContent value="vehicle-updates">
-                  <VehicleUpdates />
-                </TabsContent>
-              </RoleBasedAccess>
-
-              <TabsContent value="vehicle-details">
-                <VehicleDetails />
-              </TabsContent>
-
-              <TabsContent value="network">
-                <NetworkTopology />
-              </TabsContent>
-
-              {/* Admin only features */}
-              <RoleBasedAccess allowedRoles={['admin']}>
-                <TabsContent value="activity">
-                  <UserActivityTracker />
+                {/* Enhanced Features Tabs */}
+                <TabsContent value="health" className="w-full">
+                  <SystemHealthMonitor />
                 </TabsContent>
 
-                <TabsContent value="sdn-manager">
-                  <SDNNetworkManager />
+                {/* Operator and Admin only features */}
+                <RoleBasedAccess allowedRoles={['admin', 'operator']}>
+                  <TabsContent value="export" className="w-full">
+                    <DataExportManager />
+                  </TabsContent>
+
+                  <TabsContent value="image-processing" className="w-full">
+                    <div className="space-y-4 sm:space-y-6">
+                      <ImageUploadProcessor />
+                      <ImageProcessingPipeline />
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="vehicle-updates" className="w-full">
+                    <VehicleUpdates />
+                  </TabsContent>
+                </RoleBasedAccess>
+
+                <TabsContent value="network" className="w-full">
+                  <NetworkTopology />
                 </TabsContent>
 
-                <TabsContent value="parking">
-                  <ParkingManagement />
+                {/* Admin only features */}
+                <RoleBasedAccess allowedRoles={['admin']}>
+                  <TabsContent value="activity" className="w-full">
+                    <UserActivityTracker />
+                  </TabsContent>
+
+                  <TabsContent value="sdn-manager" className="w-full">
+                    <SDNNetworkManager />
+                  </TabsContent>
+
+                  <TabsContent value="parking" className="w-full">
+                    <ParkingManagement />
+                  </TabsContent>
+
+                  <TabsContent value="controls" className="w-full">
+                    <SystemControls />
+                  </TabsContent>
+                </RoleBasedAccess>
+
+                <TabsContent value="database" className="w-full">
+                  <VehicleDatabase />
                 </TabsContent>
 
-                <TabsContent value="controls">
-                  <SystemControls />
+                <TabsContent value="alerts" className="w-full">
+                  <AlertsPanel />
                 </TabsContent>
-              </RoleBasedAccess>
 
-              <TabsContent value="database">
-                <VehicleDatabase />
-              </TabsContent>
-
-              <TabsContent value="alerts">
-                <AlertsPanel />
-              </TabsContent>
-
-              <TabsContent value="analytics">
-                <TrafficAnalytics />
-              </TabsContent>
-            </MobileOptimizedTabs>
+                <TabsContent value="analytics" className="w-full">
+                  <TrafficAnalytics />
+                </TabsContent>
+              </MobileOptimizedTabs>
+            </div>
           </div>
         </ResponsiveLayout>
       </ErrorBoundary>
