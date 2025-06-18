@@ -5,6 +5,7 @@ import AuthWrapper from "@/components/AuthWrapper";
 import LiveFeed from "@/components/LiveFeed";
 import NetworkTopology from "@/components/NetworkTopology";
 import VehicleDatabase from "@/components/VehicleDatabase";
+import VehicleDetails from "@/components/VehicleDetails";
 import AlertsPanel from "@/components/AlertsPanel";
 import TrafficAnalytics from "@/components/TrafficAnalytics";
 import SystemControls from "@/components/SystemControls";
@@ -22,7 +23,6 @@ import LiveDataMonitor from "@/components/LiveDataMonitor";
 import SystemHealthMonitor from "@/components/SystemHealthMonitor";
 import DataExportManager from "@/components/DataExportManager";
 import UserActivityTracker from "@/components/UserActivityTracker";
-import ImageCameraDetection from "@/components/ImageCameraDetection";
 import { ResponsiveLayout } from "@/components/ResponsiveLayout";
 import { MobileOptimizedTabs } from "@/components/MobileOptimizedTabs";
 import { useAuth } from "@/hooks/useAuth";
@@ -145,7 +145,6 @@ const Index = () => {
 
                 <TabsContent value="image-processing">
                   <div className="space-y-6">
-                    <ImageCameraDetection />
                     <ImageUploadProcessor />
                     <ImageProcessingPipeline />
                   </div>
@@ -155,6 +154,10 @@ const Index = () => {
                   <VehicleUpdates />
                 </TabsContent>
               </RoleBasedAccess>
+
+              <TabsContent value="vehicle-details">
+                <VehicleDetails />
+              </TabsContent>
 
               <TabsContent value="network">
                 <NetworkTopology />
@@ -168,6 +171,10 @@ const Index = () => {
 
                 <TabsContent value="sdn-manager">
                   <SDNNetworkManager />
+                </TabsContent>
+
+                <TabsContent value="parking">
+                  <ParkingManagement />
                 </TabsContent>
 
                 <TabsContent value="controls">
