@@ -25,29 +25,25 @@ export const useAuthLogic = () => {
 
     try {
       if (isLogin) {
-        // Sign in flow - improved error handling
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
         if (error) {
           if (error.message.includes('Invalid login credentials')) {
-            toast.error("Invalid email or password. Please check your credentials and try again.");
-          } else if (error.message.includes('Email not confirmed')) {
-            toast.error("Please check your email and click the confirmation link before signing in.");
+            toast.error("Invalid email or password. Please check your credentials.");
           } else {
-            toast.error(`Sign in failed: ${error.message}`);
+            toast.error(error.message);
           }
-        } else if (data.user) {
-          toast.success("Welcome back! Signed in successfully.");
+        } else {
+          toast.success("Signed in successfully!");
           navigate("/");
         }
       } else {
-        // Sign up flow - better handling for existing users
         const userRole = determineUserRole(email);
         
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -61,26 +57,22 @@ export const useAuthLogic = () => {
 
         if (error) {
           if (error.message.includes('User already registered')) {
-            toast.error("An account with this email already exists. Switching to sign in mode.");
+            toast.error("An account with this email already exists. Please sign in instead.");
             setIsLogin(true);
-            setPassword(""); // Clear password for security
-          } else if (error.message.includes('Password should be at least')) {
-            toast.error("Password must be at least 6 characters long.");
           } else {
-            toast.error(`Registration failed: ${error.message}`);
+            toast.error(error.message);
           }
-        } else if (data.user) {
-          if (data.user.email_confirmed_at) {
-            toast.success(`Account created and verified! You have ${userRole} access.`);
-            navigate("/");
-          } else {
-            toast.success(`Account created! Please check your email to verify your account. Role: ${userRole}`);
+        } else {
+          toast.success(`Account created successfully! You have been assigned ${userRole} role.`);
+          if (userRole === "admin") {
+            toast.info("You have administrator privileges with full system access.");
           }
+          navigate("/");
         }
       }
     } catch (error) {
+      toast.error("An unexpected error occurred. Please try again.");
       console.error('Auth error:', error);
-      toast.error("An unexpected error occurred. Please try again later.");
     } finally {
       setIsLoading(false);
     }
