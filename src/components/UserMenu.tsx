@@ -7,7 +7,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
+  Dropdown MenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -32,11 +32,15 @@ const UserMenu = () => {
     setIsLoading(true);
     
     try {
+      toast.info("Signing out...");
       await signOut();
-      toast.success("Signed out successfully!");
     } catch (error) {
       console.error('UserMenu: Sign out error:', error);
       toast.error("Error signing out");
+      // Force redirect even on error
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 1000);
     } finally {
       setIsLoading(false);
     }
@@ -79,14 +83,15 @@ const UserMenu = () => {
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="bg-slate-800/50 border-slate-600 text-white hover:bg-slate-700/50">
             <User className="w-4 h-4 mr-2" />
-            {userProfile?.full_name || user?.email || 'User'}
+            <span className="hidden sm:inline">{userProfile?.full_name || user?.email || 'User'}</span>
+            <span className="sm:hidden">Menu</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-64 bg-slate-800 border-slate-600 z-50">
           <DropdownMenuLabel className="text-white">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">{userProfile?.full_name || 'User'}</p>
-              <p className="text-xs leading-none text-slate-400">{user?.email}</p>
+              <p className="text-xs leading-none text-slate-400 break-all">{user?.email}</p>
               <div className="pt-2">
                 <Badge className={`text-xs ${getRoleBadgeColor(userProfile?.role || 'viewer')}`}>
                   {getRoleIcon(userProfile?.role || 'viewer')}

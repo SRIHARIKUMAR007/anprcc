@@ -19,16 +19,58 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<any>(null);
 
+  // Clean up authentication state completely
+  const cleanupAuthState = () => {
+    console.log('Cleaning up auth state...');
+    
+    // Clear all possible auth keys from localStorage
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith('supabase.auth.') || key.includes('sb-'))) {
+        keysToRemove.push(key);
+      }
+    }
+    
+    keysToRemove.forEach(key => {
+      localStorage.removeItem(key);
+      console.log(`Removed: ${key}`);
+    });
+
+    // Clear session storage as well
+    if (typeof sessionStorage !== 'undefined') {
+      const sessionKeysToRemove = [];
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key && (key.startsWith('supabase.auth.') || key.includes('sb-'))) {
+          sessionKeysToRemove.push(key);
+        }
+      }
+      sessionKeysToRemove.forEach(key => {
+        sessionStorage.removeItem(key);
+        console.log(`Removed from session: ${key}`);
+      });
+    }
+
+    // Clear component state
+    setUser(null);
+    setSession(null);
+    setUserProfile(null);
+    setLoading(false);
+  };
+
   useEffect(() => {
     let mounted = true;
 
-    // Get initial session
     const getInitialSession = async () => {
       try {
+        console.log('Getting initial session...');
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('Error getting initial session:', error);
+          cleanupAuthState();
+          return;
         }
         
         if (mounted) {
@@ -36,7 +78,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(session?.user ?? null);
           
           if (session?.user) {
-            // Fetch user profile
+            console.log('User found in session:', session.user.email);
             try {
               const { data: profile, error: profileError } = await supabase
                 .from('profiles')
@@ -59,29 +101,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } catch (error) {
         console.error('Error in getInitialSession:', error);
         if (mounted) {
-          setLoading(false);
+          cleanupAuthState();
         }
       }
     };
 
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
+        console.log('Auth state changed:', event, session?.user?.email || 'No user');
         
         if (!mounted) return;
+        
+        if (event === 'SIGNED_OUT') {
+          console.log('User signed out - cleaning up state');
+          cleanupAuthState();
+          return;
+        }
         
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (event === 'SIGNED_OUT') {
-          setUserProfile(null);
-          setLoading(false);
-          return;
-        }
-        
         if (session?.user && event !== 'TOKEN_REFRESHED') {
-          // Fetch user profile for new sessions
+          console.log('Fetching user profile for:', session.user.email);
           try {
             const { data: profile, error } = await supabase
               .from('profiles')
@@ -114,32 +155,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signOut = async () => {
-    console.log('Starting sign out...');
+    console.log('Starting comprehensive sign out...');
     setLoading(true);
     
     try {
-      // Clear local state
-      setUser(null);
-      setSession(null);
-      setUserProfile(null);
+      // Step 1: Clean up local state first
+      cleanupAuthState();
       
-      // Sign out from Supabase
-      const { error } = await supabase.auth.signOut();
+      // Step 2: Sign out from Supabase with global scope
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
       if (error) {
-        console.error('Sign out error:', error);
+        console.error('Supabase sign out error:', error);
+        // Continue with redirect even if there's an error
       }
       
-      console.log('Sign out completed');
+      console.log('Sign out completed successfully');
       
-      // Redirect to auth page
-      window.location.href = '/auth';
+      // Step 3: Force redirect to auth page
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 100);
       
     } catch (error) {
       console.error('Error during sign out:', error);
       // Force redirect even on error
-      window.location.href = '/auth';
-    } finally {
-      setLoading(false);
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 100);
     }
   };
 

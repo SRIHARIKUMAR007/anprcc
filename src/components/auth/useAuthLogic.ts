@@ -19,6 +19,18 @@ export const useAuthLogic = () => {
     return "viewer";
   };
 
+  // Clean up auth state before new login
+  const cleanupAuthState = () => {
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith('supabase.auth.') || key.includes('sb-'))) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -26,6 +38,16 @@ export const useAuthLogic = () => {
     try {
       if (isLogin) {
         console.log('Attempting login with email:', email);
+        
+        // Clean up any existing auth state
+        cleanupAuthState();
+        
+        // Attempt to sign out any existing session
+        try {
+          await supabase.auth.signOut({ scope: 'global' });
+        } catch (err) {
+          console.log('No existing session to sign out');
+        }
         
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
@@ -42,12 +64,18 @@ export const useAuthLogic = () => {
         } else if (data.user) {
           console.log('Login successful:', data.user.email);
           toast.success("Signed in successfully!");
-          // Use navigate for proper routing
-          navigate("/", { replace: true });
+          
+          // Use window.location for clean redirect
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 500);
         }
       } else {
         console.log('Attempting signup with email:', email);
         const userRole = determineUserRole(email);
+        
+        // Clean up any existing auth state
+        cleanupAuthState();
         
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -78,14 +106,17 @@ export const useAuthLogic = () => {
         } else {
           if (data.user && !data.session) {
             toast.success("Please check your email for verification link!");
-          } else if (data.user) {
+          } else if (data.user && data.session) {
             console.log('Signup successful:', data.user.email);
             toast.success(`Account created successfully! You have been assigned ${userRole} role.`);
             if (userRole === "admin") {
               toast.info("You have administrator privileges with full system access.");
             }
-            // Use navigate for proper routing
-            navigate("/", { replace: true });
+            
+            // Use window.location for clean redirect
+            setTimeout(() => {
+              window.location.href = "/";
+            }, 500);
           }
         }
       }
