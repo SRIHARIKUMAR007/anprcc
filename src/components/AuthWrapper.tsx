@@ -14,11 +14,12 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
 
   useEffect(() => {
     if (!loading && !user) {
-      console.log('User not authenticated, redirecting to auth page');
+      console.log('AuthWrapper: User not authenticated, redirecting to auth page');
       navigate('/auth', { replace: true });
     }
   }, [user, loading, navigate]);
 
+  // Show loading skeleton while checking auth
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 p-6">
@@ -35,8 +36,9 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
     );
   }
 
+  // Don't render anything if not authenticated (will redirect)
   if (!user) {
-    return null; // Will redirect to auth
+    return null;
   }
 
   return <>{children}</>;

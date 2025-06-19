@@ -21,11 +21,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Cleanup function to clear all auth state
   const cleanupAuthState = () => {
+    console.log('Cleaning up auth state...');
+    
     // Clear all Supabase auth keys from localStorage
     const keys = Object.keys(localStorage);
     keys.forEach(key => {
       if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
         localStorage.removeItem(key);
+        console.log('Removed localStorage key:', key);
       }
     });
     
@@ -33,21 +36,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
     setSession(null);
     setUserProfile(null);
+    console.log('Auth state cleared');
   };
 
   useEffect(() => {
+    let mounted = true;
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
         
+        if (!mounted) return;
+        
         if (event === 'SIGNED_OUT') {
           cleanupAuthState();
           setLoading(false);
-          // Use replace instead of href to avoid page reload issues
-          if (window.location.pathname !== '/auth') {
-            window.location.replace('/auth');
-          }
+          // Force redirect to auth page
+          window.location.replace('/auth');
           return;
         }
         
@@ -55,8 +61,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch user profile with a slight delay to avoid deadlocks
+          // Fetch user profile with a delay to avoid potential conflicts
           setTimeout(async () => {
+            if (!mounted) return;
+            
             try {
               const { data: profile, error } = await supabase
                 .from('profiles')
@@ -66,94 +74,117 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               
               if (error) {
                 console.error('Error fetching user profile:', error);
-              } else {
+              } else if (mounted) {
                 setUserProfile(profile);
               }
             } catch (error) {
               console.error('Error fetching user profile:', error);
             }
-          }, 100);
+          }, 200);
         } else {
           setUserProfile(null);
         }
         
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     );
 
     // Get initial session
     const getInitialSession = async () => {
+      if (!mounted) return;
+      
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('Error getting initial session:', error);
           cleanupAuthState();
-          setLoading(false);
+          if (mounted) setLoading(false);
           return;
         }
         
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          try {
-            const { data: profile, error: profileError } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', session.user.id)
-              .single();
-            
-            if (profileError) {
-              console.error('Error fetching initial user profile:', profileError);
-            } else {
-              setUserProfile(profile);
+        if (mounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+          
+          if (session?.user) {
+            try {
+              const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
+              
+              if (profileError) {
+                console.error('Error fetching initial user profile:', profileError);
+              } else if (mounted) {
+                setUserProfile(profile);
+              }
+            } catch (error) {
+              console.error('Error fetching initial user profile:', error);
             }
-          } catch (error) {
-            console.error('Error fetching initial user profile:', error);
           }
         }
       } catch (error) {
         console.error('Error in getInitialSession:', error);
         cleanupAuthState();
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
     getInitialSession();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {
+    console.log('Starting sign out process...');
+    setLoading(true);
+    
     try {
-      setLoading(true);
-      
-      // Clear local state first
+      // Clear local state immediately
       cleanupAuthState();
       
-      // Attempt to sign out from Supabase with global scope
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (error) {
-        console.error('Error during global sign out:', error);
-        // Continue even if this fails
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      if (error) {
+        console.error('Supabase sign out error:', error);
       }
       
-      // Use replace instead of href for cleaner navigation
-      window.location.replace('/auth');
+      console.log('Sign out completed, redirecting...');
+      
+      // Force redirect with a small delay to ensure cleanup completes
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 100);
+      
     } catch (error) {
-      console.error('Error signing out:', error);
-      // Force redirect even if sign out fails
-      window.location.replace('/auth');
-    } finally {
-      setLoading(false);
+      console.error('Error during sign out:', error);
+      // Force redirect even if there's an error
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 100);
     }
   };
 
+  const value = {
+    user,
+    session,
+    loading,
+    signOut,
+    userProfile
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, loading, signOut, userProfile }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { User, LogOut, Settings, Shield, Eye } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import SettingsInterface from "./settings/SettingsInterface";
 import RoleBasedAccess from "./RoleBasedAccess";
 
@@ -28,23 +28,21 @@ const UserMenu = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleSignOut = async () => {
+    console.log('UserMenu: Sign out clicked');
     setIsLoading(true);
+    
     try {
       await signOut();
-      toast({
-        title: "Signed out successfully",
-        description: "You have been logged out of your account.",
-      });
+      toast.success("Signed out successfully!");
     } catch (error) {
-      console.error('Error signing out:', error);
-      toast({
-        title: "Sign out failed",
-        description: "There was an error signing out. Please try again.",
-        variant: "destructive",
-      });
+      console.error('UserMenu: Sign out error:', error);
+      toast.error("Error signing out. Redirecting anyway...");
+      // Force redirect even on error
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 1000);
     } finally {
       setIsLoading(false);
     }
