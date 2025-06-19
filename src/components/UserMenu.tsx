@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -27,7 +26,6 @@ const UserMenu = () => {
   const { user, userProfile, signOut } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     console.log('UserMenu: Sign out clicked');
@@ -38,11 +36,7 @@ const UserMenu = () => {
       toast.success("Signed out successfully!");
     } catch (error) {
       console.error('UserMenu: Sign out error:', error);
-      toast.error("Error signing out. Redirecting anyway...");
-      // Force redirect even on error
-      setTimeout(() => {
-        window.location.href = '/auth';
-      }, 1000);
+      toast.error("Error signing out");
     } finally {
       setIsLoading(false);
     }
@@ -131,7 +125,6 @@ const UserMenu = () => {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Settings Dialog - Only for Admin and Operator */}
       <RoleBasedAccess allowedRoles={['admin', 'operator']}>
         <Dialog open={showSettings} onOpenChange={setShowSettings}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-900 border-slate-700">
