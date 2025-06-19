@@ -45,7 +45,7 @@ export const useAuthLogic = () => {
           // Continue even if this fails
         }
 
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
@@ -58,8 +58,8 @@ export const useAuthLogic = () => {
           }
         } else {
           toast.success("Signed in successfully!");
-          // Force page reload for clean state
-          window.location.href = "/";
+          // Use navigate instead of window.location for better routing
+          navigate("/", { replace: true });
         }
       } else {
         const userRole = determineUserRole(email);
@@ -80,7 +80,9 @@ export const useAuthLogic = () => {
           if (error.message.includes('User already registered') || 
               error.message.includes('already registered') ||
               error.message.includes('already been registered')) {
-            toast.info("Account already exists! Please sign in instead.");
+            toast.info("Account already exists! Switching to sign in mode.", {
+              description: "Please enter your password to sign in."
+            });
             setIsLogin(true);
             setPassword("");
             setFullName("");
@@ -95,8 +97,8 @@ export const useAuthLogic = () => {
             if (userRole === "admin") {
               toast.info("You have administrator privileges with full system access.");
             }
-            // Force page reload for clean state
-            window.location.href = "/";
+            // Use navigate instead of window.location for better routing
+            navigate("/", { replace: true });
           }
         }
       }

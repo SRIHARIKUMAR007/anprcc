@@ -44,8 +44,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (event === 'SIGNED_OUT') {
           cleanupAuthState();
           setLoading(false);
-          // Force redirect to auth page
-          window.location.href = '/auth';
+          // Use replace instead of href to avoid page reload issues
+          if (window.location.pathname !== '/auth') {
+            window.location.replace('/auth');
+          }
           return;
         }
         
@@ -86,6 +88,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (error) {
           console.error('Error getting initial session:', error);
+          cleanupAuthState();
+          setLoading(false);
+          return;
         }
         
         setSession(session);
@@ -110,6 +115,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       } catch (error) {
         console.error('Error in getInitialSession:', error);
+        cleanupAuthState();
       } finally {
         setLoading(false);
       }
@@ -135,12 +141,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // Continue even if this fails
       }
       
-      // Force redirect to auth page
-      window.location.href = '/auth';
+      // Use replace instead of href for cleaner navigation
+      window.location.replace('/auth');
     } catch (error) {
       console.error('Error signing out:', error);
       // Force redirect even if sign out fails
-      window.location.href = '/auth';
+      window.location.replace('/auth');
     } finally {
       setLoading(false);
     }
