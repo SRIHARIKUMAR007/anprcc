@@ -19,12 +19,32 @@ export const useAuthLogic = () => {
     return "viewer";
   };
 
+  // Cleanup function to clear all auth state
+  const cleanupAuthState = () => {
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
       if (isLogin) {
+        // Clean up any existing auth state before login
+        cleanupAuthState();
+        
+        // Attempt global sign out first
+        try {
+          await supabase.auth.signOut({ scope: 'global' });
+        } catch (err) {
+          // Continue even if this fails
+        }
+
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -38,7 +58,8 @@ export const useAuthLogic = () => {
           }
         } else {
           toast.success("Signed in successfully!");
-          navigate("/");
+          // Force page reload for clean state
+          window.location.href = "/";
         }
       } else {
         const userRole = determineUserRole(email);
@@ -56,10 +77,13 @@ export const useAuthLogic = () => {
         });
 
         if (error) {
-          if (error.message.includes('User already registered') || error.message.includes('already registered')) {
-            toast.info("Account already exists. Switching to login...");
+          if (error.message.includes('User already registered') || 
+              error.message.includes('already registered') ||
+              error.message.includes('already been registered')) {
+            toast.info("Account already exists! Please sign in instead.");
             setIsLogin(true);
             setPassword("");
+            setFullName("");
           } else {
             toast.error(error.message);
           }
@@ -71,7 +95,8 @@ export const useAuthLogic = () => {
             if (userRole === "admin") {
               toast.info("You have administrator privileges with full system access.");
             }
-            navigate("/");
+            // Force page reload for clean state
+            window.location.href = "/";
           }
         }
       }

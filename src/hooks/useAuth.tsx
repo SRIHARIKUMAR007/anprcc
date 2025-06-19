@@ -19,11 +19,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<any>(null);
 
+  // Cleanup function to clear all auth state
+  const cleanupAuthState = () => {
+    // Clear all Supabase auth keys from localStorage
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+    
+    // Clear state
+    setUser(null);
+    setSession(null);
+    setUserProfile(null);
+  };
+
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
+        
+        if (event === 'SIGNED_OUT') {
+          cleanupAuthState();
+          setLoading(false);
+          // Force redirect to auth page
+          window.location.href = '/auth';
+          return;
+        }
+        
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -100,25 +125,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(true);
       
       // Clear local state first
-      setUser(null);
-      setSession(null);
-      setUserProfile(null);
+      cleanupAuthState();
       
-      // Attempt to sign out from Supabase
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error('Error signing out:', error);
-        throw error;
+      // Attempt to sign out from Supabase with global scope
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (error) {
+        console.error('Error during global sign out:', error);
+        // Continue even if this fails
       }
-      
-      // Clear any remaining auth data from localStorage
-      const keys = Object.keys(localStorage);
-      keys.forEach(key => {
-        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-          localStorage.removeItem(key);
-        }
-      });
       
       // Force redirect to auth page
       window.location.href = '/auth';
@@ -126,7 +141,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.error('Error signing out:', error);
       // Force redirect even if sign out fails
       window.location.href = '/auth';
-      throw error;
     } finally {
       setLoading(false);
     }
