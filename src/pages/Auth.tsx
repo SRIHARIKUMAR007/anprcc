@@ -13,7 +13,10 @@ const Auth = () => {
   useEffect(() => {
     if (!loading && user) {
       console.log('User already authenticated, redirecting to home');
-      navigate('/', { replace: true });
+      // Use setTimeout to ensure state is fully updated
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 100);
     }
   }, [user, loading, navigate]);
 
@@ -21,12 +24,15 @@ const Auth = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
-        <div className="text-white text-lg">Loading...</div>
+        <div className="text-white text-lg flex items-center">
+          <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin mr-3" />
+          Checking authentication...
+        </div>
       </div>
     );
   }
 
-  // Don't render if user is authenticated
+  // Don't render if user is authenticated (prevents flash)
   if (user) {
     return null;
   }

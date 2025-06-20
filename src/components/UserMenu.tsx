@@ -19,13 +19,19 @@ const UserMenu = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignOut = async () => {
+    console.log('UserMenu: Sign out clicked');
     setIsLoading(true);
+    
     try {
       toast.info("Signing out...");
       await signOut();
     } catch (error) {
-      console.error('Sign out error:', error);
+      console.error('UserMenu: Sign out error:', error);
       toast.error("Error signing out");
+      // Force redirect even on error
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 1000);
     } finally {
       setIsLoading(false);
     }
@@ -77,6 +83,12 @@ const UserMenu = () => {
                 {getRoleIcon(userProfile?.role || 'viewer')}
                 <span className="ml-1">{getRoleDisplayName(userProfile?.role || 'viewer')}</span>
               </Badge>
+            </div>
+            <div className="pt-1">
+              <p className="text-xs text-slate-500">
+                Access Level: {userProfile?.role === 'admin' ? 'Full Control' : 
+                              userProfile?.role === 'operator' ? 'Operations' : 'View Only'}
+              </p>
             </div>
           </div>
         </DropdownMenuLabel>

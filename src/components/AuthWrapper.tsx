@@ -1,6 +1,5 @@
 
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -10,14 +9,16 @@ interface AuthWrapperProps {
 
 const AuthWrapper = ({ children }: AuthWrapperProps) => {
   const { user, loading } = useAuth();
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading && !user) {
       console.log('User not authenticated, redirecting to auth page');
-      navigate('/auth', { replace: true });
+      // Use setTimeout to prevent navigation during render
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 100);
     }
-  }, [user, loading, navigate]);
+  }, [user, loading]);
 
   // Show loading skeleton while checking auth
   if (loading) {
@@ -36,7 +37,7 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
     );
   }
 
-  // Don't render anything if not authenticated
+  // Don't render anything if not authenticated (prevents flash)
   if (!user) {
     return null;
   }
