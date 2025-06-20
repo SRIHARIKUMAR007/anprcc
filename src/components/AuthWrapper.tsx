@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { forceRedirectToAuth } from "@/utils/authUtils";
 
 interface AuthWrapperProps {
   children: React.ReactNode;
@@ -17,8 +18,8 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
     
     if (!loading && !user) {
       console.log('AuthWrapper: User not authenticated, redirecting to auth page');
-      // Use window.location for a clean redirect
-      window.location.href = '/auth';
+      // Force redirect to auth page
+      forceRedirectToAuth();
     }
   }, [user, loading, navigate]);
 
@@ -41,7 +42,11 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
 
   // Don't render anything if not authenticated (will redirect)
   if (!user) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 flex items-center justify-center">
+        <div className="text-white">Redirecting to login...</div>
+      </div>
+    );
   }
 
   return <>{children}</>;

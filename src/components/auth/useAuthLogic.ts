@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { cleanupAuthState, forceRedirectToHome } from "@/utils/authUtils";
 
 export const useAuthLogic = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -17,18 +18,6 @@ export const useAuthLogic = () => {
       return "admin";
     }
     return "viewer";
-  };
-
-  // Clean up auth state before new login
-  const cleanupAuthState = () => {
-    const keysToRemove = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && (key.startsWith('supabase.auth.') || key.includes('sb-'))) {
-        keysToRemove.push(key);
-      }
-    }
-    keysToRemove.forEach(key => localStorage.removeItem(key));
   };
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -65,10 +54,8 @@ export const useAuthLogic = () => {
           console.log('Login successful:', data.user.email);
           toast.success("Signed in successfully!");
           
-          // Use window.location for clean redirect
-          setTimeout(() => {
-            window.location.href = "/";
-          }, 500);
+          // Force redirect to home
+          forceRedirectToHome();
         }
       } else {
         console.log('Attempting signup with email:', email);
@@ -113,10 +100,8 @@ export const useAuthLogic = () => {
               toast.info("You have administrator privileges with full system access.");
             }
             
-            // Use window.location for clean redirect
-            setTimeout(() => {
-              window.location.href = "/";
-            }, 500);
+            // Force redirect to home
+            forceRedirectToHome();
           }
         }
       }

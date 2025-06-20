@@ -1,12 +1,18 @@
 
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthForm from "@/components/auth/AuthForm";
 import RolePreview from "@/components/auth/RolePreview";
 import AuthToggle from "@/components/auth/AuthToggle";
 import RoleInfoSection from "@/components/auth/RoleInfoSection";
 import { useAuthLogic } from "@/components/auth/useAuthLogic";
+import { useAuth } from "@/hooks/useAuth";
 
 const Auth = () => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  
   const {
     isLogin,
     email,
@@ -19,6 +25,28 @@ const Auth = () => {
     handleAuth,
     handleToggleAuth
   } = useAuthLogic();
+
+  // Redirect authenticated users to home
+  useEffect(() => {
+    if (!loading && user) {
+      console.log('Auth: User already authenticated, redirecting to home');
+      navigate('/', { replace: true });
+    }
+  }, [user, loading, navigate]);
+
+  // Show loading while checking auth status
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
+
+  // Don't render auth form if user is already logged in
+  if (user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
