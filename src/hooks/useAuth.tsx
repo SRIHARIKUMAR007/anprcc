@@ -19,29 +19,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<any>(null);
 
-  // Enhanced auth state cleanup utility
-  const cleanupAuthState = () => {
-    try {
-      // Remove all Supabase auth keys from localStorage
-      const keys = Object.keys(localStorage);
-      keys.forEach(key => {
-        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-          localStorage.removeItem(key);
-        }
-      });
-      
-      // Remove from sessionStorage if present
-      const sessionKeys = Object.keys(sessionStorage || {});
-      sessionKeys.forEach(key => {
-        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-          sessionStorage.removeItem(key);
-        }
-      });
-    } catch (error) {
-      console.error('Error cleaning up auth state:', error);
-    }
-  };
-
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -50,8 +27,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (session?.user && event === 'SIGNED_IN') {
-          // Defer profile fetching to avoid deadlocks
+        if (session?.user) {
+          // Fetch user profile with a slight delay to avoid deadlocks
           setTimeout(async () => {
             try {
               const { data: profile, error } = await supabase
@@ -122,39 +99,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       setLoading(true);
       
-      // Clean up auth state first
-      cleanupAuthState();
-      
-      // Clear local state
+      // Clear local state first
       setUser(null);
       setSession(null);
       setUserProfile(null);
       
-      // Attempt global sign out with timeout
-      const signOutPromise = supabase.auth.signOut({ scope: 'global' });
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Sign out timeout')), 5000)
-      );
+      // Attempt to sign out from Supabase
+      const { error } = await supabase.auth.signOut();
       
-      try {
-        await Promise.race([signOutPromise, timeoutPromise]);
-      } catch (error) {
-        console.error('Sign out error (continuing anyway):', error);
+      if (error) {
+        console.error('Error signing out:', error);
+        throw error;
       }
       
-      // Final cleanup
-      cleanupAuthState();
+      // Clear any remaining auth data from localStorage
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          localStorage.removeItem(key);
+        }
+      });
       
-      // Force redirect with window.location for Vercel deployment
-      setTimeout(() => {
-        window.location.href = '/auth';
-      }, 100);
-      
+      // Force redirect to auth page
+      window.location.href = '/auth';
     } catch (error) {
       console.error('Error signing out:', error);
       // Force redirect even if sign out fails
-      cleanupAuthState();
       window.location.href = '/auth';
+      throw error;
     } finally {
       setLoading(false);
     }

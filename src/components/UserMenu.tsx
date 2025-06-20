@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -26,31 +27,24 @@ const UserMenu = () => {
   const { user, userProfile, signOut } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSignOut = async () => {
     setIsLoading(true);
     try {
-      toast({
-        title: "Signing out...",
-        description: "Please wait while we log you out.",
-      });
-      
       await signOut();
-      
-      // Toast success will be shown after redirect
+      toast({
+        title: "Signed out successfully",
+        description: "You have been logged out of your account.",
+      });
     } catch (error) {
       console.error('Error signing out:', error);
       toast({
-        title: "Sign out error",
-        description: "Redirecting to login page...",
+        title: "Sign out failed",
+        description: "There was an error signing out. Please try again.",
         variant: "destructive",
       });
-      
-      // Force redirect even on error
-      setTimeout(() => {
-        window.location.href = '/auth';
-      }, 1000);
     } finally {
       setIsLoading(false);
     }
@@ -93,7 +87,7 @@ const UserMenu = () => {
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="bg-slate-800/50 border-slate-600 text-white hover:bg-slate-700/50">
             <User className="w-4 h-4 mr-2" />
-            {userProfile?.full_name || user?.email?.split('@')[0] || 'User'}
+            {userProfile?.full_name || user?.email || 'User'}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-64 bg-slate-800 border-slate-600 z-50">
