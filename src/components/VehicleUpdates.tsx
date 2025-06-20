@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Car, MapPin, Clock, Shield, Eye, AlertTriangle, Activity, Zap, RefreshCw } from "lucide-react";
 import { useSupabaseRealTimeData } from "@/hooks/useSupabaseRealTimeData";
-import { toast } from "sonner";
 
 const VehicleUpdates = () => {
   const { detections, addDetection, cameras } = useSupabaseRealTimeData();
@@ -14,7 +13,6 @@ const VehicleUpdates = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("All Locations");
   const [lastUpdate, setLastUpdate] = useState(new Date());
-  const [isAddingDetection, setIsAddingDetection] = useState(false);
 
   // Get unique locations for filtering
   const uniqueLocations = ["All Locations", ...Array.from(new Set(detections.map(d => d.location)))];
@@ -27,62 +25,23 @@ const VehicleUpdates = () => {
     return matchesSearch && matchesLocation;
   });
 
-  // Generate realistic plate number
-  const generateRealisticPlate = () => {
-    const stateFormats = [
-      'TN', 'KA', 'AP', 'DL', 'MH', 'UP', 'GJ', 'WB', 'HR', 'PB'
-    ];
-    const state = stateFormats[Math.floor(Math.random() * stateFormats.length)];
-    const numbers = String(Math.floor(10 + Math.random() * 89)).padStart(2, '0');
-    const letters = String.fromCharCode(65 + Math.floor(Math.random() * 26)) + 
-                   String.fromCharCode(65 + Math.floor(Math.random() * 26));
-    const digits = String(Math.floor(1000 + Math.random() * 9000));
-    return `${state} ${numbers} ${letters} ${digits}`;
-  };
-
-  // Enhanced simulation with better detection generation
+  // Simulate adding new detection for demo
   const simulateDetection = async () => {
-    if (isAddingDetection) return;
+    const locations = ['East Checkpoint', 'West Barrier', 'North Gate', 'Main Road', 'South Gate', 'Toll Plaza'];
+    const plateFormats = ['ZLA', 'VQQ', 'CFH', 'TRN', 'WNR', 'DBQ'];
     
-    setIsAddingDetection(true);
-    
-    try {
-      const locations = [
-        'East Checkpoint', 'West Barrier', 'North Gate', 'Main Road', 
-        'South Gate', 'Toll Plaza', 'Highway Entry', 'City Center',
-        'Anna Salai', 'OMR Corridor', 'Bypass Junction'
-      ];
-      
-      const mockDetection = {
-        plate_number: generateRealisticPlate(),
-        camera_id: `CAM-${String(Math.floor(Math.random() * 8) + 1).padStart(2, '0')}`,
-        confidence: Math.floor(75 + Math.random() * 25), // 75-100% confidence
-        location: locations[Math.floor(Math.random() * locations.length)],
-        status: Math.random() > 0.85 ? 'flagged' : 'cleared' as 'cleared' | 'flagged' | 'processing'
-      };
+    const mockDetection = {
+      plate_number: `${plateFormats[Math.floor(Math.random() * plateFormats.length)]} ${String(Math.floor(100 + Math.random() * 900))}`,
+      camera_id: `CAM-${String(Math.floor(Math.random() * 8) + 1).padStart(2, '0')}`,
+      confidence: Math.floor(80 + Math.random() * 20),
+      location: locations[Math.floor(Math.random() * locations.length)],
+      status: Math.random() > 0.85 ? 'flagged' : 'cleared' as 'cleared' | 'flagged' | 'processing'
+    };
 
-      console.log('Adding new detection:', mockDetection);
-      
-      const success = await addDetection(mockDetection);
-      
-      if (success) {
-        setLastUpdate(new Date());
-        toast.success(`Detection added: ${mockDetection.plate_number} at ${mockDetection.location}`);
-      } else {
-        toast.error('Failed to add detection');
-      }
-    } catch (error) {
-      console.error('Error adding detection:', error);
-      toast.error('Error adding detection');
-    } finally {
-      setIsAddingDetection(false);
+    const success = await addDetection(mockDetection);
+    if (success) {
+      setLastUpdate(new Date());
     }
-  };
-
-  // Manual refresh function
-  const handleRefresh = () => {
-    setLastUpdate(new Date());
-    toast.info('Data refreshed successfully');
   };
 
   // Auto-refresh simulation - more frequent updates
@@ -90,10 +49,10 @@ const VehicleUpdates = () => {
     if (!autoRefresh) return;
     
     const interval = setInterval(() => {
-      if (Math.random() > 0.6) { // 40% chance to add new detection
+      if (Math.random() > 0.4) { // 60% chance to add new detection
         simulateDetection();
       }
-    }, 4000); // Update every 4 seconds
+    }, 3000); // Update every 3 seconds instead of 8
 
     return () => clearInterval(interval);
   }, [autoRefresh]);
@@ -145,16 +104,15 @@ const VehicleUpdates = () => {
             variant="outline"
             size="sm"
             onClick={simulateDetection}
-            disabled={isAddingDetection}
             className="flex items-center space-x-2"
           >
-            <Zap className={`w-4 h-4 ${isAddingDetection ? 'animate-spin' : ''}`} />
-            <span>{isAddingDetection ? 'Adding...' : 'Add Detection'}</span>
+            <Zap className="w-4 h-4" />
+            <span>Add Detection</span>
           </Button>
           <Button
             variant="outline"
             size="sm"
-            onClick={handleRefresh}
+            onClick={() => setLastUpdate(new Date())}
             className="flex items-center space-x-2"
           >
             <RefreshCw className="w-4 h-4" />

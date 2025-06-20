@@ -13,7 +13,6 @@ const RoleBasedAccess = ({ children, allowedRoles, fallback = null }: RoleBasedA
   
   const userRole = userProfile?.role || 'viewer';
   
-  // Check if user has any of the allowed roles
   if (allowedRoles.includes(userRole as 'admin' | 'operator' | 'viewer')) {
     return <>{children}</>;
   }
