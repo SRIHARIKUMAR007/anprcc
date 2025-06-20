@@ -4,10 +4,12 @@ import { TabsContent } from "@/components/ui/tabs";
 import AuthWrapper from "@/components/AuthWrapper";
 import LiveFeed from "@/components/LiveFeed";
 import NetworkTopology from "@/components/NetworkTopology";
+import VehicleDatabase from "@/components/VehicleDatabase";
 import AlertsPanel from "@/components/AlertsPanel";
 import TrafficAnalytics from "@/components/TrafficAnalytics";
 import SystemControls from "@/components/SystemControls";
 import RealTimeDashboard from "@/components/RealTimeDashboard";
+import VehicleUpdates from "@/components/VehicleUpdates";
 import ImageProcessingPipeline from "@/components/ImageProcessingPipeline";
 import SDNNetworkManager from "@/components/SDNNetworkManager";
 import ParkingManagement from "@/components/ParkingManagement";
@@ -148,6 +150,10 @@ const Index = () => {
                     <ImageProcessingPipeline />
                   </div>
                 </TabsContent>
+
+                <TabsContent value="vehicle-updates">
+                  <VehicleUpdates />
+                </TabsContent>
               </RoleBasedAccess>
 
               <TabsContent value="network">
@@ -164,10 +170,18 @@ const Index = () => {
                   <SDNNetworkManager />
                 </TabsContent>
 
+                <TabsContent value="parking">
+                  <ParkingManagement />
+                </TabsContent>
+
                 <TabsContent value="controls">
                   <SystemControls />
                 </TabsContent>
               </RoleBasedAccess>
+
+              <TabsContent value="database">
+                <VehicleDatabase />
+              </TabsContent>
 
               <TabsContent value="alerts">
                 <AlertsPanel />

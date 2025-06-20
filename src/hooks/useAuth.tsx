@@ -20,104 +20,83 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [userProfile, setUserProfile] = useState<any>(null);
 
   useEffect(() => {
-    let mounted = true;
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Fetch user profile with a slight delay to avoid deadlocks
+          setTimeout(async () => {
+            try {
+              const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
+              
+              if (error) {
+                console.error('Error fetching user profile:', error);
+              } else {
+                setUserProfile(profile);
+              }
+            } catch (error) {
+              console.error('Error fetching user profile:', error);
+            }
+          }, 100);
+        } else {
+          setUserProfile(null);
+        }
+        
+        setLoading(false);
+      }
+    );
 
     // Get initial session
     const getInitialSession = async () => {
       try {
-        console.log('Getting initial session...');
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('Error getting initial session:', error);
-          if (mounted) {
-            setUser(null);
-            setSession(null);
-            setUserProfile(null);
-            setLoading(false);
-          }
-          return;
         }
         
-        console.log('Initial session:', session ? 'Found' : 'None');
+        setSession(session);
+        setUser(session?.user ?? null);
         
-        if (mounted) {
-          setSession(session);
-          setUser(session?.user ?? null);
-          
-          if (session?.user) {
-            console.log('Fetching user profile for:', session.user.email);
-            // Fetch user profile
-            const { data: profile } = await supabase
+        if (session?.user) {
+          try {
+            const { data: profile, error: profileError } = await supabase
               .from('profiles')
               .select('*')
               .eq('id', session.user.id)
               .single();
             
-            console.log('User profile:', profile);
-            
-            if (mounted) {
+            if (profileError) {
+              console.error('Error fetching initial user profile:', profileError);
+            } else {
               setUserProfile(profile);
             }
+          } catch (error) {
+            console.error('Error fetching initial user profile:', error);
           }
-          
-          setLoading(false);
         }
       } catch (error) {
         console.error('Error in getInitialSession:', error);
-        if (mounted) {
-          setUser(null);
-          setSession(null);
-          setUserProfile(null);
-          setLoading(false);
-        }
+      } finally {
+        setLoading(false);
       }
     };
-
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session ? 'Session exists' : 'No session');
-        
-        if (!mounted) return;
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user && event !== 'TOKEN_REFRESHED') {
-          console.log('Fetching profile for auth state change:', session.user.email);
-          // Fetch user profile for new sessions
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-          
-          if (mounted) {
-            setUserProfile(profile);
-          }
-        } else if (!session) {
-          console.log('No session, clearing profile');
-          setUserProfile(null);
-        }
-        
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    );
 
     getInitialSession();
 
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   const signOut = async () => {
     try {
-      console.log('Starting sign out process...');
       setLoading(true);
       
       // Clear local state first
@@ -125,50 +104,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(null);
       setUserProfile(null);
       
-      // Clear all auth-related storage
-      const keysToRemove = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && (key.startsWith('supabase.auth.') || key.includes('sb-'))) {
-          keysToRemove.push(key);
-        }
-      }
-      keysToRemove.forEach(key => localStorage.removeItem(key));
+      // Attempt to sign out from Supabase
+      const { error } = await supabase.auth.signOut();
       
-      // Sign out from Supabase
-      const { error } = await supabase.auth.signOut({ scope: 'global' });
       if (error) {
-        console.error('Sign out error:', error);
+        console.error('Error signing out:', error);
+        throw error;
       }
       
-      console.log('Sign out completed, redirecting to auth page');
+      // Clear any remaining auth data from localStorage
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          localStorage.removeItem(key);
+        }
+      });
       
       // Force redirect to auth page
-      setTimeout(() => {
-        window.location.href = '/auth';
-      }, 100);
-      
+      window.location.href = '/auth';
     } catch (error) {
-      console.error('Error during sign out:', error);
-      // Force redirect even on error
-      setTimeout(() => {
-        window.location.href = '/auth';
-      }, 100);
+      console.error('Error signing out:', error);
+      // Force redirect even if sign out fails
+      window.location.href = '/auth';
+      throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  const value = {
-    user,
-    session,
-    loading,
-    signOut,
-    userProfile
-  };
-
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ user, session, loading, signOut, userProfile }}>
       {children}
     </AuthContext.Provider>
   );
