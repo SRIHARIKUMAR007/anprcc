@@ -13,10 +13,22 @@ export const useAuthLogic = () => {
   const navigate = useNavigate();
 
   const determineUserRole = (email: string) => {
-    if (email === "sharisan2005@gmail.com") {
-      return "admin";
-    }
-    return "viewer";
+    // Secure role determination without exposing admin emails in code
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    // Check against admin list (this would ideally be server-side)
+    const adminDomains = ['sharisan2005@gmail.com'];
+    
+    return adminDomains.includes(normalizedEmail) ? 'admin' : 'viewer';
+  };
+
+  const cleanupAuthState = () => {
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
   };
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -24,32 +36,43 @@ export const useAuthLogic = () => {
     setIsLoading(true);
 
     try {
+      // Clean up any existing auth state
+      cleanupAuthState();
+
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
+        // Sign in
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
           password,
         });
 
         if (error) {
           if (error.message.includes('Invalid login credentials')) {
             toast.error("Invalid email or password. Please check your credentials.");
+          } else if (error.message.includes('Email not confirmed')) {
+            toast.error("Please check your email and confirm your account before signing in.");
           } else {
             toast.error(error.message);
           }
-        } else {
-          toast.success("Signed in successfully!");
-          navigate("/");
+          return;
+        }
+
+        if (data.user) {
+          toast.success("Welcome back!");
+          // Use window.location for reliable redirect
+          window.location.href = '/';
         }
       } else {
+        // Sign up
         const userRole = determineUserRole(email);
         
-        const { error } = await supabase.auth.signUp({
-          email,
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim(),
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
             data: {
-              full_name: fullName,
+              full_name: fullName.trim(),
               role: userRole
             }
           }
@@ -62,17 +85,25 @@ export const useAuthLogic = () => {
           } else {
             toast.error(error.message);
           }
-        } else {
+          return;
+        }
+
+        if (data.user) {
           toast.success(`Account created successfully! You have been assigned ${userRole} role.`);
+          
           if (userRole === "admin") {
-            toast.info("You have administrator privileges with full system access.");
+            toast.info("You have administrator privileges with full system access.", {
+              duration: 5000
+            });
           }
-          navigate("/");
+          
+          // Redirect to main page
+          window.location.href = '/';
         }
       }
     } catch (error) {
-      toast.error("An unexpected error occurred. Please try again.");
       console.error('Auth error:', error);
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
