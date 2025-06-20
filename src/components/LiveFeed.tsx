@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,14 +11,15 @@ import ProcessingPipeline from "./livefeed/ProcessingPipeline";
 import CameraNetworkStatus from "./livefeed/CameraNetworkStatus";
 import RecentDetections from "./livefeed/RecentDetections";
 import LiveAlerts from "./livefeed/LiveAlerts";
+import ThreatAnalysisOverview from "./livefeed/ThreatAnalysisOverview";
+import RecentSDNActions from "./livefeed/RecentSDNActions";
+import PythonANPRService from "./livefeed/PythonANPRService";
 import { mockCameras, processingSteps } from "./livefeed/mockData";
 import { useRealTimeIntegration } from "@/hooks/useRealTimeIntegration";
 import { LiveFeedCamera } from "@/types/camera";
 import { Camera } from "@/types/supabase";
 import AIRealTimeAnalytics from "./livefeed/AIRealTimeAnalytics";
 import { useAIRealTimeEngine } from "@/hooks/useAIRealTimeEngine";
-import SDNThreatManager from "./livefeed/SDNThreatManager";
-import SupabaseServiceMonitor from "./livefeed/PythonServiceMonitor";
 import { useAIThreatDetection } from "@/hooks/useAIThreatDetection";
 import { useEnhancedBackendIntegration } from "@/hooks/useEnhancedBackendIntegration";
 import LoadingSpinner from "./common/LoadingSpinner";
@@ -294,10 +296,11 @@ const LiveFeed = () => {
             </Card>
           </div>
 
-          {/* Enhanced Side Panel */}
+          {/* Enhanced Side Panel with new components */}
           <div className="space-y-4">
-            <SupabaseServiceMonitor />
-            <SDNThreatManager cameraId={selectedCamera} />
+            <ThreatAnalysisOverview cameraId={selectedCamera} />
+            <RecentSDNActions cameraId={selectedCamera} />
+            <PythonANPRService />
             <AIRealTimeAnalytics cameraId={selectedCamera} />
             <LiveAlerts 
               selectedCamera={selectedCamera}
