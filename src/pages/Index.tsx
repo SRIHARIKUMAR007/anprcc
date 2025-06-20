@@ -19,6 +19,10 @@ import TamilNaduTrafficMap from "@/components/TamilNaduTrafficMap";
 import TollPlazaMonitor from "@/components/TollPlazaMonitor";
 import LiveWeatherWidget from "@/components/LiveWeatherWidget";
 import RealTimeMonitor from "@/components/RealTimeMonitor";
+import LiveDataMonitor from "@/components/LiveDataMonitor";
+import SystemHealthMonitor from "@/components/SystemHealthMonitor";
+import DataExportManager from "@/components/DataExportManager";
+import UserActivityTracker from "@/components/UserActivityTracker";
 import { ResponsiveLayout } from "@/components/ResponsiveLayout";
 import { MobileOptimizedTabs } from "@/components/MobileOptimizedTabs";
 import { useAuth } from "@/hooks/useAuth";
@@ -94,6 +98,10 @@ const Index = () => {
                 <RealTimeMonitor />
               </TabsContent>
 
+              <TabsContent value="live-data">
+                <LiveDataMonitor />
+              </TabsContent>
+
               <TabsContent value="tn-traffic">
                 <TamilNaduTrafficMap />
               </TabsContent>
@@ -124,8 +132,17 @@ const Index = () => {
                 </div>
               </TabsContent>
 
+              {/* Enhanced Features Tabs */}
+              <TabsContent value="health">
+                <SystemHealthMonitor />
+              </TabsContent>
+
               {/* Operator and Admin only features */}
               <RoleBasedAccess allowedRoles={['admin', 'operator']}>
+                <TabsContent value="export">
+                  <DataExportManager />
+                </TabsContent>
+
                 <TabsContent value="image-processing">
                   <div className="space-y-6">
                     <ImageUploadProcessor />
@@ -148,6 +165,10 @@ const Index = () => {
 
               {/* Admin only features */}
               <RoleBasedAccess allowedRoles={['admin']}>
+                <TabsContent value="activity">
+                  <UserActivityTracker />
+                </TabsContent>
+
                 <TabsContent value="sdn-manager">
                   <SDNNetworkManager />
                 </TabsContent>

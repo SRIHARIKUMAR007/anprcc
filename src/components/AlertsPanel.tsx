@@ -1,9 +1,9 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Shield, Clock, CheckCircle, XCircle, Bell } from "lucide-react";
+import { toast } from "sonner";
 
 const AlertsPanel = () => {
   const [alerts, setAlerts] = useState([
@@ -113,6 +113,32 @@ const AlertsPanel = () => {
     ));
   };
 
+  const markAllRead = () => {
+    const unreadAlerts = alerts.filter(alert => alert.status === "active" || alert.status === "investigating");
+    if (unreadAlerts.length === 0) {
+      toast.info("No unread alerts to mark");
+      return;
+    }
+    
+    setAlerts(alerts.map(alert => 
+      (alert.status === "active" || alert.status === "investigating") 
+        ? { ...alert, status: "acknowledged" } 
+        : alert
+    ));
+    toast.success(`Marked ${unreadAlerts.length} alerts as read`);
+  };
+
+  const clearResolved = () => {
+    const resolvedAlerts = alerts.filter(alert => alert.status === "resolved");
+    if (resolvedAlerts.length === 0) {
+      toast.info("No resolved alerts to clear");
+      return;
+    }
+    
+    setAlerts(alerts.filter(alert => alert.status !== "resolved"));
+    toast.success(`Cleared ${resolvedAlerts.length} resolved alerts`);
+  };
+
   const activeAlertsCount = alerts.filter(alert => alert.status === "active").length;
   const criticalAlertsCount = alerts.filter(alert => alert.priority === "critical").length;
 
@@ -178,10 +204,20 @@ const AlertsPanel = () => {
               Security & System Alerts
             </CardTitle>
             <div className="flex space-x-2">
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={markAllRead}
+                className="border-slate-600 text-slate-300 hover:bg-slate-700"
+              >
                 Mark All Read
               </Button>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={clearResolved}
+                className="border-slate-600 text-slate-300 hover:bg-slate-700"
+              >
                 Clear Resolved
               </Button>
             </div>
