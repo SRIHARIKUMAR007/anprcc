@@ -43,7 +43,7 @@ export const useAuthLogic = () => {
       } else {
         const userRole = determineUserRole(email);
         
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -56,23 +56,18 @@ export const useAuthLogic = () => {
         });
 
         if (error) {
-          if (error.message.includes('User already registered') || error.message.includes('already registered')) {
-            toast.info("Account already exists. Switching to login...");
+          if (error.message.includes('User already registered')) {
+            toast.error("An account with this email already exists. Please sign in instead.");
             setIsLogin(true);
-            setPassword("");
           } else {
             toast.error(error.message);
           }
         } else {
-          if (data.user && !data.session) {
-            toast.success("Please check your email for verification link!");
-          } else {
-            toast.success(`Account created successfully! You have been assigned ${userRole} role.`);
-            if (userRole === "admin") {
-              toast.info("You have administrator privileges with full system access.");
-            }
-            navigate("/");
+          toast.success(`Account created successfully! You have been assigned ${userRole} role.`);
+          if (userRole === "admin") {
+            toast.info("You have administrator privileges with full system access.");
           }
+          navigate("/");
         }
       }
     } catch (error) {
