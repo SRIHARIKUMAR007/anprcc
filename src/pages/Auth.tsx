@@ -2,34 +2,17 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import AuthForm from "@/components/auth/AuthForm";
-import RolePreview from "@/components/auth/RolePreview";
-import AuthToggle from "@/components/auth/AuthToggle";
-import RoleInfoSection from "@/components/auth/RoleInfoSection";
-import { useAuthLogic } from "@/components/auth/useAuthLogic";
 import { useAuth } from "@/hooks/useAuth";
+import AuthForm from "@/components/auth/AuthForm";
 
 const Auth = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  
-  const {
-    isLogin,
-    email,
-    setEmail,
-    password,
-    setPassword,
-    fullName,
-    setFullName,
-    isLoading,
-    handleAuth,
-    handleToggleAuth
-  } = useAuthLogic();
 
-  // Redirect authenticated users to home
+  // Redirect if already authenticated
   useEffect(() => {
     if (!loading && user) {
-      console.log('Auth: User already authenticated, redirecting to home');
+      console.log('User already authenticated, redirecting to home');
       navigate('/', { replace: true });
     }
   }, [user, loading, navigate]);
@@ -38,12 +21,12 @@ const Auth = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
-        <div className="text-white">Loading...</div>
+        <div className="text-white text-lg">Loading...</div>
       </div>
     );
   }
 
-  // Don't render auth form if user is already logged in
+  // Don't render if user is authenticated
   if (user) {
     return null;
   }
@@ -53,30 +36,14 @@ const Auth = () => {
       <Card className="w-full max-w-md bg-slate-800/50 border-slate-700 backdrop-blur-sm">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-white">
-            {isLogin ? "Sign In" : "Create Account"}
+            ANPR Control Center
           </CardTitle>
           <p className="text-slate-400">
-            {isLogin ? "Welcome back to ANPR Control Center" : "Join the ANPR Control Center"}
+            Sign in to access the system
           </p>
         </CardHeader>
         <CardContent>
-          <AuthForm
-            isLogin={isLogin}
-            email={email}
-            setEmail={setEmail}
-            password={password}
-            setPassword={setPassword}
-            fullName={fullName}
-            setFullName={setFullName}
-            isLoading={isLoading}
-            onSubmit={handleAuth}
-          />
-
-          <RolePreview email={email} isLogin={isLogin} />
-
-          <AuthToggle isLogin={isLogin} onToggle={handleToggleAuth} />
-
-          <RoleInfoSection />
+          <AuthForm />
         </CardContent>
       </Card>
     </div>

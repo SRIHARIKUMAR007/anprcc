@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,44 +10,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { User, LogOut, Settings, Shield, Eye } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import SettingsInterface from "./settings/SettingsInterface";
-import RoleBasedAccess from "./RoleBasedAccess";
 
 const UserMenu = () => {
   const { user, userProfile, signOut } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
 
   const handleSignOut = async () => {
-    console.log('UserMenu: Sign out clicked');
     setIsLoading(true);
-    
     try {
       toast.info("Signing out...");
       await signOut();
     } catch (error) {
-      console.error('UserMenu: Sign out error:', error);
+      console.error('Sign out error:', error);
       toast.error("Error signing out");
-      // Force redirect even on error
-      setTimeout(() => {
-        window.location.href = '/auth';
-      }, 1000);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleSettings = () => {
-    setShowSettings(true);
   };
 
   const getRoleBadgeColor = (role: string) => {
@@ -77,76 +59,39 @@ const UserMenu = () => {
   };
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="bg-slate-800/50 border-slate-600 text-white hover:bg-slate-700/50">
-            <User className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">{userProfile?.full_name || user?.email || 'User'}</span>
-            <span className="sm:hidden">Menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-64 bg-slate-800 border-slate-600 z-50">
-          <DropdownMenuLabel className="text-white">
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">{userProfile?.full_name || 'User'}</p>
-              <p className="text-xs leading-none text-slate-400 break-all">{user?.email}</p>
-              <div className="pt-2">
-                <Badge className={`text-xs ${getRoleBadgeColor(userProfile?.role || 'viewer')}`}>
-                  {getRoleIcon(userProfile?.role || 'viewer')}
-                  <span className="ml-1">{getRoleDisplayName(userProfile?.role || 'viewer')}</span>
-                </Badge>
-              </div>
-              <div className="pt-1">
-                <p className="text-xs text-slate-500">
-                  Access Level: {userProfile?.role === 'admin' ? 'Full Control' : 
-                                userProfile?.role === 'operator' ? 'Operations' : 'View Only'}
-                </p>
-              </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" className="bg-slate-800/50 border-slate-600 text-white hover:bg-slate-700/50">
+          <User className="w-4 h-4 mr-2" />
+          <span className="hidden sm:inline">{userProfile?.full_name || user?.email || 'User'}</span>
+          <span className="sm:hidden">Menu</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-64 bg-slate-800 border-slate-600 z-50">
+        <DropdownMenuLabel className="text-white">
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">{userProfile?.full_name || 'User'}</p>
+            <p className="text-xs leading-none text-slate-400 break-all">{user?.email}</p>
+            <div className="pt-2">
+              <Badge className={`text-xs ${getRoleBadgeColor(userProfile?.role || 'viewer')}`}>
+                {getRoleIcon(userProfile?.role || 'viewer')}
+                <span className="ml-1">{getRoleDisplayName(userProfile?.role || 'viewer')}</span>
+              </Badge>
             </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-slate-600" />
-          
-          <RoleBasedAccess allowedRoles={['admin', 'operator']}>
-            <DropdownMenuItem 
-              className="text-slate-300 hover:bg-slate-700 hover:text-white cursor-pointer"
-              onClick={handleSettings}
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-slate-600" />
-          </RoleBasedAccess>
-          
-          <DropdownMenuItem 
-            className="text-red-400 hover:bg-red-500/10 hover:text-red-300 cursor-pointer"
-            onClick={handleSignOut}
-            disabled={isLoading}
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            {isLoading ? "Signing out..." : "Sign out"}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <RoleBasedAccess allowedRoles={['admin', 'operator']}>
-        <Dialog open={showSettings} onOpenChange={setShowSettings}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-900 border-slate-700">
-            <DialogHeader>
-              <DialogTitle className="text-white flex items-center">
-                <Settings className="w-5 h-5 mr-2" />
-                System Settings
-                <Badge className={`ml-2 text-xs ${getRoleBadgeColor(userProfile?.role || 'viewer')}`}>
-                  {getRoleIcon(userProfile?.role || 'viewer')}
-                  <span className="ml-1">{getRoleDisplayName(userProfile?.role || 'viewer')}</span>
-                </Badge>
-              </DialogTitle>
-            </DialogHeader>
-            <SettingsInterface />
-          </DialogContent>
-        </Dialog>
-      </RoleBasedAccess>
-    </>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator className="bg-slate-600" />
+        
+        <DropdownMenuItem 
+          className="text-red-400 hover:bg-red-500/10 hover:text-red-300 cursor-pointer"
+          onClick={handleSignOut}
+          disabled={isLoading}
+        >
+          <LogOut className="w-4 h-4 mr-2" />
+          {isLoading ? "Signing out..." : "Sign out"}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
