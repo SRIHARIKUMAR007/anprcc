@@ -6,7 +6,6 @@ import {
   BarChart3, 
   AlertTriangle, 
   Settings, 
-  Car, 
   MapPin, 
   Shield, 
   Monitor,
@@ -119,23 +118,7 @@ export const MobileOptimizedTabs = ({ children, defaultValue }: MobileOptimizedT
               <Upload className="w-4 h-4" />
               <span>Images</span>
             </TabsTrigger>
-
-            <TabsTrigger 
-              value="vehicle-updates" 
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white flex items-center space-x-2 px-3 py-2 text-sm whitespace-nowrap"
-            >
-              <RefreshCw className="w-4 h-4" />
-              <span>Updates</span>
-            </TabsTrigger>
           </RoleBasedAccess>
-
-          <TabsTrigger 
-            value="vehicle-details" 
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white flex items-center space-x-2 px-3 py-2 text-sm whitespace-nowrap"
-          >
-            <Car className="w-4 h-4" />
-            <span>Vehicle</span>
-          </TabsTrigger>
 
           <TabsTrigger 
             value="network" 
@@ -164,14 +147,6 @@ export const MobileOptimizedTabs = ({ children, defaultValue }: MobileOptimizedT
             </TabsTrigger>
 
             <TabsTrigger 
-              value="parking" 
-              className="data-[state=active]:bg-red-600 data-[state=active]:text-white flex items-center space-x-2 px-3 py-2 text-sm whitespace-nowrap"
-            >
-              <Car className="w-4 h-4" />
-              <span>Parking</span>
-            </TabsTrigger>
-
-            <TabsTrigger 
               value="controls" 
               className="data-[state=active]:bg-red-600 data-[state=active]:text-white flex items-center space-x-2 px-3 py-2 text-sm whitespace-nowrap"
             >
@@ -179,14 +154,6 @@ export const MobileOptimizedTabs = ({ children, defaultValue }: MobileOptimizedT
               <span>Controls</span>
             </TabsTrigger>
           </RoleBasedAccess>
-
-          <TabsTrigger 
-            value="database" 
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white flex items-center space-x-2 px-3 py-2 text-sm whitespace-nowrap"
-          >
-            <Database className="w-4 h-4" />
-            <span>Database</span>
-          </TabsTrigger>
 
           <TabsTrigger 
             value="alerts" 

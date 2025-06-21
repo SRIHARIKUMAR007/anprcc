@@ -19,121 +19,182 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<any>(null);
 
+  // Clean up authentication state completely
+  const cleanupAuthState = () => {
+    console.log('Cleaning up auth state...');
+    
+    // Clear all possible auth keys from localStorage
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith('supabase.auth.') || key.includes('sb-'))) {
+        keysToRemove.push(key);
+      }
+    }
+    
+    keysToRemove.forEach(key => {
+      localStorage.removeItem(key);
+      console.log(`Removed: ${key}`);
+    });
+
+    // Clear session storage as well
+    if (typeof sessionStorage !== 'undefined') {
+      const sessionKeysToRemove = [];
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key && (key.startsWith('supabase.auth.') || key.includes('sb-'))) {
+          sessionKeysToRemove.push(key);
+        }
+      }
+      sessionKeysToRemove.forEach(key => {
+        sessionStorage.removeItem(key);
+        console.log(`Removed from session: ${key}`);
+      });
+    }
+
+    // Clear component state
+    setUser(null);
+    setSession(null);
+    setUserProfile(null);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
-        setSession(session);
-        setUser(session?.user ?? null);
+    let mounted = true;
+
+    const getInitialSession = async () => {
+      try {
+        console.log('Getting initial session...');
+        const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (session?.user) {
-          // Fetch user profile with a slight delay to avoid deadlocks
-          setTimeout(async () => {
+        if (error) {
+          console.error('Error getting initial session:', error);
+          cleanupAuthState();
+          return;
+        }
+        
+        if (mounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+          
+          if (session?.user) {
+            console.log('User found in session:', session.user.email);
             try {
-              const { data: profile, error } = await supabase
+              const { data: profile, error: profileError } = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', session.user.id)
                 .single();
               
-              if (error) {
-                console.error('Error fetching user profile:', error);
-              } else {
+              if (profileError) {
+                console.error('Error fetching user profile:', profileError);
+              } else if (mounted) {
                 setUserProfile(profile);
               }
             } catch (error) {
               console.error('Error fetching user profile:', error);
             }
-          }, 100);
-        } else {
-          setUserProfile(null);
+          }
+          
+          setLoading(false);
         }
-        
-        setLoading(false);
+      } catch (error) {
+        console.error('Error in getInitialSession:', error);
+        if (mounted) {
+          cleanupAuthState();
+        }
       }
-    );
+    };
 
-    // Get initial session
-    const getInitialSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email || 'No user');
         
-        if (error) {
-          console.error('Error getting initial session:', error);
+        if (!mounted) return;
+        
+        if (event === 'SIGNED_OUT') {
+          console.log('User signed out - cleaning up state');
+          cleanupAuthState();
+          return;
         }
         
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (session?.user) {
+        if (session?.user && event !== 'TOKEN_REFRESHED') {
+          console.log('Fetching user profile for:', session.user.email);
           try {
-            const { data: profile, error: profileError } = await supabase
+            const { data: profile, error } = await supabase
               .from('profiles')
               .select('*')
               .eq('id', session.user.id)
               .single();
             
-            if (profileError) {
-              console.error('Error fetching initial user profile:', profileError);
-            } else {
+            if (error) {
+              console.error('Error fetching user profile:', error);
+            } else if (mounted) {
               setUserProfile(profile);
             }
           } catch (error) {
-            console.error('Error fetching initial user profile:', error);
+            console.error('Error fetching user profile:', error);
           }
         }
-      } catch (error) {
-        console.error('Error in getInitialSession:', error);
-      } finally {
-        setLoading(false);
+        
+        if (mounted) {
+          setLoading(false);
+        }
       }
-    };
+    );
 
     getInitialSession();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {
+    console.log('Starting comprehensive sign out...');
+    setLoading(true);
+    
     try {
-      setLoading(true);
+      // Step 1: Clean up local state first
+      cleanupAuthState();
       
-      // Clear local state first
-      setUser(null);
-      setSession(null);
-      setUserProfile(null);
-      
-      // Attempt to sign out from Supabase
-      const { error } = await supabase.auth.signOut();
-      
+      // Step 2: Sign out from Supabase with global scope
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
       if (error) {
-        console.error('Error signing out:', error);
-        throw error;
+        console.error('Supabase sign out error:', error);
+        // Continue with redirect even if there's an error
       }
       
-      // Clear any remaining auth data from localStorage
-      const keys = Object.keys(localStorage);
-      keys.forEach(key => {
-        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-          localStorage.removeItem(key);
-        }
-      });
+      console.log('Sign out completed successfully');
       
-      // Force redirect to auth page
-      window.location.href = '/auth';
+      // Step 3: Force redirect to auth page
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 100);
+      
     } catch (error) {
-      console.error('Error signing out:', error);
-      // Force redirect even if sign out fails
-      window.location.href = '/auth';
-      throw error;
-    } finally {
-      setLoading(false);
+      console.error('Error during sign out:', error);
+      // Force redirect even on error
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 100);
     }
   };
 
+  const value = {
+    user,
+    session,
+    loading,
+    signOut,
+    userProfile
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, loading, signOut, userProfile }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

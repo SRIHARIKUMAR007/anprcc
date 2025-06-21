@@ -19,31 +19,65 @@ export const useAuthLogic = () => {
     return "viewer";
   };
 
+  // Clean up auth state before new login
+  const cleanupAuthState = () => {
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith('supabase.auth.') || key.includes('sb-'))) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
+        console.log('Attempting login with email:', email);
+        
+        // Clean up any existing auth state
+        cleanupAuthState();
+        
+        // Attempt to sign out any existing session
+        try {
+          await supabase.auth.signOut({ scope: 'global' });
+        } catch (err) {
+          console.log('No existing session to sign out');
+        }
+        
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
         if (error) {
+          console.error('Login error:', error);
           if (error.message.includes('Invalid login credentials')) {
             toast.error("Invalid email or password. Please check your credentials.");
           } else {
             toast.error(error.message);
           }
-        } else {
+        } else if (data.user) {
+          console.log('Login successful:', data.user.email);
           toast.success("Signed in successfully!");
-          navigate("/");
+          
+          // Use window.location for clean redirect
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 500);
         }
       } else {
+        console.log('Attempting signup with email:', email);
         const userRole = determineUserRole(email);
         
-        const { error } = await supabase.auth.signUp({
+        // Clean up any existing auth state
+        cleanupAuthState();
+        
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -56,23 +90,39 @@ export const useAuthLogic = () => {
         });
 
         if (error) {
-          if (error.message.includes('User already registered')) {
-            toast.error("An account with this email already exists. Please sign in instead.");
+          console.error('Signup error:', error);
+          if (error.message.includes('User already registered') || 
+              error.message.includes('already registered') ||
+              error.message.includes('already been registered')) {
+            toast.info("Account already exists! Please sign in instead.", {
+              description: "Switching to sign in mode."
+            });
             setIsLogin(true);
+            setPassword("");
+            setFullName("");
           } else {
             toast.error(error.message);
           }
         } else {
-          toast.success(`Account created successfully! You have been assigned ${userRole} role.`);
-          if (userRole === "admin") {
-            toast.info("You have administrator privileges with full system access.");
+          if (data.user && !data.session) {
+            toast.success("Please check your email for verification link!");
+          } else if (data.user && data.session) {
+            console.log('Signup successful:', data.user.email);
+            toast.success(`Account created successfully! You have been assigned ${userRole} role.`);
+            if (userRole === "admin") {
+              toast.info("You have administrator privileges with full system access.");
+            }
+            
+            // Use window.location for clean redirect
+            setTimeout(() => {
+              window.location.href = "/";
+            }, 500);
           }
-          navigate("/");
         }
       }
     } catch (error) {
-      toast.error("An unexpected error occurred. Please try again.");
       console.error('Auth error:', error);
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
