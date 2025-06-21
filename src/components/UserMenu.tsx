@@ -1,4 +1,6 @@
+
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -17,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { User, LogOut, Settings, Shield, Eye } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import SettingsInterface from "./settings/SettingsInterface";
 import RoleBasedAccess from "./RoleBasedAccess";
 
@@ -25,21 +27,24 @@ const UserMenu = () => {
   const { user, userProfile, signOut } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSignOut = async () => {
-    console.log('UserMenu: Sign out clicked');
     setIsLoading(true);
-    
     try {
-      toast.info("Signing out...");
       await signOut();
+      toast({
+        title: "Signed out successfully",
+        description: "You have been logged out of your account.",
+      });
     } catch (error) {
-      console.error('UserMenu: Sign out error:', error);
-      toast.error("Error signing out");
-      // Force redirect even on error
-      setTimeout(() => {
-        window.location.href = '/auth';
-      }, 1000);
+      console.error('Error signing out:', error);
+      toast({
+        title: "Sign out failed",
+        description: "There was an error signing out. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -82,15 +87,14 @@ const UserMenu = () => {
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="bg-slate-800/50 border-slate-600 text-white hover:bg-slate-700/50">
             <User className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">{userProfile?.full_name || user?.email || 'User'}</span>
-            <span className="sm:hidden">Menu</span>
+            {userProfile?.full_name || user?.email || 'User'}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-64 bg-slate-800 border-slate-600 z-50">
           <DropdownMenuLabel className="text-white">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">{userProfile?.full_name || 'User'}</p>
-              <p className="text-xs leading-none text-slate-400 break-all">{user?.email}</p>
+              <p className="text-xs leading-none text-slate-400">{user?.email}</p>
               <div className="pt-2">
                 <Badge className={`text-xs ${getRoleBadgeColor(userProfile?.role || 'viewer')}`}>
                   {getRoleIcon(userProfile?.role || 'viewer')}
@@ -129,6 +133,7 @@ const UserMenu = () => {
         </DropdownMenuContent>
       </DropdownMenu>
 
+      {/* Settings Dialog - Only for Admin and Operator */}
       <RoleBasedAccess allowedRoles={['admin', 'operator']}>
         <Dialog open={showSettings} onOpenChange={setShowSettings}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-900 border-slate-700">

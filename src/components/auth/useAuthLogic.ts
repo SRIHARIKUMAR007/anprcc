@@ -19,16 +19,14 @@ export const useAuthLogic = () => {
     return "viewer";
   };
 
-  // Clean up auth state before new login
+  // Cleanup function to clear all auth state
   const cleanupAuthState = () => {
-    const keysToRemove = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && (key.startsWith('supabase.auth.') || key.includes('sb-'))) {
-        keysToRemove.push(key);
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
       }
-    }
-    keysToRemove.forEach(key => localStorage.removeItem(key));
+    });
   };
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -37,45 +35,34 @@ export const useAuthLogic = () => {
 
     try {
       if (isLogin) {
-        console.log('Attempting login with email:', email);
-        
-        // Clean up any existing auth state
+        // Clean up any existing auth state before login
         cleanupAuthState();
         
-        // Attempt to sign out any existing session
+        // Attempt global sign out first
         try {
           await supabase.auth.signOut({ scope: 'global' });
         } catch (err) {
-          console.log('No existing session to sign out');
+          // Continue even if this fails
         }
-        
+
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
         if (error) {
-          console.error('Login error:', error);
           if (error.message.includes('Invalid login credentials')) {
             toast.error("Invalid email or password. Please check your credentials.");
           } else {
             toast.error(error.message);
           }
-        } else if (data.user) {
-          console.log('Login successful:', data.user.email);
+        } else {
           toast.success("Signed in successfully!");
-          
-          // Use window.location for clean redirect
-          setTimeout(() => {
-            window.location.href = "/";
-          }, 500);
+          // Use navigate instead of window.location for better routing
+          navigate("/", { replace: true });
         }
       } else {
-        console.log('Attempting signup with email:', email);
         const userRole = determineUserRole(email);
-        
-        // Clean up any existing auth state
-        cleanupAuthState();
         
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -90,12 +77,11 @@ export const useAuthLogic = () => {
         });
 
         if (error) {
-          console.error('Signup error:', error);
           if (error.message.includes('User already registered') || 
               error.message.includes('already registered') ||
               error.message.includes('already been registered')) {
-            toast.info("Account already exists! Please sign in instead.", {
-              description: "Switching to sign in mode."
+            toast.info("Account already exists! Switching to sign in mode.", {
+              description: "Please enter your password to sign in."
             });
             setIsLogin(true);
             setPassword("");
@@ -106,23 +92,19 @@ export const useAuthLogic = () => {
         } else {
           if (data.user && !data.session) {
             toast.success("Please check your email for verification link!");
-          } else if (data.user && data.session) {
-            console.log('Signup successful:', data.user.email);
+          } else {
             toast.success(`Account created successfully! You have been assigned ${userRole} role.`);
             if (userRole === "admin") {
               toast.info("You have administrator privileges with full system access.");
             }
-            
-            // Use window.location for clean redirect
-            setTimeout(() => {
-              window.location.href = "/";
-            }, 500);
+            // Use navigate instead of window.location for better routing
+            navigate("/", { replace: true });
           }
         }
       }
     } catch (error) {
-      console.error('Auth error:', error);
       toast.error("An unexpected error occurred. Please try again.");
+      console.error('Auth error:', error);
     } finally {
       setIsLoading(false);
     }

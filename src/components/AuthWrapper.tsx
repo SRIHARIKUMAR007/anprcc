@@ -13,22 +13,18 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('AuthWrapper - User:', user?.email || 'No user', 'Loading:', loading);
-    
     if (!loading && !user) {
-      console.log('AuthWrapper: User not authenticated, redirecting to auth page');
-      // Use window.location for a clean redirect
-      window.location.href = '/auth';
+      console.log('User not authenticated, redirecting to auth page');
+      navigate('/auth', { replace: true });
     }
   }, [user, loading, navigate]);
 
-  // Show loading skeleton while checking auth
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 p-4 sm:p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 p-6">
         <div className="container mx-auto space-y-6">
           <Skeleton className="h-16 w-full bg-slate-800" />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[...Array(4)].map((_, i) => (
               <Skeleton key={i} className="h-24 bg-slate-800" />
             ))}
@@ -39,9 +35,8 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
     );
   }
 
-  // Don't render anything if not authenticated (will redirect)
   if (!user) {
-    return null;
+    return null; // Will redirect to auth
   }
 
   return <>{children}</>;
