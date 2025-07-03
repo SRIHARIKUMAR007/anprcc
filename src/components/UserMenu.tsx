@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -27,32 +26,31 @@ const UserMenu = () => {
   const { user, userProfile, signOut } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSignOut = async () => {
     setIsLoading(true);
     try {
-      console.log('User menu: Starting sign out...');
       toast({
         title: "Signing out...",
         description: "Please wait while we log you out.",
       });
       
-      // Call the signOut function - it will handle redirect
       await signOut();
       
-      // Note: We don't show success toast here as the page will redirect
+      // Toast success will be shown after redirect
     } catch (error) {
       console.error('Error signing out:', error);
       toast({
-        title: "Sign out failed",
-        description: "There was an error signing out. Redirecting anyway...",
+        title: "Sign out error",
+        description: "Redirecting to login page...",
         variant: "destructive",
       });
       
-      // Force redirect even if there's an error
-      window.location.href = '/auth';
+      // Force redirect even on error
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 1000);
     } finally {
       setIsLoading(false);
     }
@@ -95,7 +93,7 @@ const UserMenu = () => {
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="bg-slate-800/50 border-slate-600 text-white hover:bg-slate-700/50">
             <User className="w-4 h-4 mr-2" />
-            {userProfile?.full_name || user?.email || 'User'}
+            {userProfile?.full_name || user?.email?.split('@')[0] || 'User'}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-64 bg-slate-800 border-slate-600 z-50">

@@ -19,20 +19,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<any>(null);
 
-  // Cleanup function to clear all auth state
+  // Enhanced auth state cleanup utility
   const cleanupAuthState = () => {
-    // Clear all Supabase auth keys from localStorage
-    const keys = Object.keys(localStorage);
-    keys.forEach(key => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        localStorage.removeItem(key);
-      }
-    });
-    
-    // Clear state
-    setUser(null);
-    setSession(null);
-    setUserProfile(null);
+    try {
+      // Remove all Supabase auth keys from localStorage
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      // Remove from sessionStorage if present
+      const sessionKeys = Object.keys(sessionStorage || {});
+      sessionKeys.forEach(key => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          sessionStorage.removeItem(key);
+        }
+      });
+    } catch (error) {
+      console.error('Error cleaning up auth state:', error);
+    }
   };
 
   useEffect(() => {
@@ -40,24 +47,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
-        
-        if (event === 'SIGNED_OUT') {
-          console.log('Auth state changed: SIGNED_OUT');
-          cleanupAuthState();
-          setLoading(false);
-          // Use href instead of replace to ensure proper navigation on Vercel
-          if (window.location.pathname !== '/auth') {
-            console.log('Redirecting to auth page from auth state change...');
-            window.location.href = '/auth';
-          }
-          return;
-        }
-        
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (session?.user) {
-          // Fetch user profile with a slight delay to avoid deadlocks
+        if (session?.user && event === 'SIGNED_IN') {
+          // Defer profile fetching to avoid deadlocks
           setTimeout(async () => {
             try {
               const { data: profile, error } = await supabase
@@ -90,9 +84,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (error) {
           console.error('Error getting initial session:', error);
-          cleanupAuthState();
-          setLoading(false);
-          return;
         }
         
         setSession(session);
@@ -117,7 +108,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       } catch (error) {
         console.error('Error in getInitialSession:', error);
-        cleanupAuthState();
       } finally {
         setLoading(false);
       }
@@ -131,26 +121,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       setLoading(true);
-      console.log('Starting sign out process...');
       
-      // Clear local state first
+      // Clean up auth state first
       cleanupAuthState();
       
-      // Attempt to sign out from Supabase with global scope
+      // Clear local state
+      setUser(null);
+      setSession(null);
+      setUserProfile(null);
+      
+      // Attempt global sign out with timeout
+      const signOutPromise = supabase.auth.signOut({ scope: 'global' });
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Sign out timeout')), 5000)
+      );
+      
       try {
-        await supabase.auth.signOut({ scope: 'global' });
-        console.log('Supabase sign out successful');
+        await Promise.race([signOutPromise, timeoutPromise]);
       } catch (error) {
-        console.error('Error during global sign out:', error);
-        // Continue even if this fails
+        console.error('Sign out error (continuing anyway):', error);
       }
       
-      // Force page reload and redirect - this prevents 404 issues on Vercel
-      console.log('Redirecting to auth page...');
-      window.location.href = '/auth';
+      // Final cleanup
+      cleanupAuthState();
+      
+      // Force redirect with window.location for Vercel deployment
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 100);
+      
     } catch (error) {
       console.error('Error signing out:', error);
       // Force redirect even if sign out fails
+      cleanupAuthState();
       window.location.href = '/auth';
     } finally {
       setLoading(false);

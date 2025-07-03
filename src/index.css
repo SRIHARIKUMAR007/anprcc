@@ -7,7 +7,6 @@
 
 @layer base {
   :root {
-    /* Enhanced Theme Colors for Traffic Control System */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -17,9 +16,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 224 71% 36%;
+    --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
-    --primary-glow: 224 71% 50%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -37,26 +35,7 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
-    --radius: 0.75rem;
-
-    /* Traffic Control System Colors */
-    --traffic-green: 142 76% 36%;
-    --traffic-yellow: 48 96% 53%;
-    --traffic-red: 0 84% 60%;
-    --traffic-blue: 217 91% 60%;
-    --traffic-cyan: 184 83% 51%;
-    --traffic-purple: 263 70% 50%;
-
-    /* Status Colors */
-    --status-success: 142 76% 36%;
-    --status-warning: 48 96% 53%;
-    --status-error: 0 84% 60%;
-    --status-info: 217 91% 60%;
-
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(224 71% 36%), hsl(224 71% 50%));
-    --gradient-cyber: linear-gradient(135deg, hsl(217 91% 60%), hsl(184 83% 51%));
-    --gradient-threat: linear-gradient(135deg, hsl(0 84% 60%), hsl(48 96% 53%));
+    --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -69,48 +48,40 @@
   }
 
   .dark {
-    /* Dark Theme - Enhanced for Traffic Control */
-    --background: 224 71% 4%;
+    --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
 
-    --card: 224 71% 7%;
+    --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 224 71% 7%;
+    --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217 91% 60%;
+    --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
-    --primary-glow: 217 91% 70%;
 
-    --secondary: 215 27.9% 16.9%;
+    --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 215 27.9% 16.9%;
+    --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 215 27.9% 16.9%;
+    --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 50%;
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 217 91% 60%;
-
-    /* Enhanced Dark Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(184 83% 51%));
-    --gradient-cyber: linear-gradient(135deg, hsl(224 71% 4%), hsl(215 27.9% 16.9%));
-    --gradient-threat: linear-gradient(135deg, hsl(0 62.8% 50%), hsl(48 96% 53%));
-
-    --sidebar-background: 224 71% 4%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary: 224.3 76.3% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 27.9% 16.9%;
+    --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 215 27.9% 16.9%;
+    --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
@@ -152,248 +123,120 @@
 }
 
 @layer components {
-  /* Enhanced Glass morphism for Traffic Control */
+  /* Glass morphism effect */
   .glass {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10;
-    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+    @apply bg-white/10 backdrop-blur-md border border-white/20;
   }
   
   .glass-dark {
-    background: linear-gradient(135deg, 
-      hsl(var(--card) / 0.6) 0%, 
-      hsl(var(--card) / 0.3) 100%
-    );
-    @apply backdrop-blur-xl border border-primary/20;
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    @apply bg-slate-800/60 backdrop-blur-md border border-slate-700/50;
   }
   
-  /* Traffic Control System Cards */
-  .traffic-card {
-    @apply glass-dark rounded-xl transition-all duration-300;
-    @apply hover:border-primary/40 hover:shadow-2xl;
-    box-shadow: 
-      0 10px 40px rgba(0, 0, 0, 0.4),
-      0 0 0 1px hsl(var(--primary) / 0.1);
+  /* Enhanced card styles */
+  .enhanced-card {
+    @apply glass-dark rounded-xl shadow-xl shadow-black/10 transition-all duration-300;
+    @apply hover:bg-slate-800/80 hover:border-slate-600/50 hover:shadow-2xl hover:shadow-blue-500/5;
   }
   
-  .traffic-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-      0 20px 60px rgba(0, 0, 0, 0.5),
-      0 0 0 1px hsl(var(--primary) / 0.3),
-      0 0 20px hsl(var(--primary) / 0.1);
-  }
-  
-  /* Cyber-themed gradients */
-  .cyber-gradient {
-    background: var(--gradient-cyber);
-  }
-  
-  .threat-gradient {
-    background: var(--gradient-threat);
-  }
-  
-  /* Enhanced gradient text */
+  /* Gradient text */
   .gradient-text {
-    background: linear-gradient(135deg, 
-      hsl(var(--primary)), 
-      hsl(var(--traffic-cyan)), 
-      hsl(var(--traffic-blue))
-    );
-    @apply bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent;
   }
   
-  .cyber-text {
-    background: linear-gradient(135deg, 
-      hsl(var(--traffic-cyan)), 
-      hsl(var(--traffic-blue))
-    );
-    @apply bg-clip-text text-transparent;
-  }
-  
-  /* Advanced animated background */
-  .cyber-bg {
-    background: linear-gradient(-45deg, 
-      hsl(var(--background)),
-      hsl(224 71% 6%),
-      hsl(215 27.9% 8%),
-      hsl(224 71% 4%)
-    );
+  /* Animated background */
+  .animated-bg {
+    background: linear-gradient(-45deg, #0f172a, #1e293b, #334155, #475569);
     background-size: 400% 400%;
-    animation: cyberShift 20s ease infinite;
+    animation: gradientShift 15s ease infinite;
   }
   
-  @keyframes cyberShift {
+  @keyframes gradientShift {
     0% { background-position: 0% 50%; }
-    25% { background-position: 100% 50%; }
-    50% { background-position: 100% 100%; }
-    75% { background-position: 0% 100%; }
+    50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
   }
   
-  /* Status indicators with glow */
+  /* Status indicators */
   .status-online {
     @apply bg-green-500/20 text-green-400 border-green-500/30;
-    box-shadow: 0 0 10px hsl(var(--traffic-green) / 0.3);
   }
   
   .status-offline {
     @apply bg-red-500/20 text-red-400 border-red-500/30;
-    box-shadow: 0 0 10px hsl(var(--traffic-red) / 0.3);
   }
   
   .status-warning {
     @apply bg-yellow-500/20 text-yellow-400 border-yellow-500/30;
-    box-shadow: 0 0 10px hsl(var(--traffic-yellow) / 0.3);
   }
   
   .status-info {
     @apply bg-blue-500/20 text-blue-400 border-blue-500/30;
-    box-shadow: 0 0 10px hsl(var(--traffic-blue) / 0.3);
   }
   
-  /* Responsive design components */
-  .responsive-grid {
-    @apply grid gap-3 md:gap-4 lg:gap-6;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  }
-  
-  .responsive-sidebar {
-    @apply w-full lg:w-80 xl:w-96;
-  }
-  
-  /* Enhanced tabs */
-  .cyber-tabs {
-    @apply flex items-center space-x-1 overflow-x-auto pb-2 scrollbar-hide;
+  /* Horizontal tab improvements */
+  .horizontal-tabs {
+    @apply flex items-center space-x-2 overflow-x-auto pb-2;
     scroll-snap-type: x mandatory;
   }
   
-  .cyber-tabs > * {
+  .horizontal-tabs > * {
     scroll-snap-align: start;
-    @apply flex-shrink-0;
   }
 }
 
 @layer utilities {
-  /* Enhanced Animation utilities */
+  /* Animation utilities */
   .animate-fade-in {
-    animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: fadeIn 0.5s ease-out;
   }
   
   .animate-slide-up {
-    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: slideUp 0.5s ease-out;
   }
   
-  .animate-cyber-glow {
-    animation: cyberGlow 2s ease-in-out infinite;
+  .animate-pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
   }
   
   .animate-slide-in {
-    animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  
-  .animate-scale-in {
-    animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  
-  .animate-threat-pulse {
-    animation: threatPulse 1.5s ease-in-out infinite;
+    animation: slideIn 0.3s ease-out;
   }
   
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(30px); }
+    from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
   }
   
   @keyframes slideUp {
-    from { transform: translateY(100%); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
   }
   
   @keyframes slideIn {
-    from { transform: translateX(-30px); opacity: 0; }
+    from { transform: translateX(-20px); opacity: 0; }
     to { transform: translateX(0); opacity: 1; }
   }
   
-  @keyframes scaleIn {
-    from { transform: scale(0.95); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+    50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.6); }
   }
   
-  @keyframes cyberGlow {
-    0%, 100% { 
-      box-shadow: 
-        0 0 20px hsl(var(--primary) / 0.3),
-        0 0 40px hsl(var(--primary) / 0.1);
-    }
-    50% { 
-      box-shadow: 
-        0 0 40px hsl(var(--primary) / 0.6),
-        0 0 80px hsl(var(--primary) / 0.2);
-    }
+  /* Text utilities */
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   }
   
-  @keyframes threatPulse {
-    0%, 100% { 
-      box-shadow: 0 0 10px hsl(var(--traffic-red) / 0.3);
-      transform: scale(1);
-    }
-    50% { 
-      box-shadow: 0 0 25px hsl(var(--traffic-red) / 0.6);
-      transform: scale(1.02);
-    }
+  .text-shadow-lg {
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
   }
   
-  /* Enhanced text utilities */
-  .text-cyber-shadow {
-    text-shadow: 
-      0 2px 4px rgba(0, 0, 0, 0.8),
-      0 0 10px hsl(var(--primary) / 0.5);
-  }
-  
-  .text-threat-shadow {
-    text-shadow: 
-      0 2px 4px rgba(0, 0, 0, 0.8),
-      0 0 10px hsl(var(--traffic-red) / 0.5);
-  }
-  
-  /* Responsive design utilities */
+  /* Responsive utilities */
   .responsive-text {
-    @apply text-xs sm:text-sm md:text-base lg:text-lg;
-  }
-  
-  .responsive-text-sm {
-    @apply text-xs sm:text-sm;
+    @apply text-sm sm:text-base lg:text-lg;
   }
   
   .responsive-padding {
-    @apply px-3 sm:px-4 md:px-6 lg:px-8;
-  }
-  
-  .responsive-margin {
-    @apply mx-2 sm:mx-4 md:mx-6 lg:mx-8;
-  }
-  
-  .responsive-gap {
-    @apply gap-2 sm:gap-3 md:gap-4 lg:gap-6;
-  }
-  
-  /* Mobile-first responsive breakpoints */
-  .mobile-stack {
-    @apply flex flex-col sm:flex-row;
-  }
-  
-  .mobile-full {
-    @apply w-full sm:w-auto;
-  }
-  
-  .tablet-grid {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3;
-  }
-  
-  .desktop-sidebar {
-    @apply hidden lg:block;
+    @apply px-4 sm:px-6 lg:px-8;
   }
 }
