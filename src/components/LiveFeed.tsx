@@ -140,7 +140,12 @@ const LiveFeed = () => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen cyber-bg">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 relative overflow-hidden">
+        {/* Animated background pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-20 left-20 w-96 h-96 bg-blue-500 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-20 w-96 h-96 bg-cyan-500 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+        </div>
         <div className="responsive-padding py-4 md:py-6 space-y-4 md:space-y-6">
           {/* Enhanced Header with Connection Status */}
           <div className="traffic-card animate-fade-in p-4 md:p-6">
@@ -219,9 +224,10 @@ const LiveFeed = () => {
             />
           </div>
 
-          <div className="responsive-grid xl:grid-cols-4">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6"
+               style={{ gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)' }}>
             {/* Main Live Video Feed */}
-            <div className="xl:col-span-3 space-y-4 animate-scale-in">
+            <div className="col-span-1 space-y-4 animate-scale-in">
               <div className="traffic-card">
                 <CardHeader className="pb-3">
                   <div className="mobile-stack lg:items-center justify-between responsive-gap">
@@ -302,7 +308,7 @@ const LiveFeed = () => {
             </div>
 
             {/* Enhanced Side Panel */}
-            <div className="responsive-sidebar space-y-4 animate-slide-in"
+            <div className="col-span-1 space-y-3 animate-slide-in"
                  style={{ animationDelay: '0.2s' }}>
               <SupabaseServiceMonitor />
               <SDNThreatManager cameraId={selectedCamera} />
