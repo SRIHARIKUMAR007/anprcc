@@ -33,18 +33,26 @@ const UserMenu = () => {
   const handleSignOut = async () => {
     setIsLoading(true);
     try {
-      await signOut();
+      console.log('User menu: Starting sign out...');
       toast({
-        title: "Signed out successfully",
-        description: "You have been logged out of your account.",
+        title: "Signing out...",
+        description: "Please wait while we log you out.",
       });
+      
+      // Call the signOut function - it will handle redirect
+      await signOut();
+      
+      // Note: We don't show success toast here as the page will redirect
     } catch (error) {
       console.error('Error signing out:', error);
       toast({
         title: "Sign out failed",
-        description: "There was an error signing out. Please try again.",
+        description: "There was an error signing out. Redirecting anyway...",
         variant: "destructive",
       });
+      
+      // Force redirect even if there's an error
+      window.location.href = '/auth';
     } finally {
       setIsLoading(false);
     }

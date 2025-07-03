@@ -42,11 +42,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.log('Auth state changed:', event, session?.user?.id);
         
         if (event === 'SIGNED_OUT') {
+          console.log('Auth state changed: SIGNED_OUT');
           cleanupAuthState();
           setLoading(false);
-          // Use replace instead of href to avoid page reload issues
+          // Use href instead of replace to ensure proper navigation on Vercel
           if (window.location.pathname !== '/auth') {
-            window.location.replace('/auth');
+            console.log('Redirecting to auth page from auth state change...');
+            window.location.href = '/auth';
           }
           return;
         }
@@ -129,6 +131,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       setLoading(true);
+      console.log('Starting sign out process...');
       
       // Clear local state first
       cleanupAuthState();
@@ -136,17 +139,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Attempt to sign out from Supabase with global scope
       try {
         await supabase.auth.signOut({ scope: 'global' });
+        console.log('Supabase sign out successful');
       } catch (error) {
         console.error('Error during global sign out:', error);
         // Continue even if this fails
       }
       
-      // Use replace instead of href for cleaner navigation
-      window.location.replace('/auth');
+      // Force page reload and redirect - this prevents 404 issues on Vercel
+      console.log('Redirecting to auth page...');
+      window.location.href = '/auth';
     } catch (error) {
       console.error('Error signing out:', error);
       // Force redirect even if sign out fails
-      window.location.replace('/auth');
+      window.location.href = '/auth';
     } finally {
       setLoading(false);
     }
