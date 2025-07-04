@@ -19,20 +19,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<any>(null);
 
-  // Cleanup function to clear all auth state
+  // Enhanced auth state cleanup utility
   const cleanupAuthState = () => {
-    // Clear all Supabase auth keys from localStorage
-    const keys = Object.keys(localStorage);
-    keys.forEach(key => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        localStorage.removeItem(key);
-      }
-    });
-    
-    // Clear state
-    setUser(null);
-    setSession(null);
-    setUserProfile(null);
+    try {
+      // Remove all Supabase auth keys from localStorage
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      // Remove from sessionStorage if present
+      const sessionKeys = Object.keys(sessionStorage || {});
+      sessionKeys.forEach(key => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          sessionStorage.removeItem(key);
+        }
+      });
+    } catch (error) {
+      console.error('Error cleaning up auth state:', error);
+    }
   };
 
   useEffect(() => {
@@ -40,24 +47,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
-        
-        if (event === 'SIGNED_OUT') {
-          console.log('Auth state changed: SIGNED_OUT');
-          cleanupAuthState();
-          setLoading(false);
-          // Use href instead of replace to ensure proper navigation on Vercel
-          if (window.location.pathname !== '/auth') {
-            console.log('Redirecting to auth page from auth state change...');
-            window.location.href = '/auth';
-          }
-          return;
-        }
-        
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (session?.user) {
-          // Fetch user profile with a slight delay to avoid deadlocks
+        if (session?.user && event === 'SIGNED_IN') {
+          // Defer profile fetching to avoid deadlocks
           setTimeout(async () => {
             try {
               const { data: profile, error } = await supabase
@@ -90,9 +84,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (error) {
           console.error('Error getting initial session:', error);
-          cleanupAuthState();
-          setLoading(false);
-          return;
         }
         
         setSession(session);
@@ -117,7 +108,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       } catch (error) {
         console.error('Error in getInitialSession:', error);
-        cleanupAuthState();
       } finally {
         setLoading(false);
       }
@@ -131,26 +121,117 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       setLoading(true);
-      console.log('Starting sign out process...');
+      console.log('Starting enhanced logout process...');
       
-      // Clear local state first
-      cleanupAuthState();
+      // Immediate state cleanup
+      setUser(null);
+      setSession(null);
+      setUserProfile(null);
       
-      // Attempt to sign out from Supabase with global scope
+      // Enhanced cleanup with multiple attempts
+      const performCleanup = () => {
+        try {
+          // Clear all possible auth-related storage
+          const storageKeys = Object.keys(localStorage);
+          storageKeys.forEach(key => {
+            if (key.includes('supabase') || key.includes('sb-') || key.includes('auth')) {
+              localStorage.removeItem(key);
+            }
+          });
+          
+          // Clear session storage
+          try {
+            const sessionKeys = Object.keys(sessionStorage);
+            sessionKeys.forEach(key => {
+              if (key.includes('supabase') || key.includes('sb-') || key.includes('auth')) {
+                sessionStorage.removeItem(key);
+              }
+            });
+          } catch (e) {
+            console.warn('Session storage cleanup failed:', e);
+          }
+          
+          // Clear any remaining tokens
+          document.cookie.split(";").forEach(cookie => {
+            const eqPos = cookie.indexOf("=");
+            const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+            if (name.trim().includes('supabase') || name.trim().includes('sb-')) {
+              document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+            }
+          });
+          
+        } catch (error) {
+          console.error('Enhanced cleanup error:', error);
+        }
+      };
+      
+      // Perform initial cleanup
+      performCleanup();
+      
+      // Attempt Supabase signout with enhanced error handling
       try {
-        await supabase.auth.signOut({ scope: 'global' });
-        console.log('Supabase sign out successful');
+        console.log('Attempting Supabase signOut...');
+        const result = await Promise.race([
+          supabase.auth.signOut({ scope: 'global' }),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Sign out timeout')), 3000)
+          )
+        ]);
+        
+        if (result && typeof result === 'object' && 'error' in result && result.error) {
+          console.warn('Supabase signOut error (continuing):', result.error);
+        } else {
+          console.log('Supabase signOut successful');
+        }
       } catch (error) {
-        console.error('Error during global sign out:', error);
-        // Continue even if this fails
+        console.warn('Supabase signOut failed (continuing):', error);
       }
       
-      // Force page reload and redirect - this prevents 404 issues on Vercel
+      // Final cleanup attempt
+      performCleanup();
+      
+      // Enhanced redirect with fallback
       console.log('Redirecting to auth page...');
-      window.location.href = '/auth';
+      
+      // Multiple redirect attempts for reliability
+      const redirect = () => {
+        try {
+          if (window.history && window.history.pushState) {
+            window.history.replaceState(null, '', '/auth');
+            window.location.replace('/auth');
+          } else {
+            window.location.href = '/auth';
+          }
+        } catch (error) {
+          console.error('Redirect error:', error);
+          // Force page reload as last resort
+          window.location.href = '/auth';
+        }
+      };
+      
+      // Immediate redirect
+      redirect();
+      
+      // Backup redirect after short delay
+      setTimeout(() => {
+        if (window.location.pathname !== '/auth') {
+          console.log('Backup redirect executing...');
+          redirect();
+        }
+      }, 500);
+      
     } catch (error) {
-      console.error('Error signing out:', error);
-      // Force redirect even if sign out fails
+      console.error('Critical logout error:', error);
+      
+      // Emergency cleanup and redirect
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+      } catch (e) {
+        console.error('Emergency cleanup failed:', e);
+      }
+      
+      // Force redirect regardless of errors
       window.location.href = '/auth';
     } finally {
       setLoading(false);

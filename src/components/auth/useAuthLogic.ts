@@ -19,33 +19,13 @@ export const useAuthLogic = () => {
     return "viewer";
   };
 
-  // Cleanup function to clear all auth state
-  const cleanupAuthState = () => {
-    const keys = Object.keys(localStorage);
-    keys.forEach(key => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        localStorage.removeItem(key);
-      }
-    });
-  };
-
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
       if (isLogin) {
-        // Clean up any existing auth state before login
-        cleanupAuthState();
-        
-        // Attempt global sign out first
-        try {
-          await supabase.auth.signOut({ scope: 'global' });
-        } catch (err) {
-          // Continue even if this fails
-        }
-
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
@@ -58,13 +38,12 @@ export const useAuthLogic = () => {
           }
         } else {
           toast.success("Signed in successfully!");
-          // Use navigate instead of window.location for better routing
-          navigate("/", { replace: true });
+          navigate("/");
         }
       } else {
         const userRole = determineUserRole(email);
         
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -77,29 +56,18 @@ export const useAuthLogic = () => {
         });
 
         if (error) {
-          if (error.message.includes('User already registered') || 
-              error.message.includes('already registered') ||
-              error.message.includes('already been registered')) {
-            toast.info("Account already exists! Switching to sign in mode.", {
-              description: "Please enter your password to sign in."
-            });
+          if (error.message.includes('User already registered')) {
+            toast.error("An account with this email already exists. Please sign in instead.");
             setIsLogin(true);
-            setPassword("");
-            setFullName("");
           } else {
             toast.error(error.message);
           }
         } else {
-          if (data.user && !data.session) {
-            toast.success("Please check your email for verification link!");
-          } else {
-            toast.success(`Account created successfully! You have been assigned ${userRole} role.`);
-            if (userRole === "admin") {
-              toast.info("You have administrator privileges with full system access.");
-            }
-            // Use navigate instead of window.location for better routing
-            navigate("/", { replace: true });
+          toast.success(`Account created successfully! You have been assigned ${userRole} role.`);
+          if (userRole === "admin") {
+            toast.info("You have administrator privileges with full system access.");
           }
+          navigate("/");
         }
       }
     } catch (error) {
