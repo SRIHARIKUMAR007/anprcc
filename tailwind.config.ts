@@ -61,18 +61,6 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				},
-				// Cyber Theme Colors
-				cyber: {
-					primary: 'hsl(var(--cyber-primary))',
-					secondary: 'hsl(var(--cyber-secondary))',
-					accent: 'hsl(var(--cyber-accent))',
-					warning: 'hsl(var(--cyber-warning))',
-					danger: 'hsl(var(--cyber-danger))',
-					bg: 'hsl(var(--cyber-bg))',
-					text: 'hsl(var(--cyber-text))',
-					border: 'hsl(var(--cyber-border))',
-					glow: 'hsl(var(--cyber-glow))'
 				}
 			},
 			borderRadius: {
