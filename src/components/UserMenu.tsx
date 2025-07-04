@@ -21,6 +21,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import SettingsInterface from "./settings/SettingsInterface";
 import RoleBasedAccess from "./RoleBasedAccess";
+import ThemeToggle from "./ThemeToggle";
 
 const UserMenu = () => {
   const { user, userProfile, signOut } = useAuth();
@@ -89,18 +90,20 @@ const UserMenu = () => {
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="bg-slate-800/50 border-slate-600 text-white hover:bg-slate-700/50">
-            <User className="w-4 h-4 mr-2" />
-            {userProfile?.full_name || user?.email?.split('@')[0] || 'User'}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-64 bg-slate-800 border-slate-600 z-50">
-          <DropdownMenuLabel className="text-white">
+      <div className="flex items-center space-x-3">
+        <ThemeToggle />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="cyber-border bg-cyber-bg/50 hover:bg-cyber-primary/10 border-cyber-border text-foreground">
+              <User className="w-4 h-4 mr-2" />
+              {userProfile?.full_name || user?.email?.split('@')[0] || 'User'}
+            </Button>
+          </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-64 cyber-card border-cyber-border z-50">
+          <DropdownMenuLabel className="text-foreground">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">{userProfile?.full_name || 'User'}</p>
-              <p className="text-xs leading-none text-slate-400">{user?.email}</p>
+              <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
               <div className="pt-2">
                 <Badge className={`text-xs ${getRoleBadgeColor(userProfile?.role || 'viewer')}`}>
                   {getRoleIcon(userProfile?.role || 'viewer')}
@@ -108,28 +111,28 @@ const UserMenu = () => {
                 </Badge>
               </div>
               <div className="pt-1">
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Access Level: {userProfile?.role === 'admin' ? 'Full Control' : 
                                 userProfile?.role === 'operator' ? 'Operations' : 'View Only'}
                 </p>
               </div>
             </div>
           </DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-slate-600" />
+          <DropdownMenuSeparator className="bg-cyber-border" />
           
           <RoleBasedAccess allowedRoles={['admin', 'operator']}>
             <DropdownMenuItem 
-              className="text-slate-300 hover:bg-slate-700 hover:text-white cursor-pointer"
+              className="text-foreground hover:bg-cyber-primary/10 hover:text-cyber-primary cursor-pointer"
               onClick={handleSettings}
             >
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-slate-600" />
+            <DropdownMenuSeparator className="bg-cyber-border" />
           </RoleBasedAccess>
           
           <DropdownMenuItem 
-            className="text-red-400 hover:bg-red-500/10 hover:text-red-300 cursor-pointer"
+            className="text-cyber-danger hover:bg-cyber-danger/10 hover:text-cyber-danger cursor-pointer"
             onClick={handleSignOut}
             disabled={isLoading}
           >
@@ -137,14 +140,15 @@ const UserMenu = () => {
             {isLoading ? "Signing out..." : "Sign out"}
           </DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>
+        </DropdownMenu>
+      </div>
 
       {/* Settings Dialog - Only for Admin and Operator */}
       <RoleBasedAccess allowedRoles={['admin', 'operator']}>
         <Dialog open={showSettings} onOpenChange={setShowSettings}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-900 border-slate-700">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto cyber-card border-cyber-border">
             <DialogHeader>
-              <DialogTitle className="text-white flex items-center">
+              <DialogTitle className="text-foreground flex items-center">
                 <Settings className="w-5 h-5 mr-2" />
                 System Settings
                 <Badge className={`ml-2 text-xs ${getRoleBadgeColor(userProfile?.role || 'viewer')}`}>

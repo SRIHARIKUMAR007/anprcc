@@ -121,39 +121,117 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       setLoading(true);
+      console.log('Starting enhanced logout process...');
       
-      // Clean up auth state first
-      cleanupAuthState();
-      
-      // Clear local state
+      // Immediate state cleanup
       setUser(null);
       setSession(null);
       setUserProfile(null);
       
-      // Attempt global sign out with timeout
-      const signOutPromise = supabase.auth.signOut({ scope: 'global' });
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Sign out timeout')), 5000)
-      );
+      // Enhanced cleanup with multiple attempts
+      const performCleanup = () => {
+        try {
+          // Clear all possible auth-related storage
+          const storageKeys = Object.keys(localStorage);
+          storageKeys.forEach(key => {
+            if (key.includes('supabase') || key.includes('sb-') || key.includes('auth')) {
+              localStorage.removeItem(key);
+            }
+          });
+          
+          // Clear session storage
+          try {
+            const sessionKeys = Object.keys(sessionStorage);
+            sessionKeys.forEach(key => {
+              if (key.includes('supabase') || key.includes('sb-') || key.includes('auth')) {
+                sessionStorage.removeItem(key);
+              }
+            });
+          } catch (e) {
+            console.warn('Session storage cleanup failed:', e);
+          }
+          
+          // Clear any remaining tokens
+          document.cookie.split(";").forEach(cookie => {
+            const eqPos = cookie.indexOf("=");
+            const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+            if (name.trim().includes('supabase') || name.trim().includes('sb-')) {
+              document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+            }
+          });
+          
+        } catch (error) {
+          console.error('Enhanced cleanup error:', error);
+        }
+      };
       
+      // Perform initial cleanup
+      performCleanup();
+      
+      // Attempt Supabase signout with enhanced error handling
       try {
-        await Promise.race([signOutPromise, timeoutPromise]);
+        console.log('Attempting Supabase signOut...');
+        const result = await Promise.race([
+          supabase.auth.signOut({ scope: 'global' }),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Sign out timeout')), 3000)
+          )
+        ]);
+        
+        if (result && typeof result === 'object' && 'error' in result && result.error) {
+          console.warn('Supabase signOut error (continuing):', result.error);
+        } else {
+          console.log('Supabase signOut successful');
+        }
       } catch (error) {
-        console.error('Sign out error (continuing anyway):', error);
+        console.warn('Supabase signOut failed (continuing):', error);
       }
       
-      // Final cleanup
-      cleanupAuthState();
+      // Final cleanup attempt
+      performCleanup();
       
-      // Force redirect with window.location for Vercel deployment
+      // Enhanced redirect with fallback
+      console.log('Redirecting to auth page...');
+      
+      // Multiple redirect attempts for reliability
+      const redirect = () => {
+        try {
+          if (window.history && window.history.pushState) {
+            window.history.replaceState(null, '', '/auth');
+            window.location.replace('/auth');
+          } else {
+            window.location.href = '/auth';
+          }
+        } catch (error) {
+          console.error('Redirect error:', error);
+          // Force page reload as last resort
+          window.location.href = '/auth';
+        }
+      };
+      
+      // Immediate redirect
+      redirect();
+      
+      // Backup redirect after short delay
       setTimeout(() => {
-        window.location.href = '/auth';
-      }, 100);
+        if (window.location.pathname !== '/auth') {
+          console.log('Backup redirect executing...');
+          redirect();
+        }
+      }, 500);
       
     } catch (error) {
-      console.error('Error signing out:', error);
-      // Force redirect even if sign out fails
-      cleanupAuthState();
+      console.error('Critical logout error:', error);
+      
+      // Emergency cleanup and redirect
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+      } catch (e) {
+        console.error('Emergency cleanup failed:', e);
+      }
+      
+      // Force redirect regardless of errors
       window.location.href = '/auth';
     } finally {
       setLoading(false);
