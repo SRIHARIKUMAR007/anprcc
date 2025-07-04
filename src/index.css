@@ -3,56 +3,39 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Cyber Traffic Control Design System - Unique Theme */
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
 
 @layer base {
   :root {
-    /* Light Theme - Modern Traffic Control */
-    --background: 240 10% 97%;
-    --foreground: 240 10% 8%;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 8%;
+    --card-foreground: 222.2 84% 4.9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 8%;
+    --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 200 95% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 240 10% 8%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 120 95% 50%;
-    --accent-foreground: 240 10% 8%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
 
-    --destructive: 0 85% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 200 95% 50%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
 
-    --radius: 0.75rem;
-
-    /* Cyber Theme Colors */
-    --cyber-primary: 195 100% 50%;
-    --cyber-secondary: 280 100% 70%;
-    --cyber-accent: 120 100% 50%;
-    --cyber-warning: 45 100% 60%;
-    --cyber-danger: 0 100% 50%;
-    --cyber-bg: 240 10% 97%;
-    --cyber-text: 240 10% 8%;
-    --cyber-border: 240 6% 85%;
-    --cyber-glow: 195 100% 50%;
-
-    /* Glass Effects */
-    --glass-primary: 195 100% 50% / 0.1;
-    --glass-secondary: 280 100% 70% / 0.1;
-    --glass-bg: 255 255 255 / 0.1;
+    --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -65,59 +48,41 @@
   }
 
   .dark {
-    /* Dark Theme - Cyber Traffic Control */
-    --background: 220 30% 3%;
-    --foreground: 195 100% 90%;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
 
-    --card: 220 25% 6%;
-    --card-foreground: 195 100% 90%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 220 25% 6%;
-    --popover-foreground: 195 100% 90%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 195 100% 50%;
-    --primary-foreground: 220 30% 3%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 220 20% 10%;
-    --secondary-foreground: 195 100% 90%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 220 20% 10%;
-    --muted-foreground: 195 50% 65%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 120 100% 50%;
-    --accent-foreground: 220 30% 3%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 100% 50%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 220 20% 15%;
-    --input: 220 20% 15%;
-    --ring: 195 100% 50%;
-
-    /* Cyber Dark Theme Colors */
-    --cyber-primary: 195 100% 50%;
-    --cyber-secondary: 280 100% 70%;
-    --cyber-accent: 120 100% 50%;
-    --cyber-warning: 45 100% 60%;
-    --cyber-danger: 0 100% 50%;
-    --cyber-bg: 220 30% 3%;
-    --cyber-text: 195 100% 90%;
-    --cyber-border: 220 20% 15%;
-    --cyber-glow: 195 100% 50%;
-
-    /* Glass Effects */
-    --glass-primary: 195 100% 50% / 0.1;
-    --glass-secondary: 280 100% 70% / 0.1;
-    --glass-bg: 0 0% 0% / 0.3;
-
-    --sidebar-background: 220 25% 5%;
-    --sidebar-foreground: 195 100% 90%;
-    --sidebar-primary: 195 100% 50%;
-    --sidebar-primary-foreground: 220 30% 3%;
-    --sidebar-accent: 220 20% 12%;
-    --sidebar-accent-foreground: 195 100% 90%;
-    --sidebar-border: 220 20% 15%;
-    --sidebar-ring: 195 100% 50%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 
@@ -128,13 +93,6 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    background: linear-gradient(135deg, 
-      hsl(var(--cyber-bg)) 0%, 
-      hsl(var(--cyber-primary) / 0.05) 25%,
-      hsl(var(--cyber-secondary) / 0.05) 75%,
-      hsl(var(--cyber-bg)) 100%);
-    background-attachment: fixed;
-    min-height: 100vh;
   }
   
   /* Enhanced scrollbar styling */
@@ -165,88 +123,31 @@
 }
 
 @layer components {
-  /* Cyber Glass Effects */
-  .cyber-glass {
-    background: hsl(var(--glass-bg));
-    backdrop-filter: blur(12px);
-    border: 1px solid hsl(var(--cyber-border));
-    box-shadow: 0 8px 32px hsl(var(--cyber-primary) / 0.1);
+  /* Glass morphism effect */
+  .glass {
+    @apply bg-white/10 backdrop-blur-md border border-white/20;
   }
   
-  .cyber-card {
-    @apply cyber-glass rounded-xl transition-all duration-300;
-    background: hsl(var(--card));
-    border: 1px solid hsl(var(--cyber-border));
-    box-shadow: 
-      0 4px 16px hsl(var(--cyber-primary) / 0.1),
-      inset 0 1px 0 hsl(var(--cyber-accent) / 0.1);
+  .glass-dark {
+    @apply bg-slate-800/60 backdrop-blur-md border border-slate-700/50;
   }
   
-  .cyber-card:hover {
-    border-color: hsl(var(--cyber-accent) / 0.5);
-    box-shadow: 
-      0 8px 32px hsl(var(--cyber-primary) / 0.2),
-      0 0 24px hsl(var(--cyber-accent) / 0.1),
-      inset 0 1px 0 hsl(var(--cyber-accent) / 0.2);
-    transform: translateY(-2px);
+  /* Enhanced card styles */
+  .enhanced-card {
+    @apply glass-dark rounded-xl shadow-xl shadow-black/10 transition-all duration-300;
+    @apply hover:bg-slate-800/80 hover:border-slate-600/50 hover:shadow-2xl hover:shadow-blue-500/5;
   }
   
-  /* Cyber Borders */
-  .cyber-border {
-    border: 1px solid hsl(var(--cyber-border));
-    position: relative;
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent;
   }
   
-  .cyber-border::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-      90deg,
-      hsl(var(--cyber-accent) / 0.3) 0%,
-      transparent 50%,
-      hsl(var(--cyber-primary) / 0.3) 100%
-    );
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-    border-radius: inherit;
-  }
-  
-  .cyber-border:hover::before {
-    opacity: 1;
-  }
-  
-  /* Gradient Text */
-  .cyber-gradient-text {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--cyber-primary)),
-      hsl(var(--cyber-accent)),
-      hsl(var(--cyber-secondary))
-    );
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-size: 200% 200%;
-    animation: gradientShift 3s ease infinite;
-  }
-  
-  /* Cyber Background Animation */
-  .cyber-bg-animated {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--cyber-bg)) 0%,
-      hsl(var(--cyber-primary) / 0.05) 25%,
-      hsl(var(--cyber-secondary) / 0.05) 50%,
-      hsl(var(--cyber-accent) / 0.03) 75%,
-      hsl(var(--cyber-bg)) 100%
-    );
+  /* Animated background */
+  .animated-bg {
+    background: linear-gradient(-45deg, #0f172a, #1e293b, #334155, #475569);
     background-size: 400% 400%;
-    animation: gradientShift 20s ease infinite;
+    animation: gradientShift 15s ease infinite;
   }
   
   @keyframes gradientShift {
@@ -255,74 +156,31 @@
     100% { background-position: 0% 50%; }
   }
   
-  /* Cyber Status Indicators */
-  .cyber-status-online {
-    background: hsl(var(--cyber-accent) / 0.2);
-    color: hsl(var(--cyber-accent));
-    border: 1px solid hsl(var(--cyber-accent) / 0.3);
+  /* Status indicators */
+  .status-online {
+    @apply bg-green-500/20 text-green-400 border-green-500/30;
   }
   
-  .cyber-status-offline {
-    background: hsl(var(--cyber-danger) / 0.2);
-    color: hsl(var(--cyber-danger));
-    border: 1px solid hsl(var(--cyber-danger) / 0.3);
+  .status-offline {
+    @apply bg-red-500/20 text-red-400 border-red-500/30;
   }
   
-  .cyber-status-warning {
-    background: hsl(var(--cyber-warning) / 0.2);
-    color: hsl(var(--cyber-warning));
-    border: 1px solid hsl(var(--cyber-warning) / 0.3);
+  .status-warning {
+    @apply bg-yellow-500/20 text-yellow-400 border-yellow-500/30;
   }
   
-  .cyber-status-info {
-    background: hsl(var(--cyber-primary) / 0.2);
-    color: hsl(var(--cyber-primary));
-    border: 1px solid hsl(var(--cyber-primary) / 0.3);
+  .status-info {
+    @apply bg-blue-500/20 text-blue-400 border-blue-500/30;
   }
   
-  /* Cyber Glow Effects */
-  .cyber-glow {
-    box-shadow: 0 0 20px hsl(var(--cyber-glow) / 0.3);
-    transition: box-shadow 0.3s ease;
+  /* Horizontal tab improvements */
+  .horizontal-tabs {
+    @apply flex items-center space-x-2 overflow-x-auto pb-2;
+    scroll-snap-type: x mandatory;
   }
   
-  .cyber-glow:hover {
-    box-shadow: 0 0 40px hsl(var(--cyber-glow) / 0.5);
-  }
-  
-  /* Responsive Grid Improvements */
-  .cyber-grid {
-    display: grid;
-    gap: 1.5rem;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  }
-  
-  @media (max-width: 768px) {
-    .cyber-grid {
-      grid-template-columns: 1fr;
-      gap: 1rem;
-    }
-  }
-  
-  /* Enhanced Responsive Layout */
-  .cyber-responsive-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  
-  @media (min-width: 1280px) {
-    .cyber-responsive-layout {
-      grid-template-columns: 1fr 320px;
-      gap: 2rem;
-    }
-  }
-  
-  @media (min-width: 1536px) {
-    .cyber-responsive-layout {
-      grid-template-columns: 1fr 360px;
-      gap: 2.5rem;
-    }
+  .horizontal-tabs > * {
+    scroll-snap-align: start;
   }
 }
 

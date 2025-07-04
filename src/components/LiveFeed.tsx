@@ -142,67 +142,68 @@ const LiveFeed = () => {
 
   return (
     <ErrorBoundary>
-      <div className="space-y-4 md:space-y-6 responsive-padding">
+      <div className="space-y-6">
         {/* Enhanced Header with Connection Status */}
-        <div className="cyber-card p-4 md:p-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="flex items-center space-x-3">
-              <Activity className="w-6 h-6 text-cyber-primary cyber-glow" />
-              <div>
-                <h2 className="text-xl md:text-2xl font-bold cyber-gradient-text">
-                  AI-Powered Live Camera Feed System
-                </h2>
-                <p className="text-muted-foreground text-sm responsive-text">
-                  Real-time AI monitoring • {cameras.filter(c => c.status === 'active').length} active cameras
-                  {trafficPattern.peakHours && (
-                    <span className="text-cyber-warning ml-2">• Peak Hours Active</span>
-                  )}
-                  <span className="text-cyber-accent ml-2 inline-flex items-center">
-                    <CheckCircle className="w-3 h-3 mr-1" />
-                    • Supabase Backend Active
-                  </span>
-                </p>
-              </div>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex items-center space-x-3">
+            <Activity className="w-6 h-6 text-blue-400" />
+            <div>
+              <h2 className="text-xl font-bold text-white">AI-Powered Live Camera Feed System</h2>
+              <p className="text-slate-400 text-sm">
+                Real-time AI monitoring • {cameras.filter(c => c.status === 'active').length} active cameras
+                {trafficPattern.peakHours && (
+                  <span className="text-orange-400 ml-2">• Peak Hours Active</span>
+                )}
+                <span className="text-green-400 ml-2 flex items-center">
+                  <CheckCircle className="w-3 h-3 mr-1" />
+                  • Supabase Backend Active
+                </span>
+              </p>
             </div>
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              variant={isLiveMode ? "default" : "outline"}
+              size="sm"
+              onClick={toggleLiveMode}
+              className="flex items-center space-x-2"
+            >
+              <Radio className={`w-4 h-4 ${isLiveMode ? 'animate-pulse' : ''}`} />
+              <span>{isLiveMode ? 'AI LIVE MODE' : 'DEMO MODE'}</span>
+            </Button>
             
-            <div className="flex flex-wrap items-center gap-2 md:gap-3">
-              <Button
-                variant={isLiveMode ? "default" : "outline"}
-                size="sm"
-                onClick={toggleLiveMode}
-                className="cyber-border bg-cyber-bg/50 hover:bg-cyber-primary/10"
-              >
-                <Radio className={`w-4 h-4 ${isLiveMode ? 'animate-pulse text-cyber-accent' : 'text-muted-foreground'}`} />
-                <span className="ml-2 text-xs md:text-sm">{isLiveMode ? 'AI LIVE MODE' : 'DEMO MODE'}</span>
-              </Button>
-              
-              <Badge variant="secondary" className={`text-xs ${isLiveMode ? 'cyber-status-online animate-pulse' : 'cyber-status-info'}`}>
-                {isLiveMode ? 'AI REAL-TIME ACTIVE' : 'SIMULATION MODE'}
-              </Badge>
+            <Badge variant="secondary" className={`${isLiveMode ? 'bg-green-500/20 text-green-400 border-green-500/30 animate-pulse' : 'bg-gray-500/20 text-gray-400 border-gray-500/30'}`}>
+              {isLiveMode ? 'AI REAL-TIME ACTIVE' : 'SIMULATION MODE'}
+            </Badge>
 
-              <Badge variant="secondary" className={`${connectionStatus.color} text-xs hidden sm:inline-flex`}>
-                {connectionStatus.status}
-              </Badge>
+            {/* Connection Status Badge */}
+            <Badge variant="secondary" className={connectionStatus.color}>
+              {connectionStatus.status}
+            </Badge>
 
-              {isAIProcessing && (
-                <Badge variant="secondary" className="cyber-status-warning animate-pulse text-xs">
-                  AI PROCESSING
-                </Badge>
-              )}
-              
-              <Badge variant="outline" className="cyber-status-info text-xs hidden md:inline-flex">
-                Tamil Nadu Traffic Control
+            <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 animate-pulse">
+              SUPABASE POWERED
+            </Badge>
+
+            {isAIProcessing && (
+              <Badge variant="secondary" className="bg-purple-500/20 text-purple-400 border-purple-500/30 animate-pulse">
+                AI PROCESSING
               </Badge>
-            </div>
+            )}
+            
+            <Badge variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+              Tamil Nadu Traffic Control
+            </Badge>
           </div>
         </div>
 
         {/* Success Message */}
-        <div className="cyber-status-online rounded-lg p-3 md:p-4 flex items-center space-x-3">
-          <CheckCircle className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
+        <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-4 flex items-center space-x-3">
+          <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
           <div>
-            <div className="font-semibold text-xs md:text-sm">Supabase Backend Active</div>
-            <div className="text-xs mt-1 opacity-90">
+            <div className="text-green-400 font-semibold text-sm">Supabase Backend Active</div>
+            <div className="text-green-300 text-xs mt-1">
               Using integrated Supabase backend for real-time ANPR processing and data management.
             </div>
           </div>
@@ -215,42 +216,39 @@ const LiveFeed = () => {
           onCameraSelect={handleCameraSelect}
         />
 
-        {/* Responsive Layout Container */}
-        <div className="cyber-responsive-layout">
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
           {/* Main Live Video Feed */}
-          <div className="space-y-4">
-            <Card className="cyber-card">
+          <div className="xl:col-span-3 space-y-4">
+            <Card className="bg-slate-800/50 border-slate-700">
               <CardHeader className="pb-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <CardTitle className="text-foreground text-base md:text-lg flex items-center space-x-2">
-                    <div className="flex items-center space-x-2 flex-wrap">
-                      <div className={`w-3 h-3 rounded-full ${isLiveMode && isRecording ? 'bg-cyber-danger animate-pulse cyber-glow' : 'bg-muted-foreground'}`}></div>
-                      <span className="text-sm md:text-base">AI Live Camera Feed - {currentCamera?.id}</span>
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                  <CardTitle className="text-white text-lg lg:text-xl flex items-center space-x-2">
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-3 h-3 rounded-full ${isLiveMode && isRecording ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}`}></div>
+                      <span>AI Live Camera Feed - {currentCamera?.id}</span>
                       {trafficPattern.peakHours && (
-                        <Badge variant="secondary" className="cyber-status-warning text-xs">
+                        <Badge variant="secondary" className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
                           PEAK
                         </Badge>
                       )}
-                      <Badge variant="secondary" className="cyber-status-online text-xs">
+                      <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
                         SUPABASE
                       </Badge>
                     </div>
                   </CardTitle>
-                  <div className="flex-shrink-0">
-                    <CameraControls
-                      isRecording={isRecording}
-                      frameRate={currentCamera?.fps || 30}
-                      resolution={currentCamera?.resolution || "1920x1080"}
-                      isFullscreen={isFullscreen}
-                      audioEnabled={audioEnabled}
-                      onRecordingToggle={handleRecordingToggle}
-                      onFullscreenToggle={handleFullscreenToggle}
-                      onAudioToggle={handleAudioToggle}
-                    />
-                  </div>
+                  <CameraControls
+                    isRecording={isRecording}
+                    frameRate={currentCamera?.fps || 30}
+                    resolution={currentCamera?.resolution || "1920x1080"}
+                    isFullscreen={isFullscreen}
+                    audioEnabled={audioEnabled}
+                    onRecordingToggle={handleRecordingToggle}
+                    onFullscreenToggle={handleFullscreenToggle}
+                    onAudioToggle={handleAudioToggle}
+                  />
                 </div>
               </CardHeader>
-              <CardContent className="p-3 md:p-6">
+              <CardContent>
                 <LiveVideoCanvas
                   isRecording={isRecording && isLiveMode}
                   isFullscreen={isFullscreen}
@@ -266,31 +264,31 @@ const LiveFeed = () => {
             </Card>
 
             {/* Processing Pipeline */}
-            <Card className="cyber-card">
-              <CardContent className="p-3 md:p-4">
+            <Card className="bg-slate-800/50 border-slate-700">
+              <CardContent className="p-4">
                 <ProcessingPipeline
                   processingStep={processingStep}
                   processingSteps={processingSteps}
                 />
                 
                 {/* AI System Load Indicator */}
-                <div className="mt-4 p-3 cyber-glass rounded-lg">
-                  <div className="text-foreground text-sm font-semibold mb-2 flex items-center justify-between">
+                <div className="mt-4 p-3 bg-slate-700/30 rounded-lg">
+                  <div className="text-white text-sm font-semibold mb-2 flex items-center justify-between">
                     <span>AI System Load</span>
-                    <span className="text-cyber-accent text-xs">Supabase Backend</span>
+                    <span className="text-green-400 text-xs">Supabase Backend</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 md:gap-4">
+                  <div className="grid grid-cols-3 gap-4">
                     <div className="text-center">
-                      <div className="text-xs text-muted-foreground">CPU</div>
-                      <div className="text-foreground font-bold text-sm md:text-base">{systemLoad.cpu}%</div>
+                      <div className="text-xs text-slate-400">CPU</div>
+                      <div className="text-white font-bold">{systemLoad.cpu}%</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-xs text-muted-foreground">Memory</div>
-                      <div className="text-foreground font-bold text-sm md:text-base">{systemLoad.memory}%</div>
+                      <div className="text-xs text-slate-400">Memory</div>
+                      <div className="text-white font-bold">{systemLoad.memory}%</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-xs text-muted-foreground">Processing</div>
-                      <div className="text-foreground font-bold text-sm md:text-base">{systemLoad.processing}%</div>
+                      <div className="text-xs text-slate-400">Processing</div>
+                      <div className="text-white font-bold">{systemLoad.processing}%</div>
                     </div>
                   </div>
                 </div>
@@ -298,8 +296,8 @@ const LiveFeed = () => {
             </Card>
           </div>
 
-          {/* Enhanced Side Panel - Responsive */}
-          <div className="space-y-3 md:space-y-4">
+          {/* Enhanced Side Panel with new components */}
+          <div className="space-y-4">
             <ThreatAnalysisOverview cameraId={selectedCamera} />
             <RecentSDNActions cameraId={selectedCamera} />
             <PythonANPRService />
