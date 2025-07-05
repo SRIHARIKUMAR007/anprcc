@@ -121,40 +121,112 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       setLoading(true);
+      console.log('Starting enhanced sign out process...');
       
       // Clean up auth state first
       cleanupAuthState();
       
-      // Clear local state
+      // Clear local state immediately
       setUser(null);
       setSession(null);
       setUserProfile(null);
       
-      // Attempt global sign out with timeout
-      const signOutPromise = supabase.auth.signOut({ scope: 'global' });
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Sign out timeout')), 5000)
-      );
+      // Enhanced sign out with multiple attempts and timeout
+      const signOutWithRetry = async (attempts = 3) => {
+        for (let i = 0; i < attempts; i++) {
+          try {
+            console.log(`Sign out attempt ${i + 1}/${attempts}`);
+            
+            // Create timeout promise
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error(`Sign out timeout on attempt ${i + 1}`)), 3000)
+            );
+            
+            // Try different sign out methods
+            const signOutPromises = [
+              supabase.auth.signOut({ scope: 'global' }),
+              supabase.auth.signOut({ scope: 'local' }),
+              supabase.auth.signOut()
+            ];
+            
+            // Race against timeout
+            await Promise.race([
+              Promise.allSettled(signOutPromises),
+              timeoutPromise
+            ]);
+            
+            console.log(`Sign out attempt ${i + 1} completed`);
+            break;
+            
+          } catch (error) {
+            console.error(`Sign out attempt ${i + 1} failed:`, error);
+            
+            if (i === attempts - 1) {
+              console.log('All sign out attempts failed, proceeding with cleanup');
+            } else {
+              // Wait before retry
+              await new Promise(resolve => setTimeout(resolve, 500));
+            }
+          }
+        }
+      };
       
+      await signOutWithRetry();
+      
+      // Final comprehensive cleanup
+      cleanupAuthState();
+      
+      // Clear any remaining auth tokens
       try {
-        await Promise.race([signOutPromise, timeoutPromise]);
+        await supabase.removeAllSubscriptions();
       } catch (error) {
-        console.error('Sign out error (continuing anyway):', error);
+        console.error('Error removing subscriptions:', error);
       }
       
-      // Final cleanup
-      cleanupAuthState();
+      console.log('Sign out process completed, redirecting...');
       
-      // Force redirect with window.location for Vercel deployment
-      setTimeout(() => {
-        window.location.href = '/auth';
-      }, 100);
+      // Enhanced redirect with multiple fallbacks
+      const redirect = () => {
+        try {
+          // Method 1: Try router navigation if available
+          if (window.history && window.history.pushState) {
+            window.history.pushState(null, '', '/auth');
+            window.location.reload();
+            return;
+          }
+          
+          // Method 2: Direct location change
+          window.location.href = '/auth';
+          
+        } catch (error) {
+          console.error('Redirect error, using fallback:', error);
+          // Method 3: Force page reload to root
+          window.location.reload();
+        }
+      };
+      
+      // Small delay to ensure cleanup completes
+      setTimeout(redirect, 200);
       
     } catch (error) {
-      console.error('Error signing out:', error);
-      // Force redirect even if sign out fails
+      console.error('Critical sign out error:', error);
+      
+      // Force cleanup and redirect even on critical error
       cleanupAuthState();
-      window.location.href = '/auth';
+      setUser(null);
+      setSession(null);
+      setUserProfile(null);
+      
+      // Force redirect as last resort
+      setTimeout(() => {
+        try {
+          window.location.href = '/auth';
+        } catch (redirectError) {
+          console.error('Failed to redirect, reloading page:', redirectError);
+          window.location.reload();
+        }
+      }, 100);
+      
     } finally {
       setLoading(false);
     }
