@@ -176,13 +176,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Final comprehensive cleanup
       cleanupAuthState();
       
-      // Clear any remaining auth tokens
-      try {
-        await supabase.removeAllSubscriptions();
-      } catch (error) {
-        console.error('Error removing subscriptions:', error);
-      }
-      
       console.log('Sign out process completed, redirecting...');
       
       // Enhanced redirect with multiple fallbacks
