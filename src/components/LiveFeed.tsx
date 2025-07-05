@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,6 @@ import { mockCameras, processingSteps } from "./livefeed/mockData";
 import { useRealTimeIntegration } from "@/hooks/useRealTimeIntegration";
 import { LiveFeedCamera } from "@/types/camera";
 import { Camera } from "@/types/supabase";
-import AIRealTimeAnalytics from "./livefeed/AIRealTimeAnalytics";
 import { useAIRealTimeEngine } from "@/hooks/useAIRealTimeEngine";
 import { useAIThreatDetection } from "@/hooks/useAIThreatDetection";
 import { useEnhancedBackendIntegration } from "@/hooks/useEnhancedBackendIntegration";
@@ -306,7 +304,6 @@ const LiveFeed = () => {
                 <ThreatAnalysisOverview cameraId={selectedCamera} />
                 <RecentSDNActions cameraId={selectedCamera} />
                 <PythonANPRService />
-                <AIRealTimeAnalytics cameraId={selectedCamera} />
                 <LiveAlerts 
                   selectedCamera={selectedCamera}
                   isLive={isLiveMode && isRecording}
