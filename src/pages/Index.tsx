@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { TabsContent } from "@/components/ui/tabs";
 import AuthWrapper from "@/components/AuthWrapper";
@@ -33,6 +32,7 @@ import StatusCards from "@/components/dashboard/StatusCards";
 import RecentDetectionsList from "@/components/livefeed/RecentDetectionsList";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import RoleBasedAccess from "@/components/RoleBasedAccess";
+import SecurityMonitoring from "@/components/SecurityMonitoring";
 
 const Index = () => {
   const { user, userProfile } = useAuth();
@@ -102,6 +102,10 @@ const Index = () => {
                 <LiveDataMonitor />
               </TabsContent>
 
+              <TabsContent value="security">
+                <SecurityMonitoring />
+              </TabsContent>
+
               <TabsContent value="tn-traffic">
                 <TamilNaduTrafficMap />
               </TabsContent>
@@ -119,16 +123,8 @@ const Index = () => {
               </TabsContent>
 
               <TabsContent value="live" className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2">
-                    <LiveFeed />
-                  </div>
-                  <div>
-                    <RecentDetectionsList 
-                      detections={detections}
-                      isConnected={isConnected}
-                    />
-                  </div>
+                <div className="grid grid-cols-1 gap-6">
+                  <LiveFeed />
                 </div>
               </TabsContent>
 
