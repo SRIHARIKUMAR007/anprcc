@@ -182,51 +182,6 @@
   .horizontal-tabs > * {
     scroll-snap-align: start;
   }
-
-  /* Live Feed Grid Layout */
-  .live-feed-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  @media (min-width: 1280px) {
-    .live-feed-grid {
-      grid-template-columns: 2fr 1fr;
-      gap: 1.5rem;
-    }
-  }
-
-  /* Side Panel Cards */
-  .side-panel-cards {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  @media (min-width: 640px) and (max-width: 1279px) {
-    .side-panel-cards {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (min-width: 1280px) {
-    .side-panel-cards {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  /* Responsive card heights */
-  .responsive-card {
-    min-height: 120px;
-    height: fit-content;
-  }
-
-  @media (min-width: 1280px) {
-    .responsive-card {
-      min-height: 140px;
-    }
-  }
 }
 
 @layer utilities {

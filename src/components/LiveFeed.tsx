@@ -142,183 +142,185 @@ const LiveFeed = () => {
 
   return (
     <ErrorBoundary>
-      <div className="space-y-4 sm:space-y-6">
-        {/* Enhanced Header with Connection Status */}
-        <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
-          <div className="flex items-center space-x-3">
-            <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
-            <div>
-              <h2 className="text-lg sm:text-xl font-bold text-white">AI-Powered Live Camera Feed System</h2>
-              <p className="text-slate-400 text-xs sm:text-sm">
-                Real-time AI monitoring • {cameras.filter(c => c.status === 'active').length} active cameras
-                {trafficPattern.peakHours && (
-                  <span className="text-orange-400 ml-2">• Peak Hours Active</span>
-                )}
-                <span className="text-green-400 ml-2 flex items-center">
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                  • Supabase Backend Active
-                </span>
-              </p>
+      <div className="min-h-screen bg-slate-900 p-4 lg:p-6">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Enhanced Header with Connection Status */}
+          <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+            <div className="flex items-center space-x-3">
+              <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
+              <div>
+                <h2 className="text-lg sm:text-xl font-bold text-white">AI-Powered Live Camera Feed System</h2>
+                <p className="text-slate-400 text-xs sm:text-sm">
+                  Real-time AI monitoring • {cameras.filter(c => c.status === 'active').length} active cameras
+                  {trafficPattern.peakHours && (
+                    <span className="text-orange-400 ml-2">• Peak Hours Active</span>
+                  )}
+                  <span className="text-green-400 ml-2 flex items-center">
+                    <CheckCircle className="w-3 h-3 mr-1" />
+                    • Supabase Backend Active
+                  </span>
+                </p>
+              </div>
             </div>
-          </div>
-          
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <Button
-              variant={isLiveMode ? "default" : "outline"}
-              size="sm"
-              onClick={toggleLiveMode}
-              className="flex items-center space-x-2 text-xs sm:text-sm"
-            >
-              <Radio className={`w-3 h-3 sm:w-4 sm:h-4 ${isLiveMode ? 'animate-pulse' : ''}`} />
-              <span>{isLiveMode ? 'AI LIVE MODE' : 'DEMO MODE'}</span>
-            </Button>
             
-            <Badge variant="secondary" className={`text-xs ${isLiveMode ? 'bg-green-500/20 text-green-400 border-green-500/30 animate-pulse' : 'bg-gray-500/20 text-gray-400 border-gray-500/30'}`}>
-              {isLiveMode ? 'AI REAL-TIME ACTIVE' : 'SIMULATION MODE'}
-            </Badge>
-
-            {/* Connection Status Badge */}
-            <Badge variant="secondary" className={connectionStatus.color + " text-xs"}>
-              {connectionStatus.status}
-            </Badge>
-
-            <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 animate-pulse text-xs">
-              SUPABASE POWERED
-            </Badge>
-
-            {isAIProcessing && (
-              <Badge variant="secondary" className="bg-purple-500/20 text-purple-400 border-purple-500/30 animate-pulse text-xs">
-                AI PROCESSING
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <Button
+                variant={isLiveMode ? "default" : "outline"}
+                size="sm"
+                onClick={toggleLiveMode}
+                className="flex items-center space-x-2 text-xs sm:text-sm"
+              >
+                <Radio className={`w-3 h-3 sm:w-4 sm:h-4 ${isLiveMode ? 'animate-pulse' : ''}`} />
+                <span>{isLiveMode ? 'AI LIVE MODE' : 'DEMO MODE'}</span>
+              </Button>
+              
+              <Badge variant="secondary" className={`text-xs ${isLiveMode ? 'bg-green-500/20 text-green-400 border-green-500/30 animate-pulse' : 'bg-gray-500/20 text-gray-400 border-gray-500/30'}`}>
+                {isLiveMode ? 'AI REAL-TIME ACTIVE' : 'SIMULATION MODE'}
               </Badge>
-            )}
-            
-            <Badge variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
-              Tamil Nadu Traffic Control
-            </Badge>
-          </div>
-        </div>
 
-        {/* Success Message */}
-        <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-3 sm:p-4 flex items-center space-x-3">
-          <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 flex-shrink-0" />
-          <div>
-            <div className="text-green-400 font-semibold text-xs sm:text-sm">Supabase Backend Active</div>
-            <div className="text-green-300 text-xs mt-1">
-              Using integrated Supabase backend for real-time ANPR processing and data management.
+              {/* Connection Status Badge */}
+              <Badge variant="secondary" className={connectionStatus.color + " text-xs"}>
+                {connectionStatus.status}
+              </Badge>
+
+              <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 animate-pulse text-xs">
+                SUPABASE POWERED
+              </Badge>
+
+              {isAIProcessing && (
+                <Badge variant="secondary" className="bg-purple-500/20 text-purple-400 border-purple-500/30 animate-pulse text-xs">
+                  AI PROCESSING
+                </Badge>
+              )}
+              
+              <Badge variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
+                Tamil Nadu Traffic Control
+              </Badge>
             </div>
           </div>
-        </div>
 
-        {/* Camera Selector */}
-        <CameraSelector
-          cameras={cameras}
-          selectedCamera={selectedCamera}
-          onCameraSelect={handleCameraSelect}
-        />
-
-        {/* Main Content Grid - Fixed Layout */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6">
-          {/* Main Live Video Feed - Takes 8 columns on XL screens */}
-          <div className="xl:col-span-8 space-y-4">
-            <Card className="bg-slate-800/50 border-slate-700">
-              <CardHeader className="pb-3">
-                <div className="flex flex-col space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
-                  <CardTitle className="text-white text-base sm:text-lg lg:text-xl flex items-center space-x-2">
-                    <div className="flex items-center space-x-2 flex-wrap">
-                      <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${isLiveMode && isRecording ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}`}></div>
-                      <span className="text-sm sm:text-base lg:text-lg">AI Live Camera Feed - {currentCamera?.id}</span>
-                      {trafficPattern.peakHours && (
-                        <Badge variant="secondary" className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
-                          PEAK
-                        </Badge>
-                      )}
-                      <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
-                        SUPABASE
-                      </Badge>
-                    </div>
-                  </CardTitle>
-                  <div className="w-full lg:w-auto">
-                    <CameraControls
-                      isRecording={isRecording}
-                      frameRate={currentCamera?.fps || 30}
-                      resolution={currentCamera?.resolution || "1920x1080"}
-                      isFullscreen={isFullscreen}
-                      audioEnabled={audioEnabled}
-                      onRecordingToggle={handleRecordingToggle}
-                      onFullscreenToggle={handleFullscreenToggle}
-                      onAudioToggle={handleAudioToggle}
-                    />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-3 sm:p-6">
-                <LiveVideoCanvas
-                  isRecording={isRecording && isLiveMode}
-                  isFullscreen={isFullscreen}
-                  currentCamera={currentCamera}
-                  frameRate={currentCamera?.fps || 30}
-                  vehicleCount={trafficPattern.vehicleCount}
-                  detectedPlate={detectedPlate}
-                  confidence={confidence}
-                  processingStep={processingStep}
-                  onVehicleCountUpdate={handleVehicleCountUpdate}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Processing Pipeline */}
-            <Card className="bg-slate-800/50 border-slate-700">
-              <CardContent className="p-3 sm:p-4">
-                <ProcessingPipeline
-                  processingStep={processingStep}
-                  processingSteps={processingSteps}
-                />
-                
-                {/* AI System Load Indicator */}
-                <div className="mt-4 p-3 bg-slate-700/30 rounded-lg">
-                  <div className="text-white text-sm font-semibold mb-2 flex items-center justify-between">
-                    <span>AI System Load</span>
-                    <span className="text-green-400 text-xs">Supabase Backend</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 sm:gap-4">
-                    <div className="text-center">
-                      <div className="text-xs text-slate-400">CPU</div>
-                      <div className="text-white font-bold text-sm sm:text-base">{systemLoad.cpu}%</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xs text-slate-400">Memory</div>
-                      <div className="text-white font-bold text-sm sm:text-base">{systemLoad.memory}%</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xs text-slate-400">Processing</div>
-                      <div className="text-white font-bold text-sm sm:text-base">{systemLoad.processing}%</div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Success Message */}
+          <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-3 sm:p-4 flex items-center space-x-3">
+            <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 flex-shrink-0" />
+            <div>
+              <div className="text-green-400 font-semibold text-xs sm:text-sm">Supabase Backend Active</div>
+              <div className="text-green-300 text-xs mt-1">
+                Using integrated Supabase backend for real-time ANPR processing and data management.
+              </div>
+            </div>
           </div>
 
-          {/* Enhanced Side Panel - Takes 4 columns on XL screens */}
-          <div className="xl:col-span-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-4">
-              <ThreatAnalysisOverview cameraId={selectedCamera} />
-              <RecentSDNActions cameraId={selectedCamera} />
-              <PythonANPRService />
-              <AIRealTimeAnalytics cameraId={selectedCamera} />
-              <LiveAlerts 
-                selectedCamera={selectedCamera}
-                isLive={isLiveMode && isRecording}
-              />
-              <RecentDetections
-                plateHistory={plateHistory}
-                selectedCamera={selectedCamera}
-              />
-              <CameraNetworkStatus
-                cameras={cameras}
-                selectedCamera={selectedCamera}
-                onCameraSelect={handleCameraSelect}
-              />
+          {/* Camera Selector */}
+          <CameraSelector
+            cameras={cameras}
+            selectedCamera={selectedCamera}
+            onCameraSelect={handleCameraSelect}
+          />
+
+          {/* Main Content Grid - Improved Layout */}
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            {/* Main Live Video Feed - Takes 2 columns on XL screens */}
+            <div className="xl:col-span-2 space-y-6">
+              <Card className="bg-slate-800/50 border-slate-700">
+                <CardHeader className="pb-3">
+                  <div className="flex flex-col space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+                    <CardTitle className="text-white text-base sm:text-lg lg:text-xl flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 flex-wrap">
+                        <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${isLiveMode && isRecording ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}`}></div>
+                        <span className="text-sm sm:text-base lg:text-lg">AI Live Camera Feed - {currentCamera?.id}</span>
+                        {trafficPattern.peakHours && (
+                          <Badge variant="secondary" className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
+                            PEAK
+                          </Badge>
+                        )}
+                        <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
+                          SUPABASE
+                        </Badge>
+                      </div>
+                    </CardTitle>
+                    <div className="w-full lg:w-auto">
+                      <CameraControls
+                        isRecording={isRecording}
+                        frameRate={currentCamera?.fps || 30}
+                        resolution={currentCamera?.resolution || "1920x1080"}
+                        isFullscreen={isFullscreen}
+                        audioEnabled={audioEnabled}
+                        onRecordingToggle={handleRecordingToggle}
+                        onFullscreenToggle={handleFullscreenToggle}
+                        onAudioToggle={handleAudioToggle}
+                      />
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-3 sm:p-6">
+                  <LiveVideoCanvas
+                    isRecording={isRecording && isLiveMode}
+                    isFullscreen={isFullscreen}
+                    currentCamera={currentCamera}
+                    frameRate={currentCamera?.fps || 30}
+                    vehicleCount={trafficPattern.vehicleCount}
+                    detectedPlate={detectedPlate}
+                    confidence={confidence}
+                    processingStep={processingStep}
+                    onVehicleCountUpdate={handleVehicleCountUpdate}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Processing Pipeline */}
+              <Card className="bg-slate-800/50 border-slate-700">
+                <CardContent className="p-3 sm:p-4">
+                  <ProcessingPipeline
+                    processingStep={processingStep}
+                    processingSteps={processingSteps}
+                  />
+                  
+                  {/* AI System Load Indicator */}
+                  <div className="mt-4 p-3 bg-slate-700/30 rounded-lg">
+                    <div className="text-white text-sm font-semibold mb-2 flex items-center justify-between">
+                      <span>AI System Load</span>
+                      <span className="text-green-400 text-xs">Supabase Backend</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 sm:gap-4">
+                      <div className="text-center">
+                        <div className="text-xs text-slate-400">CPU</div>
+                        <div className="text-white font-bold text-sm sm:text-base">{systemLoad.cpu}%</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-xs text-slate-400">Memory</div>
+                        <div className="text-white font-bold text-sm sm:text-base">{systemLoad.memory}%</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-xs text-slate-400">Processing</div>
+                        <div className="text-white font-bold text-sm sm:text-base">{systemLoad.processing}%</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Enhanced Side Panel - Takes 1 column on XL screens */}
+            <div className="xl:col-span-1">
+              <div className="space-y-4">
+                <ThreatAnalysisOverview cameraId={selectedCamera} />
+                <RecentSDNActions cameraId={selectedCamera} />
+                <PythonANPRService />
+                <AIRealTimeAnalytics cameraId={selectedCamera} />
+                <LiveAlerts 
+                  selectedCamera={selectedCamera}
+                  isLive={isLiveMode && isRecording}
+                />
+                <RecentDetections
+                  plateHistory={plateHistory}
+                  selectedCamera={selectedCamera}
+                />
+                <CameraNetworkStatus
+                  cameras={cameras}
+                  selectedCamera={selectedCamera}
+                  onCameraSelect={handleCameraSelect}
+                />
+              </div>
             </div>
           </div>
         </div>
