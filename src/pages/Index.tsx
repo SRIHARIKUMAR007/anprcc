@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { TabsContent } from "@/components/ui/tabs";
 import AuthWrapper from "@/components/AuthWrapper";
@@ -25,13 +26,11 @@ import { MobileOptimizedTabs } from "@/components/MobileOptimizedTabs";
 import { useAuth } from "@/hooks/useAuth";
 import { useEnhancedBackendIntegration } from "@/hooks/useEnhancedBackendIntegration";
 import HeaderSection from "@/components/dashboard/HeaderSection";
-import WelcomeMessage from "@/components/dashboard/WelcomeMessage";
-import StatusCards from "@/components/dashboard/StatusCards";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import RoleBasedAccess from "@/components/RoleBasedAccess";
 import SecurityMonitoring from "@/components/SecurityMonitoring";
-
-import SDNControllerPage from "@/components/SDNControllerPage";
+import EnhancedDashboard from "@/components/dashboard/EnhancedDashboard";
+import EnhancedSDNController from "@/components/sdn/EnhancedSDNController";
 
 const Index = () => {
   const { user, userProfile } = useAuth();
@@ -44,29 +43,6 @@ const Index = () => {
     connectionHealth,
     isFullyConnected
   } = useEnhancedBackendIntegration();
-  
-  const [systemStatus, setSystemStatus] = useState({
-    cameras: cameras.length || 8,
-    activeCameras: cameras.filter(c => c.status === 'active').length || 7,
-    vehiclesDetected: systemStats?.detections_today || 1247,
-    plateRecognitions: systemStats?.detections_today || 1189,
-    alerts: 3,
-    networkHealth: 98
-  });
-
-  // Update system status when real data changes
-  useEffect(() => {
-    if (systemStats && cameras.length > 0) {
-      setSystemStatus({
-        cameras: cameras.length,
-        activeCameras: cameras.filter(c => c.status === 'active').length,
-        vehiclesDetected: systemStats.detections_today,
-        plateRecognitions: systemStats.detections_today,
-        alerts: 3,
-        networkHealth: isFullyConnected ? 98 : 75
-      });
-    }
-  }, [systemStats, cameras, isFullyConnected]);
 
   return (
     <AuthWrapper>
@@ -77,28 +53,20 @@ const Index = () => {
             isBackendConnected={isBackendConnected}
           />
 
-          <WelcomeMessage 
-            user={user}
-            userProfile={userProfile}
-            isConnected={isConnected}
-            isBackendConnected={isBackendConnected}
-          />
-
-          <StatusCards 
-            systemStatus={systemStatus}
-            systemStats={systemStats}
-          />
-
           {/* Main Dashboard Tabs */}
           <div className="animate-fade-in">
-            <MobileOptimizedTabs defaultValue="realtime">
+            <MobileOptimizedTabs defaultValue="home">
               
+              <TabsContent value="home">
+                <EnhancedDashboard />
+              </TabsContent>
+
               <TabsContent value="realtime">
                 <RealTimeMonitor />
               </TabsContent>
 
               <TabsContent value="sdn-controller">
-                <SDNControllerPage />
+                <EnhancedSDNController />
               </TabsContent>
 
               <TabsContent value="live-data">

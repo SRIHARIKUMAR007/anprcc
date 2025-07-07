@@ -19,7 +19,8 @@ import {
   Users,
   FileImage,
   TrendingUp,
-  Network
+  Network,
+  Home
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import RoleBasedAccess from "./RoleBasedAccess";
@@ -29,7 +30,7 @@ interface MobileOptimizedTabsProps {
   defaultValue?: string;
 }
 
-export const MobileOptimizedTabs = ({ children, defaultValue = "realtime" }: MobileOptimizedTabsProps) => {
+export const MobileOptimizedTabs = ({ children, defaultValue = "home" }: MobileOptimizedTabsProps) => {
   const { userProfile } = useAuth();
   
   return (
@@ -37,6 +38,15 @@ export const MobileOptimizedTabs = ({ children, defaultValue = "realtime" }: Mob
       <div className="w-full border-b border-cyan-500/30 cyber-glass sticky top-0 z-40 backdrop-blur-xl">
         <ScrollArea className="w-full whitespace-nowrap">
           <TabsList className="inline-flex h-20 w-max min-w-full items-center justify-start gap-3 p-4 bg-transparent">
+            
+            {/* Home Tab - New primary tab */}
+            <TabsTrigger 
+              value="home" 
+              className="flex flex-col items-center space-y-2 p-4 min-w-[100px] h-16 text-xs data-[state=active]:cyber-glow data-[state=active]:bg-gradient-to-br data-[state=active]:from-emerald-500/30 data-[state=active]:to-cyan-500/30 data-[state=active]:text-emerald-300 data-[state=active]:border-2 data-[state=active]:border-emerald-400/50 hover:bg-slate-700/40 transition-all duration-300 rounded-xl cyber-glass shadow-lg"
+            >
+              <Home className="w-6 h-6" />
+              <span className="font-semibold">Home</span>
+            </TabsTrigger>
             
             {/* Core Tabs - Available to all users */}
             <TabsTrigger 
