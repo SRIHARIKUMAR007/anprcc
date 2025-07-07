@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { TabsContent } from "@/components/ui/tabs";
 import AuthWrapper from "@/components/AuthWrapper";
@@ -11,8 +12,6 @@ import SystemControls from "@/components/SystemControls";
 import RealTimeDashboard from "@/components/RealTimeDashboard";
 import VehicleUpdates from "@/components/VehicleUpdates";
 import ImageProcessingPipeline from "@/components/ImageProcessingPipeline";
-import SDNNetworkManager from "@/components/SDNNetworkManager";
-import ParkingManagement from "@/components/ParkingManagement";
 import ImageUploadProcessor from "@/components/ImageUploadProcessor";
 import TamilNaduTrafficMap from "@/components/TamilNaduTrafficMap";
 import TollPlazaMonitor from "@/components/TollPlazaMonitor";
@@ -29,7 +28,6 @@ import { useEnhancedBackendIntegration } from "@/hooks/useEnhancedBackendIntegra
 import HeaderSection from "@/components/dashboard/HeaderSection";
 import WelcomeMessage from "@/components/dashboard/WelcomeMessage";
 import StatusCards from "@/components/dashboard/StatusCards";
-import RecentDetectionsList from "@/components/livefeed/RecentDetectionsList";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import RoleBasedAccess from "@/components/RoleBasedAccess";
 import SecurityMonitoring from "@/components/SecurityMonitoring";
@@ -155,22 +153,10 @@ const Index = () => {
                 <VehicleDetails />
               </TabsContent>
 
-              <TabsContent value="network">
-                <NetworkTopology />
-              </TabsContent>
-
               {/* Admin only features */}
               <RoleBasedAccess allowedRoles={['admin']}>
                 <TabsContent value="activity">
                   <UserActivityTracker />
-                </TabsContent>
-
-                <TabsContent value="sdn-manager">
-                  <SDNNetworkManager />
-                </TabsContent>
-
-                <TabsContent value="parking">
-                  <ParkingManagement />
                 </TabsContent>
 
                 <TabsContent value="controls">

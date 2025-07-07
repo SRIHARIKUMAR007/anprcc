@@ -15,13 +15,13 @@ import {
   Upload,
   Car,
   Bell,
-  Network,
   Settings,
-  ParkingCircle,
   Users,
   FileImage,
   TrendingUp
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import RoleBasedAccess from "./RoleBasedAccess";
 
 interface MobileOptimizedTabsProps {
   children: React.ReactNode;
@@ -29,14 +29,18 @@ interface MobileOptimizedTabsProps {
 }
 
 export const MobileOptimizedTabs = ({ children, defaultValue = "realtime" }: MobileOptimizedTabsProps) => {
+  const { userProfile } = useAuth();
+  
   return (
     <Tabs defaultValue={defaultValue} className="w-full">
-      <div className="w-full border-b border-purple-500/20 bg-gradient-to-r from-slate-900/90 to-purple-900/90 backdrop-blur-md">
+      <div className="w-full border-b border-purple-500/20 cyber-glass sticky top-0 z-40">
         <ScrollArea className="w-full whitespace-nowrap">
           <TabsList className="inline-flex h-16 w-max min-w-full items-center justify-start gap-1 p-2 bg-transparent">
+            
+            {/* Core Tabs - Available to all users */}
             <TabsTrigger 
               value="realtime" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500/20 data-[state=active]:to-cyan-500/20 data-[state=active]:text-cyan-300 data-[state=active]:border data-[state=active]:border-cyan-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
+              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:cyber-glow data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500/20 data-[state=active]:to-cyan-500/20 data-[state=active]:text-cyan-300 data-[state=active]:border data-[state=active]:border-cyan-400/30 hover:bg-slate-700/30 transition-all duration-300 rounded-lg cyber-text-glow"
             >
               <Activity className="w-5 h-5" />
               <span>Real-time</span>
@@ -44,7 +48,7 @@ export const MobileOptimizedTabs = ({ children, defaultValue = "realtime" }: Mob
             
             <TabsTrigger 
               value="live-data" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-emerald-500/20 data-[state=active]:to-green-500/20 data-[state=active]:text-emerald-300 data-[state=active]:border data-[state=active]:border-emerald-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
+              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:cyber-glow-green data-[state=active]:bg-gradient-to-br data-[state=active]:from-emerald-500/20 data-[state=active]:to-green-500/20 data-[state=active]:text-emerald-300 data-[state=active]:border data-[state=active]:border-emerald-400/30 hover:bg-slate-700/30 transition-all duration-300 rounded-lg"
             >
               <Database className="w-5 h-5" />
               <span>Live Data</span>
@@ -52,7 +56,7 @@ export const MobileOptimizedTabs = ({ children, defaultValue = "realtime" }: Mob
 
             <TabsTrigger 
               value="security" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500/20 data-[state=active]:to-violet-500/20 data-[state=active]:text-purple-300 data-[state=active]:border data-[state=active]:border-purple-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
+              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:cyber-glow data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500/20 data-[state=active]:to-violet-500/20 data-[state=active]:text-purple-300 data-[state=active]:border data-[state=active]:border-purple-400/30 hover:bg-slate-700/30 transition-all duration-300 rounded-lg"
             >
               <Shield className="w-5 h-5" />
               <span>Security</span>
@@ -60,7 +64,7 @@ export const MobileOptimizedTabs = ({ children, defaultValue = "realtime" }: Mob
 
             <TabsTrigger 
               value="tn-traffic" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-orange-500/20 data-[state=active]:to-amber-500/20 data-[state=active]:text-orange-300 data-[state=active]:border data-[state=active]:border-orange-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
+              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-orange-500/20 data-[state=active]:to-amber-500/20 data-[state=active]:text-orange-300 data-[state=active]:border data-[state=active]:border-orange-400/30 hover:bg-slate-700/30 transition-all duration-300 rounded-lg"
             >
               <MapPin className="w-5 h-5" />
               <span>TN Traffic</span>
@@ -68,7 +72,7 @@ export const MobileOptimizedTabs = ({ children, defaultValue = "realtime" }: Mob
 
             <TabsTrigger 
               value="toll-monitor" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-cyan-500/20 data-[state=active]:to-teal-500/20 data-[state=active]:text-cyan-300 data-[state=active]:border data-[state=active]:border-cyan-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
+              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:cyber-glow-cyan data-[state=active]:bg-gradient-to-br data-[state=active]:from-cyan-500/20 data-[state=active]:to-teal-500/20 data-[state=active]:text-cyan-300 data-[state=active]:border data-[state=active]:border-cyan-400/30 hover:bg-slate-700/30 transition-all duration-300 rounded-lg"
             >
               <Truck className="w-5 h-5" />
               <span>Toll Plaza</span>
@@ -76,7 +80,7 @@ export const MobileOptimizedTabs = ({ children, defaultValue = "realtime" }: Mob
 
             <TabsTrigger 
               value="weather" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-indigo-500/20 data-[state=active]:to-blue-500/20 data-[state=active]:text-indigo-300 data-[state=active]:border data-[state=active]:border-indigo-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
+              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-indigo-500/20 data-[state=active]:to-blue-500/20 data-[state=active]:text-indigo-300 data-[state=active]:border data-[state=active]:border-indigo-400/30 hover:bg-slate-700/30 transition-all duration-300 rounded-lg"
             >
               <Cloud className="w-5 h-5" />
               <span>Weather</span>
@@ -84,7 +88,7 @@ export const MobileOptimizedTabs = ({ children, defaultValue = "realtime" }: Mob
 
             <TabsTrigger 
               value="dashboard" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-violet-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-violet-300 data-[state=active]:border data-[state=active]:border-violet-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
+              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-violet-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-violet-300 data-[state=active]:border data-[state=active]:border-violet-400/30 hover:bg-slate-700/30 transition-all duration-300 rounded-lg"
             >
               <BarChart3 className="w-5 h-5" />
               <span>Dashboard</span>
@@ -92,7 +96,7 @@ export const MobileOptimizedTabs = ({ children, defaultValue = "realtime" }: Mob
 
             <TabsTrigger 
               value="live" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-red-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-red-300 data-[state=active]:border data-[state=active]:border-red-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
+              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-red-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-red-300 data-[state=active]:border data-[state=active]:border-red-400/30 hover:bg-slate-700/30 transition-all duration-300 rounded-lg"
             >
               <Camera className="w-5 h-5" />
               <span>Live Feed</span>
@@ -100,39 +104,43 @@ export const MobileOptimizedTabs = ({ children, defaultValue = "realtime" }: Mob
 
             <TabsTrigger 
               value="health" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-emerald-500/20 data-[state=active]:to-green-500/20 data-[state=active]:text-emerald-300 data-[state=active]:border data-[state=active]:border-emerald-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
+              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:cyber-glow-green data-[state=active]:bg-gradient-to-br data-[state=active]:from-emerald-500/20 data-[state=active]:to-green-500/20 data-[state=active]:text-emerald-300 data-[state=active]:border data-[state=active]:border-emerald-400/30 hover:bg-slate-700/30 transition-all duration-300 rounded-lg"
             >
               <Heart className="w-5 h-5" />
               <span>Health</span>
             </TabsTrigger>
 
-            <TabsTrigger 
-              value="export" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-teal-500/20 data-[state=active]:to-cyan-500/20 data-[state=active]:text-teal-300 data-[state=active]:border data-[state=active]:border-teal-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
-            >
-              <Download className="w-5 h-5" />
-              <span>Export</span>
-            </TabsTrigger>
+            {/* Operator and Admin only tabs */}
+            <RoleBasedAccess allowedRoles={['admin', 'operator']}>
+              <TabsTrigger 
+                value="export" 
+                className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:cyber-glow-cyan data-[state=active]:bg-gradient-to-br data-[state=active]:from-teal-500/20 data-[state=active]:to-cyan-500/20 data-[state=active]:text-teal-300 data-[state=active]:border data-[state=active]:border-teal-400/30 hover:bg-slate-700/30 transition-all duration-300 rounded-lg"
+              >
+                <Download className="w-5 h-5" />
+                <span>Export</span>
+              </TabsTrigger>
 
-            <TabsTrigger 
-              value="image-processing" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-pink-500/20 data-[state=active]:to-rose-500/20 data-[state=active]:text-pink-300 data-[state=active]:border data-[state=active]:border-pink-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
-            >
-              <FileImage className="w-5 h-5" />
-              <span>Image Proc</span>
-            </TabsTrigger>
+              <TabsTrigger 
+                value="image-processing" 
+                className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-pink-500/20 data-[state=active]:to-rose-500/20 data-[state=active]:text-pink-300 data-[state=active]:border data-[state=active]:border-pink-400/30 hover:bg-slate-700/30 transition-all duration-300 rounded-lg"
+              >
+                <FileImage className="w-5 h-5" />
+                <span>Image Proc</span>
+              </TabsTrigger>
 
-            <TabsTrigger 
-              value="vehicle-updates" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-lime-500/20 data-[state=active]:to-green-500/20 data-[state=active]:text-lime-300 data-[state=active]:border data-[state=active]:border-lime-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
-            >
-              <Upload className="w-5 h-5" />
-              <span>Updates</span>
-            </TabsTrigger>
+              <TabsTrigger 
+                value="vehicle-updates" 
+                className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-lime-500/20 data-[state=active]:to-green-500/20 data-[state=active]:text-lime-300 data-[state=active]:border data-[state=active]:border-lime-400/30 hover:bg-slate-700/30 transition-all duration-300 rounded-lg"
+              >
+                <Upload className="w-5 h-5" />
+                <span>Updates</span>
+              </TabsTrigger>
+            </RoleBasedAccess>
 
+            {/* Common tabs */}
             <TabsTrigger 
               value="vehicle-details" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-yellow-500/20 data-[state=active]:to-amber-500/20 data-[state=active]:text-yellow-300 data-[state=active]:border data-[state=active]:border-yellow-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
+              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-yellow-500/20 data-[state=active]:to-amber-500/20 data-[state=active]:text-yellow-300 data-[state=active]:border data-[state=active]:border-yellow-400/30 hover:bg-slate-700/30 transition-all duration-300 rounded-lg"
             >
               <Car className="w-5 h-5" />
               <span>Vehicles</span>
@@ -140,23 +148,15 @@ export const MobileOptimizedTabs = ({ children, defaultValue = "realtime" }: Mob
 
             <TabsTrigger 
               value="alerts" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-red-500/20 data-[state=active]:to-orange-500/20 data-[state=active]:text-red-300 data-[state=active]:border data-[state=active]:border-red-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
+              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-red-500/20 data-[state=active]:to-orange-500/20 data-[state=active]:text-red-300 data-[state=active]:border data-[state=active]:border-red-400/30 hover:bg-slate-700/30 transition-all duration-300 rounded-lg"
             >
               <Bell className="w-5 h-5" />
               <span>Alerts</span>
             </TabsTrigger>
 
             <TabsTrigger 
-              value="network" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500/20 data-[state=active]:to-indigo-500/20 data-[state=active]:text-blue-300 data-[state=active]:border data-[state=active]:border-blue-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
-            >
-              <Network className="w-5 h-5" />
-              <span>Network</span>
-            </TabsTrigger>
-
-            <TabsTrigger 
               value="analytics" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-purple-300 data-[state=active]:border data-[state=active]:border-purple-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
+              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:cyber-glow data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-purple-300 data-[state=active]:border data-[state=active]:border-purple-400/30 hover:bg-slate-700/30 transition-all duration-300 rounded-lg"
             >
               <TrendingUp className="w-5 h-5" />
               <span>Analytics</span>
@@ -164,39 +164,26 @@ export const MobileOptimizedTabs = ({ children, defaultValue = "realtime" }: Mob
 
             <TabsTrigger 
               value="activity" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-indigo-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-indigo-300 data-[state=active]:border data-[state=active]:border-indigo-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
+              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-indigo-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-indigo-300 data-[state=active]:border data-[state=active]:border-indigo-400/30 hover:bg-slate-700/30 transition-all duration-300 rounded-lg"
             >
               <Users className="w-5 h-5" />
               <span>Activity</span>
             </TabsTrigger>
 
-            <TabsTrigger 
-              value="sdn-manager" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-cyan-500/20 data-[state=active]:to-blue-500/20 data-[state=active]:text-cyan-300 data-[state=active]:border data-[state=active]:border-cyan-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
-            >
-              <Network className="w-5 h-5" />
-              <span>SDN</span>
-            </TabsTrigger>
-
-            <TabsTrigger 
-              value="parking" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-orange-500/20 data-[state=active]:to-red-500/20 data-[state=active]:text-orange-300 data-[state=active]:border data-[state=active]:border-orange-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
-            >
-              <ParkingCircle className="w-5 h-5" />
-              <span>Parking</span>
-            </TabsTrigger>
-
-            <TabsTrigger 
-              value="controls" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-gray-500/20 data-[state=active]:to-slate-500/20 data-[state=active]:text-gray-300 data-[state=active]:border data-[state=active]:border-gray-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
-            >
-              <Settings className="w-5 h-5" />
-              <span>Controls</span>
-            </TabsTrigger>
+            {/* Admin only tabs */}
+            <RoleBasedAccess allowedRoles={['admin']}>
+              <TabsTrigger 
+                value="controls" 
+                className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-gray-500/20 data-[state=active]:to-slate-500/20 data-[state=active]:text-gray-300 data-[state=active]:border data-[state=active]:border-gray-400/30 hover:bg-slate-700/30 transition-all duration-300 rounded-lg"
+              >
+                <Settings className="w-5 h-5" />
+                <span>Controls</span>
+              </TabsTrigger>
+            </RoleBasedAccess>
 
             <TabsTrigger 
               value="database" 
-              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:bg-gradient-to-br data-[state=active]:from-emerald-500/20 data-[state=active]:to-teal-500/20 data-[state=active]:text-emerald-300 data-[state=active]:border data-[state=active]:border-emerald-400/30 hover:bg-slate-700/30 transition-all duration-200 rounded-lg"
+              className="flex flex-col items-center space-y-1 p-3 min-w-[90px] text-xs data-[state=active]:cyber-glow-green data-[state=active]:bg-gradient-to-br data-[state=active]:from-emerald-500/20 data-[state=active]:to-teal-500/20 data-[state=active]:text-emerald-300 data-[state=active]:border data-[state=active]:border-emerald-400/30 hover:bg-slate-700/30 transition-all duration-300 rounded-lg"
             >
               <Database className="w-5 h-5" />
               <span>Database</span>
