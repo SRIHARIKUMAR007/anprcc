@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Activity, Pause, Play, Radio, CheckCircle, Camera } from "lucide-react";
+import { Activity, Pause, Play, Radio, CheckCircle, Camera, Monitor, Zap } from "lucide-react";
 import CameraSelector from "./livefeed/CameraSelector";
 import CameraControls from "./livefeed/CameraControls";
 import LiveVideoCanvas from "./livefeed/LiveVideoCanvas";
@@ -117,11 +117,11 @@ const LiveFeed = () => {
   // Get connection status for display
   const getConnectionStatus = () => {
     if (connectionHealth.backend && connectionHealth.database) {
-      return { status: 'Supabase Active', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' };
+      return { status: 'Live Connected', color: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/30' };
     } else if (connectionHealth.database) {
-      return { status: 'Database Only', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' };
+      return { status: 'Database Only', color: 'bg-amber-400/10 text-amber-300 border-amber-400/30' };
     } else {
-      return { status: 'Demo Mode', color: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' };
+      return { status: 'Demo Mode', color: 'bg-cyan-400/10 text-cyan-300 border-cyan-400/30' };
     }
   };
 
@@ -129,68 +129,68 @@ const LiveFeed = () => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen animated-bg p-4 lg:p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-4 lg:p-6">
         <div className="max-w-7xl mx-auto space-y-6">
-          {/* Enhanced Header with New Theme */}
-          <div className="enhanced-card p-6 animate-fade-in">
+          {/* Enhanced Header */}
+          <div className="bg-gradient-to-r from-slate-800/80 to-indigo-900/80 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 shadow-2xl animate-fade-in">
             <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
               <div className="flex items-center space-x-4">
-                <div className="p-3 rounded-full bg-gradient-to-r from-purple-500/20 to-cyan-500/20 neon-glow">
-                  <Camera className="w-6 h-6 text-cyan-400" />
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-600/20 border border-indigo-400/30 shadow-lg">
+                  <Monitor className="w-8 h-8 text-indigo-300" />
                 </div>
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-bold gradient-text text-neon">
-                    AI-Powered Live Camera Feed System
-                  </h2>
-                  <p className="text-purple-200 text-sm sm:text-base">
-                    Real-time AI monitoring • {cameras.filter(c => c.status === 'active').length} active cameras
+                  <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-white via-indigo-200 to-purple-300 bg-clip-text text-transparent">
+                    AI-Powered Live Camera Feed
+                  </h1>
+                  <p className="text-slate-300 text-sm sm:text-base mt-1">
+                    Real-time ANPR monitoring • {cameras.filter(c => c.status === 'active').length} active cameras
                     {trafficPattern.peakHours && (
-                      <span className="text-amber-400 ml-2">• Peak Hours Active</span>
+                      <span className="text-amber-300 ml-2">• Peak Traffic Hours</span>
                     )}
                   </p>
                 </div>
               </div>
               
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <Button
                   variant={isLiveMode ? "default" : "outline"}
                   size="sm"
                   onClick={toggleLiveMode}
-                  className="flex items-center space-x-2 text-xs sm:text-sm bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 border-0"
+                  className={`flex items-center space-x-2 text-sm transition-all duration-300 ${
+                    isLiveMode 
+                      ? 'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white border-0 shadow-lg' 
+                      : 'bg-slate-700/50 text-slate-300 border-slate-600 hover:bg-slate-600/50'
+                  }`}
                 >
-                  <Radio className={`w-3 h-3 sm:w-4 sm:h-4 ${isLiveMode ? 'animate-pulse' : ''}`} />
-                  <span>{isLiveMode ? 'AI LIVE MODE' : 'DEMO MODE'}</span>
+                  <Zap className={`w-4 h-4 ${isLiveMode ? 'animate-pulse' : ''}`} />
+                  <span>{isLiveMode ? 'LIVE MODE' : 'DEMO MODE'}</span>
                 </Button>
                 
-                <Badge variant="secondary" className={`text-xs ${isLiveMode ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 animate-pulse' : 'bg-gray-500/20 text-gray-400 border-gray-500/30'}`}>
-                  {isLiveMode ? 'AI REAL-TIME ACTIVE' : 'SIMULATION MODE'}
+                <Badge variant="secondary" className={`${isLiveMode ? 'bg-emerald-400/10 text-emerald-300 border-emerald-400/30 animate-pulse' : 'bg-slate-600/20 text-slate-400 border-slate-500/30'}`}>
+                  {isLiveMode ? 'REAL-TIME ACTIVE' : 'SIMULATION'}
                 </Badge>
 
-                <Badge variant="secondary" className={connectionStatus.color + " text-xs"}>
+                <Badge variant="secondary" className={connectionStatus.color}>
                   {connectionStatus.status}
                 </Badge>
 
                 {isAIProcessing && (
-                  <Badge variant="secondary" className="bg-purple-500/20 text-purple-400 border-purple-500/30 animate-pulse text-xs">
+                  <Badge variant="secondary" className="bg-purple-400/10 text-purple-300 border-purple-400/30 animate-pulse">
                     AI PROCESSING
                   </Badge>
                 )}
-                
-                <Badge variant="outline" className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 text-xs">
-                  Tamil Nadu Traffic Control
-                </Badge>
               </div>
             </div>
           </div>
 
-          {/* Success Message with New Theme */}
-          <div className="enhanced-card p-4 animate-slide-in">
+          {/* Status Indicator */}
+          <div className="bg-gradient-to-r from-slate-800/60 to-slate-700/60 backdrop-blur-xl border border-slate-600/50 rounded-xl p-4 shadow-xl animate-slide-in">
             <div className="flex items-center space-x-3">
-              <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+              <CheckCircle className="w-6 h-6 text-emerald-400 flex-shrink-0" />
               <div>
-                <div className="text-emerald-400 font-semibold text-sm">Supabase Backend Active</div>
-                <div className="text-purple-200 text-xs mt-1">
-                  Using integrated Supabase backend for real-time ANPR processing and data management.
+                <div className="text-emerald-300 font-semibold">System Operational</div>
+                <div className="text-slate-300 text-sm mt-1">
+                  Integrated backend processing with real-time ANPR detection and Tamil Nadu traffic monitoring.
                 </div>
               </div>
             </div>
@@ -205,22 +205,24 @@ const LiveFeed = () => {
             />
           </div>
 
-          {/* Main Live Video Feed - Full Width */}
+          {/* Main Live Video Feed */}
           <div className="animate-slide-in" style={{ animationDelay: '0.2s' }}>
-            <Card className="enhanced-card">
-              <CardHeader className="pb-3">
+            <Card className="bg-gradient-to-br from-slate-800/60 to-slate-700/60 backdrop-blur-xl border border-slate-600/50 shadow-2xl rounded-2xl overflow-hidden">
+              <CardHeader className="pb-4 bg-gradient-to-r from-slate-800/80 to-slate-700/80">
                 <div className="flex flex-col space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
-                  <CardTitle className="text-white text-base sm:text-lg lg:text-xl flex items-center space-x-2">
-                    <div className="flex items-center space-x-2 flex-wrap">
-                      <div className={`w-3 h-3 rounded-full ${isLiveMode && isRecording ? 'bg-red-500 animate-pulse neon-glow' : 'bg-gray-400'}`}></div>
-                      <span className="gradient-text text-neon">AI Live Camera Feed - {currentCamera?.id}</span>
+                  <CardTitle className="text-white text-lg sm:text-xl lg:text-2xl flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 flex-wrap">
+                      <div className={`w-4 h-4 rounded-full ${isLiveMode && isRecording ? 'bg-red-500 animate-pulse shadow-lg shadow-red-500/50' : 'bg-slate-500'}`}></div>
+                      <span className="bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-transparent font-bold">
+                        Live Camera Feed - {currentCamera?.id}
+                      </span>
                       {trafficPattern.peakHours && (
-                        <Badge variant="secondary" className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">
-                          PEAK
+                        <Badge variant="secondary" className="bg-amber-400/10 text-amber-300 border-amber-400/30">
+                          PEAK TRAFFIC
                         </Badge>
                       )}
-                      <Badge variant="secondary" className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                        SUPABASE
+                      <Badge variant="secondary" className="bg-indigo-400/10 text-indigo-300 border-indigo-400/30">
+                        AI ENHANCED
                       </Badge>
                     </div>
                   </CardTitle>
@@ -238,7 +240,7 @@ const LiveFeed = () => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="p-3 sm:p-6">
+              <CardContent className="p-6">
                 <LiveVideoCanvas
                   isRecording={isRecording && isLiveMode}
                   isFullscreen={isFullscreen}
@@ -254,33 +256,55 @@ const LiveFeed = () => {
             </Card>
           </div>
 
-          {/* Processing Pipeline with New Theme */}
+          {/* Processing Pipeline */}
           <div className="animate-slide-in" style={{ animationDelay: '0.3s' }}>
-            <Card className="enhanced-card">
-              <CardContent className="p-4">
+            <Card className="bg-gradient-to-br from-slate-800/60 to-slate-700/60 backdrop-blur-xl border border-slate-600/50 shadow-xl rounded-xl">
+              <CardContent className="p-6">
                 <ProcessingPipeline
                   processingStep={processingStep}
                   processingSteps={processingSteps}
                 />
                 
-                {/* AI System Load Indicator with New Theme */}
-                <div className="mt-4 p-4 bg-gradient-to-r from-purple-900/20 to-cyan-900/20 rounded-lg border border-purple-500/20">
-                  <div className="text-white text-sm font-semibold mb-3 flex items-center justify-between">
-                    <span className="gradient-text">AI System Load</span>
-                    <span className="text-emerald-400 text-xs">Supabase Backend</span>
+                {/* AI System Load Indicator */}
+                <div className="mt-6 p-6 bg-gradient-to-r from-indigo-900/30 to-purple-900/30 rounded-xl border border-indigo-500/20 shadow-inner">
+                  <div className="text-white text-lg font-semibold mb-4 flex items-center justify-between">
+                    <span className="bg-gradient-to-r from-indigo-300 to-purple-300 bg-clip-text text-transparent">
+                      AI System Performance
+                    </span>
+                    <Badge variant="secondary" className="bg-indigo-400/10 text-indigo-300 border-indigo-400/30">
+                      Real-time Monitoring
+                    </Badge>
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center">
-                      <div className="text-xs text-purple-300">CPU</div>
-                      <div className="text-cyan-400 font-bold text-base neon-glow">{systemLoad.cpu}%</div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div className="text-center p-4 bg-slate-700/30 rounded-lg border border-slate-600/30">
+                      <div className="text-sm text-slate-400 mb-2">CPU Usage</div>
+                      <div className="text-2xl font-bold text-cyan-300 mb-1">{systemLoad.cpu}%</div>
+                      <div className="w-full bg-slate-600 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full transition-all duration-500" 
+                          style={{ width: `${systemLoad.cpu}%` }}
+                        ></div>
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-xs text-purple-300">Memory</div>
-                      <div className="text-purple-400 font-bold text-base neon-glow">{systemLoad.memory}%</div>
+                    <div className="text-center p-4 bg-slate-700/30 rounded-lg border border-slate-600/30">
+                      <div className="text-sm text-slate-400 mb-2">Memory</div>
+                      <div className="text-2xl font-bold text-purple-300 mb-1">{systemLoad.memory}%</div>
+                      <div className="w-full bg-slate-600 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-500" 
+                          style={{ width: `${systemLoad.memory}%` }}
+                        ></div>
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-xs text-purple-300">Processing</div>
-                      <div className="text-pink-400 font-bold text-base neon-glow">{systemLoad.processing}%</div>
+                    <div className="text-center p-4 bg-slate-700/30 rounded-lg border border-slate-600/30">
+                      <div className="text-sm text-slate-400 mb-2">Processing</div>
+                      <div className="text-2xl font-bold text-emerald-300 mb-1">{systemLoad.processing}%</div>
+                      <div className="w-full bg-slate-600 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-emerald-500 to-green-500 h-2 rounded-full transition-all duration-500" 
+                          style={{ width: `${systemLoad.processing}%` }}
+                        ></div>
+                      </div>
                     </div>
                   </div>
                 </div>

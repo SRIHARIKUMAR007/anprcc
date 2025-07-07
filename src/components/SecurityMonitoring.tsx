@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Shield, Network, AlertTriangle, Eye } from "lucide-react";
+import { Shield, Network, AlertTriangle, Eye, Lock } from "lucide-react";
 import ThreatAnalysisOverview from "./livefeed/ThreatAnalysisOverview";
 import RecentSDNActions from "./livefeed/RecentSDNActions";
 import PythonANPRService from "./livefeed/PythonANPRService";
@@ -49,34 +49,34 @@ const SecurityMonitoring = () => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen animated-bg p-4 lg:p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-purple-950 p-4 lg:p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Header */}
-          <div className="enhanced-card p-6 animate-fade-in">
+          <div className="bg-gradient-to-r from-slate-800/80 to-purple-900/80 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 shadow-2xl animate-fade-in">
             <div className="flex items-center space-x-4">
-              <div className="p-3 rounded-full bg-gradient-to-r from-purple-500/20 to-cyan-500/20 neon-glow">
-                <Shield className="w-8 h-8 text-cyan-400" />
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/20 to-indigo-600/20 border border-purple-400/30 shadow-lg">
+                <Lock className="w-8 h-8 text-purple-300" />
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold gradient-text text-neon">
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-white via-purple-200 to-indigo-300 bg-clip-text text-transparent">
                   Security Monitoring Center
                 </h1>
-                <p className="text-purple-200 mt-1">
+                <p className="text-slate-300 mt-1">
                   Advanced AI-powered threat detection and network security management
                 </p>
               </div>
             </div>
             
-            <div className="flex flex-wrap items-center gap-3 mt-4">
-              <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 animate-pulse">
+            <div className="flex flex-wrap items-center gap-3 mt-6">
+              <Badge className="bg-emerald-400/10 text-emerald-300 border-emerald-400/30 animate-pulse">
                 <Eye className="w-3 h-3 mr-1" />
                 LIVE MONITORING
               </Badge>
-              <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+              <Badge className="bg-purple-400/10 text-purple-300 border-purple-400/30">
                 <Network className="w-3 h-3 mr-1" />
                 SDN ACTIVE
               </Badge>
-              <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
+              <Badge className="bg-cyan-400/10 text-cyan-300 border-cyan-400/30">
                 <AlertTriangle className="w-3 h-3 mr-1" />
                 AI THREAT DETECTION
               </Badge>
@@ -87,68 +87,68 @@ const SecurityMonitoring = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {/* Column 1 */}
             <div className="space-y-6 animate-slide-in">
-              <div className="enhanced-card">
+              <Card className="bg-gradient-to-br from-slate-800/60 to-slate-700/60 backdrop-blur-xl border border-slate-600/50 shadow-xl rounded-xl">
                 <ThreatAnalysisOverview cameraId={selectedCamera} />
-              </div>
+              </Card>
               
-              <div className="enhanced-card">
+              <Card className="bg-gradient-to-br from-slate-800/60 to-slate-700/60 backdrop-blur-xl border border-slate-600/50 shadow-xl rounded-xl">
                 <RecentSDNActions cameraId={selectedCamera} />
-              </div>
+              </Card>
             </div>
 
             {/* Column 2 */}
             <div className="space-y-6 animate-slide-in" style={{ animationDelay: '0.1s' }}>
-              <div className="enhanced-card">
+              <Card className="bg-gradient-to-br from-slate-800/60 to-slate-700/60 backdrop-blur-xl border border-slate-600/50 shadow-xl rounded-xl">
                 <PythonANPRService />
-              </div>
+              </Card>
 
-              <div className="enhanced-card">
+              <Card className="bg-gradient-to-br from-slate-800/60 to-slate-700/60 backdrop-blur-xl border border-slate-600/50 shadow-xl rounded-xl">
                 <LiveAlerts 
                   selectedCamera={selectedCamera}
                   isLive={true}
                 />
-              </div>
+              </Card>
             </div>
 
             {/* Column 3 */}
             <div className="space-y-6 animate-slide-in" style={{ animationDelay: '0.2s' }}>
-              <div className="enhanced-card">
+              <Card className="bg-gradient-to-br from-slate-800/60 to-slate-700/60 backdrop-blur-xl border border-slate-600/50 shadow-xl rounded-xl">
                 <RecentDetections
                   plateHistory={plateHistory}
                   selectedCamera={selectedCamera}
                 />
-              </div>
+              </Card>
 
-              <div className="enhanced-card">
+              <Card className="bg-gradient-to-br from-slate-800/60 to-slate-700/60 backdrop-blur-xl border border-slate-600/50 shadow-xl rounded-xl">
                 <CameraNetworkStatus
                   cameras={cameras}
                   selectedCamera={selectedCamera}
                   onCameraSelect={handleCameraSelect}
                 />
-              </div>
+              </Card>
             </div>
           </div>
 
           {/* Real-time Status Bar */}
-          <div className="enhanced-card p-4 animate-fade-in">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-              <div className="space-y-1">
-                <div className="text-2xl font-bold text-emerald-400">
+          <div className="bg-gradient-to-r from-slate-800/60 to-slate-700/60 backdrop-blur-xl border border-slate-600/50 rounded-xl p-6 shadow-xl animate-fade-in">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+              <div className="space-y-2">
+                <div className="text-3xl font-bold text-emerald-300">
                   {cameras.filter(c => c.status === 'active').length}
                 </div>
-                <div className="text-xs text-purple-200">Active Cameras</div>
+                <div className="text-sm text-slate-400">Active Cameras</div>
               </div>
-              <div className="space-y-1">
-                <div className="text-2xl font-bold text-cyan-400">0</div>
-                <div className="text-xs text-purple-200">Critical Threats</div>
+              <div className="space-y-2">
+                <div className="text-3xl font-bold text-cyan-300">0</div>
+                <div className="text-sm text-slate-400">Critical Threats</div>
               </div>
-              <div className="space-y-1">
-                <div className="text-2xl font-bold text-amber-400">3</div>
-                <div className="text-xs text-purple-200">Medium Alerts</div>
+              <div className="space-y-2">
+                <div className="text-3xl font-bold text-amber-300">3</div>
+                <div className="text-sm text-slate-400">Medium Alerts</div>
               </div>
-              <div className="space-y-1">
-                <div className="text-2xl font-bold text-purple-400">98%</div>
-                <div className="text-xs text-purple-200">System Health</div>
+              <div className="space-y-2">
+                <div className="text-3xl font-bold text-purple-300">98%</div>
+                <div className="text-sm text-slate-400">System Health</div>
               </div>
             </div>
           </div>
