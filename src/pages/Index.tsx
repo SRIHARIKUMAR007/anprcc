@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { TabsContent } from "@/components/ui/tabs";
 import AuthWrapper from "@/components/AuthWrapper";
@@ -31,6 +30,8 @@ import StatusCards from "@/components/dashboard/StatusCards";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import RoleBasedAccess from "@/components/RoleBasedAccess";
 import SecurityMonitoring from "@/components/SecurityMonitoring";
+
+import SDNControllerPage from "@/components/SDNControllerPage";
 
 const Index = () => {
   const { user, userProfile } = useAuth();
@@ -94,6 +95,10 @@ const Index = () => {
               
               <TabsContent value="realtime">
                 <RealTimeMonitor />
+              </TabsContent>
+
+              <TabsContent value="sdn-controller">
+                <SDNControllerPage />
               </TabsContent>
 
               <TabsContent value="live-data">
