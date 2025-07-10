@@ -48,12 +48,22 @@ export const useRealTimeSystemData = () => {
           status: (detection.status || 'cleared') as 'cleared' | 'flagged' | 'processing'
         }));
 
+        // Transform cameras data to ensure proper typing
+        const transformedCameras = (camerasResult.data || []).map(camera => ({
+          ...camera,
+          status: (camera.status || 'active') as 'active' | 'inactive' | 'maintenance',
+          ip_address: camera.ip_address as string | null,
+          last_heartbeat: camera.last_heartbeat as string | null,
+          created_at: camera.created_at as string | null,
+          updated_at: camera.updated_at as string | null
+        }));
+
         // Set initial data
         setData(prev => ({
           ...prev,
           detections: transformedDetections,
           systemStats: systemStatsResult.data?.[0] || null,
-          cameras: camerasResult.data || [],
+          cameras: transformedCameras,
           isConnected: true
         }));
 
@@ -114,7 +124,17 @@ export const useRealTimeSystemData = () => {
             { event: '*', schema: 'public', table: 'cameras' }, 
             (payload) => {
               console.log('Camera update:', payload);
-              const newCamera = payload.new as Camera;
+              const rawCamera = payload.new as any;
+              
+              // Properly cast the camera with status type
+              const newCamera: Camera = {
+                ...rawCamera,
+                status: (rawCamera?.status || 'active') as 'active' | 'inactive' | 'maintenance',
+                ip_address: rawCamera?.ip_address as string | null,
+                last_heartbeat: rawCamera?.last_heartbeat as string | null,
+                created_at: rawCamera?.created_at as string | null,
+                updated_at: rawCamera?.updated_at as string | null
+              };
               
               setData(prev => ({
                 ...prev,
