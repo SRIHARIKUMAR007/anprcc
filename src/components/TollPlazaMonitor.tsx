@@ -11,8 +11,14 @@ import {
   Activity,
   BarChart3,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  TrendingUp,
+  TrendingDown,
+  Users,
+  Truck,
+  Bike
 } from "lucide-react";
+import { useSupabaseRealTimeData } from "@/hooks/useSupabaseRealTimeData";
 
 interface TollPlaza {
   id: string;
@@ -26,9 +32,17 @@ interface TollPlaza {
   revenue: number;
   vehiclesPassed: number;
   status: 'operational' | 'maintenance' | 'congested';
+  vehicleTypes: {
+    cars: number;
+    trucks: number;
+    bikes: number;
+  };
+  hourlyTrend: number[];
+  efficiency: number;
 }
 
 const TollPlazaMonitor = () => {
+  const { systemStats, isConnected } = useSupabaseRealTimeData();
   const [tollPlazas, setTollPlazas] = useState<TollPlaza[]>([]);
   const [isLive, setIsLive] = useState(true);
 
@@ -46,7 +60,10 @@ const TollPlazaMonitor = () => {
           averageWaitTime: 3.5,
           revenue: 245000,
           vehiclesPassed: 1240,
-          status: 'operational'
+          status: 'operational',
+          vehicleTypes: { cars: 850, trucks: 290, bikes: 100 },
+          hourlyTrend: [45, 52, 48, 61, 73, 68, 72, 85],
+          efficiency: 87
         },
         {
           id: 'TP-002',
@@ -59,7 +76,10 @@ const TollPlazaMonitor = () => {
           averageWaitTime: 2.1,
           revenue: 187000,
           vehiclesPassed: 980,
-          status: 'operational'
+          status: 'operational',
+          vehicleTypes: { cars: 680, trucks: 220, bikes: 80 },
+          hourlyTrend: [38, 42, 45, 51, 56, 52, 58, 67],
+          efficiency: 92
         },
         {
           id: 'TP-003',
@@ -72,7 +92,10 @@ const TollPlazaMonitor = () => {
           averageWaitTime: 8.2,
           revenue: 156000,
           vehiclesPassed: 756,
-          status: 'congested'
+          status: 'congested',
+          vehicleTypes: { cars: 520, trucks: 180, bikes: 56 },
+          hourlyTrend: [42, 48, 45, 52, 68, 71, 67, 73],
+          efficiency: 68
         },
         {
           id: 'TP-004',
@@ -85,7 +108,74 @@ const TollPlazaMonitor = () => {
           averageWaitTime: 1.8,
           revenue: 123000,
           vehiclesPassed: 642,
-          status: 'maintenance'
+          status: 'maintenance',
+          vehicleTypes: { cars: 450, trucks: 142, bikes: 50 },
+          hourlyTrend: [32, 35, 38, 41, 44, 40, 37, 42],
+          efficiency: 75
+        },
+        {
+          id: 'TP-005',
+          name: 'Coimbatore Toll Plaza',
+          location: 'Coimbatore',
+          highway: 'NH-47',
+          totalLanes: 10,
+          activeLanes: 9,
+          queueLength: 15,
+          averageWaitTime: 4.2,
+          revenue: 298000,
+          vehiclesPassed: 1456,
+          status: 'operational',
+          vehicleTypes: { cars: 980, trucks: 356, bikes: 120 },
+          hourlyTrend: [55, 62, 58, 71, 83, 78, 82, 95],
+          efficiency: 89
+        },
+        {
+          id: 'TP-006',
+          name: 'Madurai Toll Plaza',
+          location: 'Madurai',
+          highway: 'NH-38',
+          totalLanes: 6,
+          activeLanes: 6,
+          queueLength: 18,
+          averageWaitTime: 5.8,
+          revenue: 201000,
+          vehiclesPassed: 1123,
+          status: 'congested',
+          vehicleTypes: { cars: 760, trucks: 263, bikes: 100 },
+          hourlyTrend: [48, 52, 49, 58, 72, 68, 71, 78],
+          efficiency: 78
+        },
+        {
+          id: 'TP-007',
+          name: 'Vellore Toll Plaza',
+          location: 'Vellore',
+          highway: 'NH-46',
+          totalLanes: 8,
+          activeLanes: 8,
+          queueLength: 7,
+          averageWaitTime: 2.8,
+          revenue: 189000,
+          vehiclesPassed: 967,
+          status: 'operational',
+          vehicleTypes: { cars: 650, trucks: 237, bikes: 80 },
+          hourlyTrend: [41, 45, 42, 49, 58, 54, 61, 68],
+          efficiency: 91
+        },
+        {
+          id: 'TP-008',
+          name: 'Tirunelveli Toll Plaza',
+          location: 'Tirunelveli',
+          highway: 'NH-44',
+          totalLanes: 4,
+          activeLanes: 4,
+          queueLength: 11,
+          averageWaitTime: 3.9,
+          revenue: 134000,
+          vehiclesPassed: 678,
+          status: 'operational',
+          vehicleTypes: { cars: 456, trucks: 167, bikes: 55 },
+          hourlyTrend: [35, 38, 36, 42, 48, 45, 50, 56],
+          efficiency: 82
         }
       ];
       
@@ -99,16 +189,28 @@ const TollPlazaMonitor = () => {
     if (!isLive) return;
 
     const interval = setInterval(() => {
-      setTollPlazas(prev => prev.map(toll => ({
-        ...toll,
-        queueLength: Math.max(0, toll.queueLength + Math.floor(Math.random() * 6 - 3)),
-        averageWaitTime: Math.max(0.5, toll.averageWaitTime + Math.random() * 2 - 1),
-        revenue: toll.revenue + Math.floor(Math.random() * 5000),
-        vehiclesPassed: toll.vehiclesPassed + Math.floor(Math.random() * 10),
-        status: toll.queueLength > 20 ? 'congested' : 
-                toll.activeLanes < toll.totalLanes ? 'maintenance' : 'operational'
-      })));
-    }, 4000);
+      setTollPlazas(prev => prev.map(toll => {
+        const queueChange = Math.floor(Math.random() * 8 - 4);
+        const newQueue = Math.max(0, toll.queueLength + queueChange);
+        
+        return {
+          ...toll,
+          queueLength: newQueue,
+          averageWaitTime: Math.max(0.8, toll.averageWaitTime + Math.random() * 2 - 1),
+          revenue: toll.revenue + Math.floor(Math.random() * 8000),
+          vehiclesPassed: toll.vehiclesPassed + Math.floor(Math.random() * 15),
+          status: newQueue > 20 ? 'congested' : 
+                  toll.activeLanes < toll.totalLanes ? 'maintenance' : 'operational',
+          vehicleTypes: {
+            cars: toll.vehicleTypes.cars + Math.floor(Math.random() * 8),
+            trucks: toll.vehicleTypes.trucks + Math.floor(Math.random() * 4),
+            bikes: toll.vehicleTypes.bikes + Math.floor(Math.random() * 3)
+          },
+          hourlyTrend: [...toll.hourlyTrend.slice(1), toll.hourlyTrend[toll.hourlyTrend.length - 1] + Math.floor(Math.random() * 10 - 5)],
+          efficiency: Math.max(50, Math.min(100, toll.efficiency + Math.floor(Math.random() * 6 - 3)))
+        };
+      }));
+    }, 3000);
 
     return () => clearInterval(interval);
   }, [isLive]);
@@ -131,35 +233,55 @@ const TollPlazaMonitor = () => {
     }
   };
 
+  const getTrendIcon = (trend: number[]) => {
+    const recent = trend.slice(-3).reduce((a, b) => a + b, 0) / 3;
+    const earlier = trend.slice(0, 3).reduce((a, b) => a + b, 0) / 3;
+    return recent > earlier ? <TrendingUp className="w-4 h-4 text-green-400" /> : <TrendingDown className="w-4 h-4 text-red-400" />;
+  };
+
   const totalRevenue = tollPlazas.reduce((sum, toll) => sum + toll.revenue, 0);
   const totalVehicles = tollPlazas.reduce((sum, toll) => sum + toll.vehiclesPassed, 0);
+  const avgEfficiency = tollPlazas.reduce((sum, toll) => sum + toll.efficiency, 0) / tollPlazas.length;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="flex items-center space-x-3">
-          <Navigation className="w-6 h-6 text-blue-400" />
-          <div>
-            <h2 className="text-xl font-bold text-white">Tamil Nadu Toll Plaza Monitor</h2>
-            <p className="text-slate-400 text-sm">Live monitoring of highway toll plazas</p>
+    <div className="space-y-6 p-6 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 min-h-screen">
+      {/* Enhanced Header */}
+      <div className="cyber-glass rounded-xl p-6 border border-cyan-500/30">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-600/20 border border-indigo-400/30">
+              <Navigation className="w-8 h-8 text-indigo-300" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gradient bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent">
+                Tamil Nadu Toll Plaza Network
+              </h2>
+              <p className="text-slate-400 text-sm mt-1">
+                Real-time monitoring of {tollPlazas.length} highway toll plazas across Tamil Nadu
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-3">
+            <Badge className={`${isConnected ? 'bg-green-500/20 text-green-400 border-green-500/30 animate-pulse' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>
+              {isConnected ? 'DATABASE LIVE' : 'OFFLINE'}
+            </Badge>
+            <Button
+              variant={isLive ? "default" : "outline"}
+              size="sm"
+              onClick={() => setIsLive(!isLive)}
+              className={`flex items-center space-x-2 ${isLive ? 'cyber-glow bg-gradient-to-r from-emerald-600 to-green-600' : ''}`}
+            >
+              <Activity className={`w-4 h-4 ${isLive ? 'animate-pulse' : ''}`} />
+              <span>{isLive ? 'Live Updates' : 'Paused'}</span>
+            </Button>
           </div>
         </div>
-        
-        <Button
-          variant={isLive ? "default" : "outline"}
-          size="sm"
-          onClick={() => setIsLive(!isLive)}
-          className="flex items-center space-x-2"
-        >
-          <Activity className={`w-4 h-4 ${isLive ? 'animate-pulse' : ''}`} />
-          <span>{isLive ? 'Live Updates' : 'Paused'}</span>
-        </Button>
       </div>
 
-      {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-slate-800/50 border-slate-700">
+      {/* Enhanced Summary Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <Card className="cyber-card border-green-500/30">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -174,11 +296,11 @@ const TollPlazaMonitor = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800/50 border-slate-700">
+        <Card className="cyber-card border-blue-500/30">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-slate-400">Vehicles Passed</div>
+                <div className="text-sm text-slate-400">Total Vehicles</div>
                 <div className="text-2xl font-bold text-white">{totalVehicles.toLocaleString()}</div>
               </div>
               <Car className="w-8 h-8 text-blue-400" />
@@ -186,7 +308,7 @@ const TollPlazaMonitor = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800/50 border-slate-700">
+        <Card className="cyber-card border-purple-500/30">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -200,7 +322,7 @@ const TollPlazaMonitor = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800/50 border-slate-700">
+        <Card className="cyber-card border-orange-500/30">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -213,14 +335,28 @@ const TollPlazaMonitor = () => {
             </div>
           </CardContent>
         </Card>
+
+        <Card className="cyber-card border-cyan-500/30">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm text-slate-400">Avg Efficiency</div>
+                <div className="text-2xl font-bold text-white">
+                  {avgEfficiency.toFixed(0)}%
+                </div>
+              </div>
+              <TrendingUp className="w-8 h-8 text-cyan-400" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Toll Plaza Details */}
-      <Card className="bg-slate-800/50 border-slate-700">
+      {/* Enhanced Toll Plaza Grid */}
+      <Card className="cyber-card border-slate-600/50">
         <CardHeader>
           <CardTitle className="text-white flex items-center justify-between">
-            <span className="flex items-center">
-              <Navigation className="w-5 h-5 mr-2" />
+            <span className="flex items-center text-gradient bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent">
+              <Navigation className="w-5 h-5 mr-2 text-cyan-400" />
               Live Toll Plaza Status
             </span>
             <Badge variant="secondary" className={`${isLive ? 'bg-green-500/20 text-green-400 border-green-500/30 animate-pulse' : 'bg-gray-500/20 text-gray-400 border-gray-500/30'}`}>
@@ -229,42 +365,86 @@ const TollPlazaMonitor = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {tollPlazas.map((toll) => (
-              <div key={toll.id} className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/50">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-2">
+              <div key={toll.id} className="cyber-glass rounded-lg p-5 border border-slate-600/50 hover:border-cyan-500/50 transition-all duration-300">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3">
                     {getStatusIcon(toll.status)}
-                    <span className="font-semibold text-white">{toll.name}</span>
+                    <div>
+                      <span className="font-semibold text-white text-lg">{toll.name}</span>
+                      <div className="flex items-center space-x-2 mt-1">
+                        {getTrendIcon(toll.hourlyTrend)}
+                        <span className="text-xs text-slate-400">Efficiency: {toll.efficiency}%</span>
+                      </div>
+                    </div>
                   </div>
                   <Badge variant="secondary" className={getStatusColor(toll.status)}>
                     {toll.status.toUpperCase()}
                   </Badge>
                 </div>
                 
-                <div className="space-y-2">
-                  <div className="text-sm text-slate-300">{toll.highway}</div>
+                <div className="space-y-3">
+                  <div className="text-sm text-slate-300 font-medium">{toll.highway}</div>
                   <div className="text-xs text-slate-400">{toll.location}, Tamil Nadu</div>
                   
-                  <div className="grid grid-cols-2 gap-3 pt-2">
-                    <div className="bg-slate-800/50 rounded p-2">
-                      <div className="text-xs text-slate-400">Queue Length</div>
-                      <div className="text-lg font-bold text-white">{toll.queueLength}</div>
+                  {/* Vehicle Type Breakdown */}
+                  <div className="grid grid-cols-3 gap-2 mb-4">
+                    <div className="bg-slate-800/50 rounded p-2 text-center">
+                      <Car className="w-4 h-4 text-blue-400 mx-auto mb-1" />
+                      <div className="text-xs text-slate-400">Cars</div>
+                      <div className="text-sm font-bold text-white">{toll.vehicleTypes.cars}</div>
                     </div>
-                    <div className="bg-slate-800/50 rounded p-2">
+                    <div className="bg-slate-800/50 rounded p-2 text-center">
+                      <Truck className="w-4 h-4 text-orange-400 mx-auto mb-1" />
+                      <div className="text-xs text-slate-400">Trucks</div>
+                      <div className="text-sm font-bold text-white">{toll.vehicleTypes.trucks}</div>
+                    </div>
+                    <div className="bg-slate-800/50 rounded p-2 text-center">
+                      <Bike className="w-4 h-4 text-green-400 mx-auto mb-1" />
+                      <div className="text-xs text-slate-400">Bikes</div>
+                      <div className="text-sm font-bold text-white">{toll.vehicleTypes.bikes}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-slate-800/50 rounded p-3">
+                      <div className="text-xs text-slate-400">Queue Length</div>
+                      <div className={`text-lg font-bold ${toll.queueLength > 20 ? 'text-red-400' : toll.queueLength > 10 ? 'text-orange-400' : 'text-green-400'}`}>
+                        {toll.queueLength}
+                      </div>
+                    </div>
+                    <div className="bg-slate-800/50 rounded p-3">
                       <div className="text-xs text-slate-400">Wait Time</div>
                       <div className="text-lg font-bold text-white">{toll.averageWaitTime.toFixed(1)}m</div>
                     </div>
-                    <div className="bg-slate-800/50 rounded p-2">
+                    <div className="bg-slate-800/50 rounded p-3">
                       <div className="text-xs text-slate-400">Active Lanes</div>
                       <div className="text-lg font-bold text-white">{toll.activeLanes}/{toll.totalLanes}</div>
                     </div>
-                    <div className="bg-slate-800/50 rounded p-2">
+                    <div className="bg-slate-800/50 rounded p-3">
                       <div className="text-xs text-slate-400">Revenue</div>
                       <div className="text-lg font-bold text-white flex items-center">
                         <IndianRupee className="w-3 h-3 mr-1" />
                         {(toll.revenue / 1000).toFixed(0)}K
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Efficiency Bar */}
+                  <div className="mt-3">
+                    <div className="flex justify-between text-xs text-slate-400 mb-1">
+                      <span>Efficiency</span>
+                      <span>{toll.efficiency}%</span>
+                    </div>
+                    <div className="w-full bg-slate-700 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full transition-all duration-1000 ${
+                          toll.efficiency > 85 ? 'bg-green-500' : 
+                          toll.efficiency > 70 ? 'bg-orange-500' : 'bg-red-500'
+                        }`}
+                        style={{ width: `${toll.efficiency}%` }}
+                      ></div>
                     </div>
                   </div>
                 </div>
