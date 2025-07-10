@@ -2,11 +2,12 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { Detection, SystemStats, Camera } from '@/types/supabase';
 
 interface RealTimeSystemData {
-  detections: any[];
-  systemStats: any;
-  cameras: any[];
+  detections: Detection[];
+  systemStats: SystemStats | null;
+  cameras: Camera[];
   networkHealth: number;
   threatLevel: 'LOW' | 'MEDIUM' | 'HIGH';
   activeIncidents: number;
@@ -57,10 +58,12 @@ export const useRealTimeSystemData = () => {
             { event: '*', schema: 'public', table: 'detections' }, 
             (payload) => {
               console.log('Detection update:', payload);
+              const newDetection = payload.new as Detection;
+              
               setData(prev => {
-                const newDetections = payload.eventType === 'INSERT' 
-                  ? [payload.new, ...prev.detections.slice(0, 99)]
-                  : prev.detections.map(d => d.id === payload.new?.id ? payload.new : d);
+                const newDetections = payload.eventType === 'INSERT' && newDetection?.id
+                  ? [newDetection, ...prev.detections.slice(0, 99)]
+                  : prev.detections.map(d => d.id === newDetection?.id ? newDetection : d);
                 
                 return {
                   ...prev,
@@ -80,10 +83,14 @@ export const useRealTimeSystemData = () => {
             { event: '*', schema: 'public', table: 'system_stats' }, 
             (payload) => {
               console.log('System stats update:', payload);
+              const newStats = payload.new as SystemStats;
+              
               setData(prev => ({
                 ...prev,
-                systemStats: payload.new || prev.systemStats,
-                networkHealth: 100 - ((payload.new?.cpu_usage || 0) + (payload.new?.memory_usage || 0)) / 2
+                systemStats: newStats || prev.systemStats,
+                networkHealth: newStats?.cpu_usage && newStats?.memory_usage 
+                  ? 100 - ((newStats.cpu_usage + newStats.memory_usage) / 2)
+                  : prev.networkHealth
               }));
             }
           )
@@ -95,11 +102,13 @@ export const useRealTimeSystemData = () => {
             { event: '*', schema: 'public', table: 'cameras' }, 
             (payload) => {
               console.log('Camera update:', payload);
+              const newCamera = payload.new as Camera;
+              
               setData(prev => ({
                 ...prev,
-                cameras: payload.eventType === 'INSERT' 
-                  ? [...prev.cameras, payload.new]
-                  : prev.cameras.map(c => c.id === payload.new?.id ? payload.new : c)
+                cameras: payload.eventType === 'INSERT' && newCamera?.id
+                  ? [...prev.cameras, newCamera]
+                  : prev.cameras.map(c => c.id === newCamera?.id ? newCamera : c)
               }));
             }
           )
