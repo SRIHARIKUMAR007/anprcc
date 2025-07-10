@@ -42,10 +42,16 @@ export const useRealTimeSystemData = () => {
           supabase.from('cameras').select('*')
         ]);
 
+        // Transform detections data to ensure proper typing
+        const transformedDetections = (detectionsResult.data || []).map(detection => ({
+          ...detection,
+          status: (detection.status || 'cleared') as 'cleared' | 'flagged' | 'processing'
+        }));
+
         // Set initial data
         setData(prev => ({
           ...prev,
-          detections: detectionsResult.data || [],
+          detections: transformedDetections,
           systemStats: systemStatsResult.data?.[0] || null,
           cameras: camerasResult.data || [],
           isConnected: true
@@ -58,7 +64,13 @@ export const useRealTimeSystemData = () => {
             { event: '*', schema: 'public', table: 'detections' }, 
             (payload) => {
               console.log('Detection update:', payload);
-              const newDetection = payload.new as Detection;
+              const rawDetection = payload.new as any;
+              
+              // Properly cast the detection with status type
+              const newDetection: Detection = {
+                ...rawDetection,
+                status: (rawDetection?.status || 'cleared') as 'cleared' | 'flagged' | 'processing'
+              };
               
               setData(prev => {
                 const newDetections = payload.eventType === 'INSERT' && newDetection?.id
