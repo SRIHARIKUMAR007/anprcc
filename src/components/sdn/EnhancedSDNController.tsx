@@ -41,31 +41,38 @@ const EnhancedSDNController = () => {
   };
 
   return (
-    <div className="space-y-8 p-6">
-      <SDNHeader 
-        isConnected={isConnected}
-        isOptimizing={isOptimizing}
-        controllerStats={controllerStats}
-        networkMetrics={networkMetrics}
-        onOptimize={optimizeNetwork}
-      />
-
-      {/* Network Topology - Full Width */}
-      <div className="w-full">
-        <SDNNetworkTopology />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <NetworkFlowMetrics networkMetrics={networkMetrics} />
-        <ControllerResources 
-          controllerStats={controllerStats} 
-          networkMetrics={networkMetrics} 
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-4 md:p-6">
+      {/* Enhanced Header with better spacing */}
+      <div className="mb-6">
+        <SDNHeader 
+          isConnected={isConnected}
+          isOptimizing={isOptimizing}
+          controllerStats={controllerStats}
+          networkMetrics={networkMetrics}
+          onOptimize={optimizeNetwork}
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <SecurityStatus />
-        <AdvancedConfiguration />
+      {/* Network Topology - Enhanced Full Width Section */}
+      <div className="mb-8">
+        <div className="cyber-glass rounded-xl border border-cyan-500/30 shadow-2xl overflow-hidden">
+          <SDNNetworkTopology />
+        </div>
+      </div>
+
+      {/* Metrics Grid - Better organized */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+        <div className="space-y-6">
+          <NetworkFlowMetrics networkMetrics={networkMetrics} />
+          <SecurityStatus />
+        </div>
+        <div className="space-y-6">
+          <ControllerResources 
+            controllerStats={controllerStats} 
+            networkMetrics={networkMetrics} 
+          />
+          <AdvancedConfiguration />
+        </div>
       </div>
     </div>
   );
