@@ -1,4 +1,3 @@
-
 import { useRef, useEffect, useState } from "react";
 import { MapPin, Cpu, Clock, Zap, AlertTriangle, Activity } from "lucide-react";
 import DetectionOverlay from "./DetectionOverlay";
@@ -18,6 +17,7 @@ interface LiveVideoCanvasProps {
 
 interface Vehicle {
   x: number;
+  y: number;
   speed: number;
   plateNumber: string;
   color: string;
@@ -25,6 +25,8 @@ interface Vehicle {
   type: string;
   id: string;
   direction: 'left' | 'right';
+  size: { width: number; height: number };
+  lastDetectionTime: number;
 }
 
 const LiveVideoCanvas = ({
@@ -40,6 +42,7 @@ const LiveVideoCanvas = ({
 }: LiveVideoCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const vehiclePositions = useRef<Vehicle[]>([]);
+  const audioContextRef = useRef<AudioContext | null>(null);
   const [networkLatency, setNetworkLatency] = useState(12);
   const [fps, setFps] = useState(frameRate);
   const [processingLoad, setProcessingLoad] = useState(45);
@@ -47,89 +50,164 @@ const LiveVideoCanvas = ({
   const [alertMessage, setAlertMessage] = useState("");
   const [timestamp, setTimestamp] = useState(new Date());
 
-  // Generate camera-specific realistic plates
+  // Initialize audio context for sound effects
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+  }, []);
+
+  // Play detection sound
+  const playDetectionSound = (frequency: number = 800, duration: number = 200) => {
+    if (!audioContextRef.current || !isRecording) return;
+    
+    try {
+      const oscillator = audioContextRef.current.createOscillator();
+      const gainNode = audioContextRef.current.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContextRef.current.destination);
+      
+      oscillator.frequency.setValueAtTime(frequency, audioContextRef.current.currentTime);
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.1, audioContextRef.current.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContextRef.current.currentTime + duration / 1000);
+      
+      oscillator.start(audioContextRef.current.currentTime);
+      oscillator.stop(audioContextRef.current.currentTime + duration / 1000);
+    } catch (error) {
+      console.log('Audio not available');
+    }
+  };
+
+  // Generate unique camera-specific plates with regional patterns
   const generateCameraSpecificPlate = (cameraId: string) => {
-    const cameraSeeds = {
-      'CAM-01': ['TN-01', 'TN-09', 'TN-33'],
-      'CAM-02': ['KA-05', 'KA-09', 'AP-16'],
-      'CAM-03': ['TN-45', 'TN-67', 'MH-12'],
-      'CAM-04': ['DL-08', 'UP-16', 'HR-26'],
-      'CAM-05': ['TN-72', 'TN-38', 'WB-19'],
-      'CAM-06': ['GJ-15', 'RJ-27', 'PB-03'],
-      'CAM-07': ['TN-55', 'TN-02', 'OR-07'],
-      'CAM-08': ['MP-09', 'CG-04', 'JH-05']
+    const cameraPatterns = {
+      'CAM-01': { states: ['TN-01', 'TN-09', 'TN-33'], suffix: 'A' },
+      'CAM-02': { states: ['KA-05', 'KA-09', 'AP-16'], suffix: 'B' },
+      'CAM-03': { states: ['TN-45', 'TN-67', 'MH-12'], suffix: 'C' },
+      'CAM-04': { states: ['DL-08', 'UP-16', 'HR-26'], suffix: 'D' },
+      'CAM-05': { states: ['TN-72', 'TN-38', 'WB-19'], suffix: 'E' },
+      'CAM-06': { states: ['GJ-15', 'RJ-27', 'PB-03'], suffix: 'F' },
+      'CAM-07': { states: ['TN-55', 'TN-02', 'OR-07'], suffix: 'G' },
+      'CAM-08': { states: ['MP-09', 'CG-04', 'JH-05'], suffix: 'H' }
     };
     
-    const seeds = cameraSeeds[cameraId as keyof typeof cameraSeeds] || ['TN-01', 'TN-09'];
-    const state = seeds[Math.floor(Math.random() * seeds.length)];
+    const pattern = cameraPatterns[cameraId as keyof typeof cameraPatterns] || cameraPatterns['CAM-01'];
+    const state = pattern.states[Math.floor(Math.random() * pattern.states.length)];
     const letters = String.fromCharCode(65 + Math.floor(Math.random() * 26)) + 
                    String.fromCharCode(65 + Math.floor(Math.random() * 26));
     const digits = String(Math.floor(1000 + Math.random() * 9000));
-    return `${state}-${letters}-${digits}`;
+    return `${state} ${letters} ${digits}${pattern.suffix}`;
   };
 
-  // Camera-specific vehicle configurations
+  // Enhanced camera-specific configurations with unique characteristics
   const getCameraConfig = (cameraId: string) => {
     const configs = {
       'CAM-01': { 
-        vehicleCount: 6, 
-        speedRange: [1.2, 2.8], 
-        vehicleTypes: ['car', 'truck', 'bus'],
-        trafficDensity: 'high',
-        direction: 'bidirectional'
-      },
-      'CAM-02': { 
-        vehicleCount: 4, 
-        speedRange: [0.8, 2.2], 
-        vehicleTypes: ['car', 'motorcycle'],
-        trafficDensity: 'medium',
-        direction: 'left-to-right'
-      },
-      'CAM-03': { 
         vehicleCount: 8, 
-        speedRange: [0.5, 1.8], 
+        speedRange: [2.5, 4.2], 
         vehicleTypes: ['car', 'truck', 'bus', 'motorcycle'],
         trafficDensity: 'high',
-        direction: 'right-to-left'
+        direction: 'bidirectional',
+        laneCount: 4,
+        roadColor: '#374151',
+        environment: 'highway',
+        detectionZone: { start: 0.3, end: 0.7 }
+      },
+      'CAM-02': { 
+        vehicleCount: 5, 
+        speedRange: [1.8, 3.5], 
+        vehicleTypes: ['car', 'motorcycle', 'auto'],
+        trafficDensity: 'medium',
+        direction: 'left-to-right',
+        laneCount: 3,
+        roadColor: '#4b5563',
+        environment: 'city',
+        detectionZone: { start: 0.35, end: 0.65 }
+      },
+      'CAM-03': { 
+        vehicleCount: 12, 
+        speedRange: [1.2, 2.8], 
+        vehicleTypes: ['car', 'truck', 'bus', 'motorcycle', 'auto'],
+        trafficDensity: 'very-high',
+        direction: 'bidirectional',
+        laneCount: 6,
+        roadColor: '#374151',
+        environment: 'toll-plaza',
+        detectionZone: { start: 0.25, end: 0.75 }
       },
       'CAM-04': { 
         vehicleCount: 3, 
-        speedRange: [1.5, 3.2], 
+        speedRange: [3.2, 5.5], 
         vehicleTypes: ['car', 'truck'],
         trafficDensity: 'low',
-        direction: 'bidirectional'
+        direction: 'right-to-left',
+        laneCount: 2,
+        roadColor: '#6b7280',
+        environment: 'rural',
+        detectionZone: { start: 0.4, end: 0.6 }
       },
       'CAM-05': { 
-        vehicleCount: 7, 
-        speedRange: [0.7, 2.5], 
-        vehicleTypes: ['car', 'bus', 'motorcycle'],
+        vehicleCount: 9, 
+        speedRange: [1.5, 3.2], 
+        vehicleTypes: ['car', 'bus', 'motorcycle', 'auto'],
         trafficDensity: 'high',
-        direction: 'left-to-right'
+        direction: 'left-to-right',
+        laneCount: 4,
+        roadColor: '#374151',
+        environment: 'commercial',
+        detectionZone: { start: 0.3, end: 0.7 }
       },
       'CAM-06': { 
-        vehicleCount: 5, 
-        speedRange: [1.0, 2.8], 
+        vehicleCount: 6, 
+        speedRange: [2.0, 4.0], 
         vehicleTypes: ['car', 'truck', 'motorcycle'],
         trafficDensity: 'medium',
-        direction: 'bidirectional'
+        direction: 'bidirectional',
+        laneCount: 3,
+        roadColor: '#4b5563',
+        environment: 'suburban',
+        detectionZone: { start: 0.35, end: 0.65 }
       },
       'CAM-07': { 
         vehicleCount: 4, 
-        speedRange: [1.8, 3.5], 
+        speedRange: [2.8, 4.8], 
         vehicleTypes: ['car', 'motorcycle'],
-        trafficDensity: 'medium',
-        direction: 'right-to-left'
+        trafficDensity: 'medium-low',
+        direction: 'right-to-left',
+        laneCount: 2,
+        roadColor: '#6b7280',
+        environment: 'residential',
+        detectionZone: { start: 0.4, end: 0.6 }
       },
       'CAM-08': { 
-        vehicleCount: 6, 
-        speedRange: [0.6, 2.0], 
+        vehicleCount: 10, 
+        speedRange: [2.2, 3.8], 
         vehicleTypes: ['car', 'truck', 'bus'],
         trafficDensity: 'high',
-        direction: 'left-to-right'
+        direction: 'left-to-right',
+        laneCount: 5,
+        roadColor: '#374151',
+        environment: 'expressway',
+        detectionZone: { start: 0.28, end: 0.72 }
       }
     };
     
     return configs[cameraId as keyof typeof configs] || configs['CAM-01'];
+  };
+
+  // Get vehicle specifications based on type
+  const getVehicleSpecs = (type: string) => {
+    const specs = {
+      'car': { width: 65, height: 28, color: () => `hsl(${Math.random() * 360}, 70%, ${45 + Math.random() * 15}%)` },
+      'truck': { width: 110, height: 38, color: () => `hsl(${20 + Math.random() * 40}, 60%, ${35 + Math.random() * 15}%)` },
+      'bus': { width: 130, height: 42, color: () => `hsl(${200 + Math.random() * 60}, 50%, ${40 + Math.random() * 20}%)` },
+      'motorcycle': { width: 35, height: 18, color: () => `hsl(${Math.random() * 360}, 80%, ${50 + Math.random() * 20}%)` },
+      'auto': { width: 45, height: 22, color: () => `hsl(${40 + Math.random() * 80}, 70%, ${45 + Math.random() * 15}%)` }
+    };
+    return specs[type as keyof typeof specs] || specs.car;
   };
 
   // Real-time metrics updates with camera-specific variations
@@ -138,29 +216,37 @@ const LiveVideoCanvas = ({
 
     const metricsInterval = setInterval(() => {
       const cameraConfig = getCameraConfig(currentCamera?.id || 'CAM-01');
-      const baseLatency = cameraConfig.trafficDensity === 'high' ? 15 : 
-                         cameraConfig.trafficDensity === 'medium' ? 10 : 8;
+      const baseLatency = cameraConfig.trafficDensity === 'very-high' ? 18 : 
+                         cameraConfig.trafficDensity === 'high' ? 15 : 
+                         cameraConfig.trafficDensity === 'medium' ? 12 : 8;
       
-      setNetworkLatency(baseLatency + Math.random() * 10);
+      setNetworkLatency(baseLatency + Math.random() * 8);
       setFps(frameRate - 1 + Math.random() * 2);
       
-      const baseLoad = cameraConfig.trafficDensity === 'high' ? 50 : 
-                      cameraConfig.trafficDensity === 'medium' ? 35 : 25;
-      setProcessingLoad(baseLoad + Math.random() * 20);
+      const baseLoad = cameraConfig.trafficDensity === 'very-high' ? 65 :
+                      cameraConfig.trafficDensity === 'high' ? 55 : 
+                      cameraConfig.trafficDensity === 'medium' ? 40 : 30;
+      setProcessingLoad(baseLoad + Math.random() * 15);
       setTimestamp(new Date());
 
       // Camera-specific alert probability
-      const alertProbability = cameraConfig.trafficDensity === 'high' ? 0.98 : 0.985;
+      const alertProbability = cameraConfig.trafficDensity === 'very-high' ? 0.96 :
+                              cameraConfig.trafficDensity === 'high' ? 0.98 : 0.985;
       if (Math.random() > alertProbability) {
         setIsAlert(true);
         const alerts = [
-          `${currentCamera?.id}: Overspeeding detected`,
+          `${currentCamera?.id}: Speed violation detected`,
           `${currentCamera?.id}: Suspicious vehicle behavior`,
-          `${currentCamera?.id}: License plate verification needed`,
-          `${currentCamera?.id}: Traffic congestion alert`
+          `${currentCamera?.id}: License plate verification required`,
+          `${currentCamera?.id}: Traffic congestion alert`,
+          `${currentCamera?.id}: Vehicle classification anomaly`
         ];
         setAlertMessage(alerts[Math.floor(Math.random() * alerts.length)]);
-        setTimeout(() => setIsAlert(false), 3000);
+        
+        // Play alert sound
+        playDetectionSound(1200, 300);
+        
+        setTimeout(() => setIsAlert(false), 4000);
       }
     }, 1000);
 
@@ -177,23 +263,35 @@ const LiveVideoCanvas = ({
     let animationId: number;
     const cameraConfig = getCameraConfig(currentCamera.id);
 
-    // Initialize camera-specific vehicles
-    if (vehiclePositions.current.length === 0 || vehiclePositions.current[0]?.id !== currentCamera.id) {
+    // Initialize unique vehicles for each camera
+    if (vehiclePositions.current.length === 0 || 
+        vehiclePositions.current[0]?.id.split('-')[0] !== currentCamera.id) {
       vehiclePositions.current = [];
+      
       for (let i = 0; i < cameraConfig.vehicleCount; i++) {
+        const vehicleType = cameraConfig.vehicleTypes[Math.floor(Math.random() * cameraConfig.vehicleTypes.length)];
+        const specs = getVehicleSpecs(vehicleType);
+        
         const direction = cameraConfig.direction === 'left-to-right' ? 'right' :
                          cameraConfig.direction === 'right-to-left' ? 'left' :
                          Math.random() > 0.5 ? 'right' : 'left';
         
+        const lane = Math.floor(Math.random() * cameraConfig.laneCount);
+        const startX = direction === 'right' ? -specs.width - Math.random() * 200 : 
+                      canvas.width + specs.width + Math.random() * 200;
+        
         vehiclePositions.current.push({
-          x: Math.random() * (canvas.width + 200) - 100,
+          x: startX,
+          y: 0, // Will be calculated based on lane
           speed: cameraConfig.speedRange[0] + Math.random() * (cameraConfig.speedRange[1] - cameraConfig.speedRange[0]),
           plateNumber: generateCameraSpecificPlate(currentCamera.id),
-          color: `hsl(${Math.random() * 360}, 70%, ${45 + Math.random() * 20}%)`,
-          lane: Math.floor(Math.random() * 3),
-          type: cameraConfig.vehicleTypes[Math.floor(Math.random() * cameraConfig.vehicleTypes.length)],
+          color: specs.color(),
+          lane,
+          type: vehicleType,
           id: `${currentCamera.id}-${i}`,
-          direction
+          direction,
+          size: { width: specs.width, height: specs.height },
+          lastDetectionTime: 0
         });
       }
     }
@@ -201,135 +299,168 @@ const LiveVideoCanvas = ({
     const animate = () => {
       // Enhanced gradient background with camera-specific styling
       const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      const cameraHue = parseInt(currentCamera.id.split('-')[1]) * 30;
-      gradient.addColorStop(0, `hsl(${220 + cameraHue % 60}, 25%, 8%)`);
-      gradient.addColorStop(0.6, `hsl(${220 + cameraHue % 60}, 20%, 12%)`);
-      gradient.addColorStop(1, `hsl(${220 + cameraHue % 60}, 15%, 18%)`);
+      const cameraHue = parseInt(currentCamera.id.split('-')[1]) * 45;
+      const envColors = {
+        'highway': [220, 25, 8],
+        'city': [200, 30, 12],
+        'toll-plaza': [180, 35, 15],
+        'rural': [160, 20, 10],
+        'commercial': [240, 28, 14],
+        'suburban': [140, 25, 11],
+        'residential': [120, 22, 9],
+        'expressway': [260, 32, 16]
+      };
+      
+      const [h, s, l] = envColors[cameraConfig.environment as keyof typeof envColors] || envColors.highway;
+      gradient.addColorStop(0, `hsl(${(h + cameraHue) % 360}, ${s}%, ${l}%)`);
+      gradient.addColorStop(0.6, `hsl(${(h + cameraHue) % 360}, ${s-5}%, ${l+4}%)`);
+      gradient.addColorStop(1, `hsl(${(h + cameraHue) % 360}, ${s-10}%, ${l+8}%)`);
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Enhanced road with camera-specific markings
-      ctx.fillStyle = '#374151';
-      ctx.fillRect(0, canvas.height * 0.6, canvas.width, canvas.height * 0.4);
-
-      // Dynamic lane markings based on traffic density
-      ctx.strokeStyle = cameraConfig.trafficDensity === 'high' ? '#fbbf24' : '#ffffff';
-      ctx.setLineDash([12, 8]);
-      ctx.lineWidth = cameraConfig.trafficDensity === 'high' ? 3 : 2;
+      // Enhanced road with camera-specific styling
+      const roadHeight = canvas.height * 0.45;
+      const roadY = canvas.height * 0.55;
       
-      for (let i = 1; i < 3; i++) {
+      ctx.fillStyle = cameraConfig.roadColor;
+      ctx.fillRect(0, roadY, canvas.width, roadHeight);
+
+      // Dynamic lane markings based on lane count and traffic density
+      ctx.strokeStyle = cameraConfig.trafficDensity === 'very-high' ? '#f59e0b' : 
+                       cameraConfig.trafficDensity === 'high' ? '#fbbf24' : '#ffffff';
+      ctx.setLineDash([15, 10]);
+      ctx.lineWidth = cameraConfig.laneCount > 4 ? 4 : 3;
+      
+      const laneHeight = roadHeight / cameraConfig.laneCount;
+      for (let i = 1; i < cameraConfig.laneCount; i++) {
         ctx.beginPath();
-        ctx.moveTo(0, canvas.height * (0.6 + i * 0.1));
-        ctx.lineTo(canvas.width, canvas.height * (0.6 + i * 0.1));
+        ctx.moveTo(0, roadY + i * laneHeight);
+        ctx.lineTo(canvas.width, roadY + i * laneHeight);
         ctx.stroke();
       }
 
       // Enhanced road borders
       ctx.setLineDash([]);
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = cameraConfig.trafficDensity === 'high' ? '#ef4444' : '#facc15';
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = cameraConfig.environment === 'toll-plaza' ? '#ef4444' : 
+                       cameraConfig.trafficDensity === 'very-high' ? '#f59e0b' : '#facc15';
       ctx.beginPath();
-      ctx.moveTo(0, canvas.height * 0.6);
-      ctx.lineTo(canvas.width, canvas.height * 0.6);
+      ctx.moveTo(0, roadY);
+      ctx.lineTo(canvas.width, roadY);
       ctx.stroke();
 
-      // Animate vehicles with enhanced movement
+      // Animate vehicles with unique movement patterns
       vehiclePositions.current.forEach((vehicle, index) => {
         const moveDirection = vehicle.direction === 'right' ? 1 : -1;
         vehicle.x += vehicle.speed * moveDirection;
         
-        // Reset vehicle position based on direction
-        if ((vehicle.direction === 'right' && vehicle.x > canvas.width + 120) ||
-            (vehicle.direction === 'left' && vehicle.x < -120)) {
-          vehicle.x = vehicle.direction === 'right' ? -120 : canvas.width + 120;
+        // Calculate lane position
+        const laneHeight = roadHeight / cameraConfig.laneCount;
+        vehicle.y = roadY + (vehicle.lane * laneHeight) + (laneHeight - vehicle.size.height) / 2;
+        
+        // Reset vehicle position with new characteristics
+        if ((vehicle.direction === 'right' && vehicle.x > canvas.width + vehicle.size.width + 50) ||
+            (vehicle.direction === 'left' && vehicle.x < -vehicle.size.width - 50)) {
+          
+          vehicle.x = vehicle.direction === 'right' ? 
+            -vehicle.size.width - Math.random() * 150 : 
+            canvas.width + vehicle.size.width + Math.random() * 150;
+          
           vehicle.plateNumber = generateCameraSpecificPlate(currentCamera.id);
-          vehicle.color = `hsl(${Math.random() * 360}, 70%, ${45 + Math.random() * 20}%)`;
-          vehicle.lane = Math.floor(Math.random() * 3);
+          const newType = cameraConfig.vehicleTypes[Math.floor(Math.random() * cameraConfig.vehicleTypes.length)];
+          const newSpecs = getVehicleSpecs(newType);
+          vehicle.type = newType;
+          vehicle.size = { width: newSpecs.width, height: newSpecs.height };
+          vehicle.color = newSpecs.color();
+          vehicle.lane = Math.floor(Math.random() * cameraConfig.laneCount);
+          vehicle.speed = cameraConfig.speedRange[0] + Math.random() * (cameraConfig.speedRange[1] - cameraConfig.speedRange[0]);
         }
 
-        const laneY = canvas.height * (0.62 + vehicle.lane * 0.12);
-        
-        // Enhanced vehicle rendering
-        let vehicleWidth = 80;
-        let vehicleHeight = 25;
-        
-        switch (vehicle.type) {
-          case 'truck':
-            vehicleWidth = 120;
-            vehicleHeight = 35;
-            break;
-          case 'bus':
-            vehicleWidth = 140;
-            vehicleHeight = 40;
-            break;
-          case 'motorcycle':
-            vehicleWidth = 40;
-            vehicleHeight = 15;
-            break;
-        }
-        
-        // Vehicle shadow
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-        ctx.fillRect(vehicle.x + 2, laneY + 2, vehicleWidth, vehicleHeight);
+        // Enhanced vehicle rendering with shadows and details
+        const shadowOffset = 3;
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.fillRect(vehicle.x + shadowOffset, vehicle.y + shadowOffset, vehicle.size.width, vehicle.size.height);
         
         // Vehicle body with gradient
-        const vehicleGradient = ctx.createLinearGradient(vehicle.x, laneY, vehicle.x, laneY + vehicleHeight);
+        const vehicleGradient = ctx.createLinearGradient(vehicle.x, vehicle.y, vehicle.x, vehicle.y + vehicle.size.height);
         vehicleGradient.addColorStop(0, vehicle.color);
-        vehicleGradient.addColorStop(1, vehicle.color.replace(/\d+%\)$/, '35%)'));
+        vehicleGradient.addColorStop(1, vehicle.color.replace(/\d+%\)$/, '25%)'));
         ctx.fillStyle = vehicleGradient;
-        ctx.fillRect(vehicle.x, laneY, vehicleWidth, vehicleHeight);
+        ctx.fillRect(vehicle.x, vehicle.y, vehicle.size.width, vehicle.size.height);
         
-        // Enhanced vehicle details
-        ctx.fillStyle = '#87ceeb';
-        ctx.fillRect(vehicle.x + 10, laneY + 2, vehicleWidth - 20, vehicleHeight * 0.4);
+        // Vehicle details based on type
+        if (vehicle.type === 'bus') {
+          // Windows for bus
+          ctx.fillStyle = '#87ceeb';
+          for (let w = 0; w < 4; w++) {
+            ctx.fillRect(vehicle.x + 15 + w * 25, vehicle.y + 3, 20, vehicle.size.height * 0.4);
+          }
+        } else if (vehicle.type === 'truck') {
+          // Cabin and cargo for truck
+          ctx.fillStyle = '#4a5568';
+          ctx.fillRect(vehicle.x + vehicle.size.width * 0.7, vehicle.y, vehicle.size.width * 0.3, vehicle.size.height);
+        } else {
+          // Windshield for cars
+          ctx.fillStyle = '#87ceeb';
+          ctx.fillRect(vehicle.x + 8, vehicle.y + 2, vehicle.size.width - 16, vehicle.size.height * 0.4);
+        }
         
-        // License plate with better visibility
+        // License plate with enhanced visibility
         ctx.fillStyle = '#ffffff';
-        const plateWidth = Math.min(50, vehicleWidth * 0.6);
-        const plateHeight = 10;
-        ctx.fillRect(vehicle.x + (vehicleWidth - plateWidth) / 2, laneY + vehicleHeight - 14, plateWidth, plateHeight);
+        const plateWidth = Math.min(45, vehicle.size.width * 0.6);
+        const plateHeight = 12;
+        const plateX = vehicle.x + (vehicle.size.width - plateWidth) / 2;
+        const plateY = vehicle.y + vehicle.size.height - 16;
+        ctx.fillRect(plateX, plateY, plateWidth, plateHeight);
         
-        // Enhanced plate text
+        // Plate text with better contrast
         ctx.fillStyle = '#000000';
-        ctx.font = 'bold 7px monospace';
+        ctx.font = 'bold 8px monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(
-          vehicle.plateNumber, 
-          vehicle.x + vehicleWidth / 2, 
-          laneY + vehicleHeight - 6
-        );
+        const plateText = vehicle.plateNumber.length > 10 ? 
+          vehicle.plateNumber.substring(0, 10) : vehicle.plateNumber;
+        ctx.fillText(plateText, plateX + plateWidth / 2, plateY + 9);
         ctx.textAlign = 'left';
 
-        // Enhanced detection zone
-        const detectionZoneStart = canvas.width * 0.35;
-        const detectionZoneEnd = canvas.width * 0.65;
+        // Enhanced detection zone with camera-specific settings
+        const detectionZoneStart = canvas.width * cameraConfig.detectionZone.start;
+        const detectionZoneEnd = canvas.width * cameraConfig.detectionZone.end;
         
-        if (vehicle.x > detectionZoneStart && vehicle.x < detectionZoneEnd) {
-          // Multi-colored detection box
-          ctx.strokeStyle = '#10b981';
-          ctx.lineWidth = 2;
-          ctx.setLineDash([3, 3]);
-          ctx.strokeRect(vehicle.x - 5, laneY - 5, vehicleWidth + 10, vehicleHeight + 10);
+        if (vehicle.x + vehicle.size.width > detectionZoneStart && vehicle.x < detectionZoneEnd) {
+          const now = Date.now();
           
-          // Enhanced scanning animation
-          const scanProgress = ((Date.now() + index * 200) % 2000) / 2000;
-          const scanLineX = vehicle.x + scanProgress * vehicleWidth;
+          // Detection highlighting
+          ctx.strokeStyle = '#10b981';
+          ctx.lineWidth = 3;
+          ctx.setLineDash([4, 4]);
+          ctx.strokeRect(vehicle.x - 6, vehicle.y - 6, vehicle.size.width + 12, vehicle.size.height + 12);
+          
+          // Scanning animation
+          const scanProgress = ((now + index * 300) % 2500) / 2500;
+          const scanLineX = vehicle.x + scanProgress * vehicle.size.width;
           ctx.strokeStyle = '#22d3ee';
           ctx.lineWidth = 2;
           ctx.setLineDash([]);
           ctx.beginPath();
-          ctx.moveTo(scanLineX, laneY - 5);
-          ctx.lineTo(scanLineX, laneY + vehicleHeight + 5);
+          ctx.moveTo(scanLineX, vehicle.y - 6);
+          ctx.lineTo(scanLineX, vehicle.y + vehicle.size.height + 6);
           ctx.stroke();
           
-          // Enhanced detection info
+          // Play detection sound occasionally
+          if (now - vehicle.lastDetectionTime > 5000 && Math.random() > 0.98) {
+            playDetectionSound(600, 150);
+            vehicle.lastDetectionTime = now;
+          }
+          
+          // Detection info overlay
           ctx.fillStyle = 'rgba(16, 185, 129, 0.9)';
-          ctx.fillRect(vehicle.x, laneY - 30, vehicleWidth, 22);
+          ctx.fillRect(vehicle.x, vehicle.y - 35, vehicle.size.width, 28);
           ctx.fillStyle = '#ffffff';
           ctx.font = 'bold 8px monospace';
           ctx.textAlign = 'center';
-          ctx.fillText(`SCANNING: ${vehicle.plateNumber.slice(0, 8)}`, vehicle.x + vehicleWidth / 2, laneY - 16);
-          ctx.fillText(`Conf: ${(85 + Math.random() * 15).toFixed(1)}%`, vehicle.x + vehicleWidth / 2, laneY - 8);
+          ctx.fillText(`SCAN: ${plateText.slice(0, 9)}`, vehicle.x + vehicle.size.width / 2, vehicle.y - 22);
+          const confidence = 87 + Math.random() * 12;
+          ctx.fillText(`${confidence.toFixed(1)}% • ${vehicle.type.toUpperCase()}`, vehicle.x + vehicle.size.width / 2, vehicle.y - 12);
           ctx.textAlign = 'left';
         }
       });
@@ -430,7 +561,7 @@ const LiveVideoCanvas = ({
           Load: {processingLoad.toFixed(0)}%
         </div>
       </div>
-
+      
       <DetectionOverlay 
         detectedPlate={detectedPlate}
         confidence={confidence}
