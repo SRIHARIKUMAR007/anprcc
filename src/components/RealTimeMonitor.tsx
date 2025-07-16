@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,10 +32,10 @@ interface LocationData {
 }
 
 const RealTimeMonitor = () => {
-  const { liveData, isLiveMode, toggleLiveMode, getSystemMetrics, detections, cameras } = useRealTimeIntegration();
+  const { liveData, isLiveMode, toggleLiveMode, getEnhancedSystemMetrics, detections, cameras } = useRealTimeIntegration();
   const [selectedDistrict, setSelectedDistrict] = useState('All Districts');
   const [locationData, setLocationData] = useState<LocationData[]>([]);
-  const [systemMetrics, setSystemMetrics] = useState(getSystemMetrics());
+  const [systemMetrics, setSystemMetrics] = useState(getEnhancedSystemMetrics());
 
   // Tamil Nadu districts and key locations
   const tamilNaduLocations: LocationData[] = [
@@ -171,11 +170,11 @@ const RealTimeMonitor = () => {
         lastUpdate: new Date().toISOString()
       })));
 
-      setSystemMetrics(getSystemMetrics());
+      setSystemMetrics(getEnhancedSystemMetrics());
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [isLiveMode, getSystemMetrics]);
+  }, [isLiveMode, getEnhancedSystemMetrics]);
 
   const filteredLocations = selectedDistrict === 'All Districts' ? 
     locationData : locationData.filter(loc => loc.district === selectedDistrict);

@@ -195,6 +195,7 @@ export const useRealTimeIntegration = () => {
     };
 
     // Optimized interval timing
+    const activeCameras = cameras.filter(c => c.status === 'active');
     const intervalTime = activeCameras.length > 6 ? 3000 : 2500;
     detectionIntervalRef.current = setInterval(processDetections, intervalTime);
 
