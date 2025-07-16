@@ -44,21 +44,13 @@ const LiveVideoCanvas = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const vehiclePositions = useRef<Vehicle[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
-  const lastVehicleCountRef = useRef<number>(0);
+  const animationFrameRef = useRef<number | null>(null);
   const [networkLatency, setNetworkLatency] = useState(12);
   const [fps, setFps] = useState(frameRate);
   const [processingLoad, setProcessingLoad] = useState(45);
   const [isAlert, setIsAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [timestamp, setTimestamp] = useState(new Date());
-
-  // Throttled vehicle count update to prevent infinite loops
-  const throttledVehicleCountUpdate = useCallback((count: number) => {
-    if (lastVehicleCountRef.current !== count) {
-      lastVehicleCountRef.current = count;
-      onVehicleCountUpdate(count);
-    }
-  }, [onVehicleCountUpdate]);
 
   // Initialize audio context
   useEffect(() => {
@@ -117,7 +109,7 @@ const LiveVideoCanvas = ({
     const configs = {
       'CAM-01': { 
         vehicleCount: 8, 
-        speedRange: [3.5, 5.2], 
+        speedRange: [4.5, 7.2], 
         vehicleTypes: ['car', 'truck', 'bus', 'motorcycle'],
         trafficDensity: 'high',
         direction: 'bidirectional',
@@ -127,7 +119,7 @@ const LiveVideoCanvas = ({
       },
       'CAM-02': { 
         vehicleCount: 5, 
-        speedRange: [2.8, 4.5], 
+        speedRange: [3.8, 6.5], 
         vehicleTypes: ['car', 'motorcycle', 'auto'],
         trafficDensity: 'medium',
         direction: 'left-to-right',
@@ -137,7 +129,7 @@ const LiveVideoCanvas = ({
       },
       'CAM-03': { 
         vehicleCount: 12, 
-        speedRange: [1.8, 3.2], 
+        speedRange: [2.8, 4.2], 
         vehicleTypes: ['car', 'truck', 'bus', 'motorcycle', 'auto'],
         trafficDensity: 'very-high',
         direction: 'bidirectional',
@@ -147,7 +139,7 @@ const LiveVideoCanvas = ({
       },
       'CAM-04': { 
         vehicleCount: 3, 
-        speedRange: [4.2, 6.5], 
+        speedRange: [5.2, 8.5], 
         vehicleTypes: ['car', 'truck'],
         trafficDensity: 'low',
         direction: 'right-to-left',
@@ -157,7 +149,7 @@ const LiveVideoCanvas = ({
       },
       'CAM-05': { 
         vehicleCount: 9, 
-        speedRange: [2.5, 4.2], 
+        speedRange: [3.5, 5.2], 
         vehicleTypes: ['car', 'bus', 'motorcycle', 'auto'],
         trafficDensity: 'high',
         direction: 'left-to-right',
@@ -167,7 +159,7 @@ const LiveVideoCanvas = ({
       },
       'CAM-06': { 
         vehicleCount: 6, 
-        speedRange: [3.0, 5.0], 
+        speedRange: [4.0, 6.0], 
         vehicleTypes: ['car', 'truck', 'motorcycle'],
         trafficDensity: 'medium',
         direction: 'bidirectional',
@@ -177,7 +169,7 @@ const LiveVideoCanvas = ({
       },
       'CAM-07': { 
         vehicleCount: 4, 
-        speedRange: [3.8, 5.8], 
+        speedRange: [4.8, 7.8], 
         vehicleTypes: ['car', 'motorcycle'],
         trafficDensity: 'medium-low',
         direction: 'right-to-left',
@@ -187,7 +179,7 @@ const LiveVideoCanvas = ({
       },
       'CAM-08': { 
         vehicleCount: 10, 
-        speedRange: [3.2, 4.8], 
+        speedRange: [4.2, 6.8], 
         vehicleTypes: ['car', 'truck', 'bus'],
         trafficDensity: 'high',
         direction: 'left-to-right',
@@ -249,20 +241,24 @@ const LiveVideoCanvas = ({
         
         setTimeout(() => setIsAlert(false), 4000);
       }
-    }, 2000);
+    }, 3000);
 
     return () => clearInterval(metricsInterval);
   }, [isRecording, frameRate, currentCamera, getCameraConfig, playDetectionSound]);
 
   // Main animation effect
   useEffect(() => {
-    if (!canvasRef.current || !isRecording || !currentCamera || currentCamera.status !== 'active') return;
+    if (!canvasRef.current || !isRecording || !currentCamera || currentCamera.status !== 'active') {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      return;
+    }
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animationId: number;
     const cameraConfig = getCameraConfig(currentCamera.id);
 
     // Initialize vehicles for current camera
@@ -299,6 +295,8 @@ const LiveVideoCanvas = ({
     }
 
     const animate = () => {
+      if (!ctx || !canvas) return;
+
       // Enhanced gradient background
       const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
       const cameraHue = parseInt(currentCamera.id.split('-')[1]) * 45;
@@ -491,18 +489,21 @@ const LiveVideoCanvas = ({
         ctx.textAlign = 'left';
       }
 
-      // Update vehicle count (throttled to prevent infinite loops)
-      throttledVehicleCountUpdate(vehiclePositions.current.length);
+      // Update vehicle count
+      onVehicleCountUpdate(vehiclePositions.current.length);
       
-      animationId = requestAnimationFrame(animate);
+      animationFrameRef.current = requestAnimationFrame(animate);
     };
 
     animate();
 
     return () => {
-      if (animationId) cancelAnimationFrame(animationId);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
     };
-  }, [isRecording, currentCamera, frameRate, getCameraConfig, getVehicleSpecs, generateCameraSpecificPlate, playDetectionSound, throttledVehicleCountUpdate, fps, networkLatency, processingLoad, isAlert, alertMessage, timestamp]);
+  }, [isRecording, currentCamera, frameRate, getCameraConfig, getVehicleSpecs, generateCameraSpecificPlate, playDetectionSound, onVehicleCountUpdate, fps, networkLatency, processingLoad, isAlert, alertMessage, timestamp]);
 
   return (
     <div className={`relative bg-gradient-to-br from-slate-700 to-slate-800 rounded-lg overflow-hidden ${

@@ -48,7 +48,7 @@ const LiveFeed = () => {
 
   const { isBackendConnected, connectionHealth, isConnected, systemStats, detections } = useEnhancedBackendIntegration();
 
-  // Memoized enhanced analytics for better performance
+  // Stable memoized analytics to prevent re-renders
   const liveAnalytics = useMemo(() => {
     const metrics = getEnhancedSystemMetrics();
     return {
@@ -62,9 +62,9 @@ const LiveFeed = () => {
         [cam.camera_id]: getCameraPerformance(cam.camera_id).performanceScore
       }), {} as Record<string, number>)
     };
-  }, [getEnhancedSystemMetrics, getCameraPerformance, realCameras]);
+  }, [realCameras.length, detections.length]); // Only depend on length to avoid deep comparisons
 
-  // Transform real cameras with enhanced performance data
+  // Stable memoized cameras array
   const transformedRealCameras: LiveFeedCamera[] = useMemo(() => {
     return realCameras.map((camera: CameraType) => {
       const performance = getCameraPerformance(camera.camera_id);
@@ -84,67 +84,39 @@ const LiveFeed = () => {
         direction: ["North-South", "East-West", "Bidirectional", "Multi-directional"][Math.floor(Math.random() * 4)]
       };
     });
-  }, [realCameras, getCameraPerformance, liveData]);
+  }, [realCameras.length]); // Only depend on length
 
   const cameras = transformedRealCameras.length > 0 ? transformedRealCameras : mockCameras;
-  const currentCamera = cameras.find(cam => cam.id === selectedCamera);
+  const currentCamera = useMemo(() => 
+    cameras.find(cam => cam.id === selectedCamera), 
+    [cameras, selectedCamera]
+  );
 
-  // Enhanced plate detection with performance optimization
-  useEffect(() => {
-    if (!isRecording || !isLiveMode) return;
-
-    const interval = setInterval(() => {
-      const currentIndex = processingSteps.indexOf(processingStep);
-      const nextIndex = (currentIndex + 1) % processingSteps.length;
-      setProcessingStep(processingSteps[nextIndex]);
-
-      // Camera-specific detection probability
-      const cameraPerformance = getCameraPerformance(selectedCamera);
-      const detectionProbability = cameraPerformance.performanceScore > 90 ? 0.25 : 0.15;
-      
-      if (Math.random() < detectionProbability) {
-        processAIDetection(selectedCamera).then(aiData => {
-          if (aiData) {
-            setDetectedPlate(aiData.plateNumber);
-            setConfidence(aiData.confidence);
-            
-            const displayTime = aiData.confidence > 90 ? 4000 : 2500;
-            setTimeout(() => {
-              setDetectedPlate(null);
-              setConfidence(0);
-            }, displayTime);
-          }
-        });
-      }
-    }, performanceOptimized ? 1200 : 2000);
-
-    return () => clearInterval(interval);
-  }, [isRecording, isLiveMode, processingStep, performanceOptimized, processAIDetection, selectedCamera, getCameraPerformance]);
-
+  // Stable callback functions
   const handleCameraSelect = useCallback((cameraId: string) => {
     setSelectedCamera(cameraId);
   }, []);
 
   const handleRecordingToggle = useCallback(() => {
-    setIsRecording(!isRecording);
-  }, [isRecording]);
+    setIsRecording(prev => !prev);
+  }, []);
 
   const handleFullscreenToggle = useCallback(() => {
-    setIsFullscreen(!isFullscreen);
-  }, [isFullscreen]);
+    setIsFullscreen(prev => !prev);
+  }, []);
 
   const handleAudioToggle = useCallback(() => {
-    setAudioEnabled(!audioEnabled);
-  }, [audioEnabled]);
+    setAudioEnabled(prev => !prev);
+  }, []);
 
   const handleVehicleCountUpdate = useCallback((count: number) => {
     setVehicleCount(count);
   }, []);
 
   const toggleLiveMode = useCallback(() => {
-    setIsLiveMode(!isLiveMode);
+    setIsLiveMode(prev => !prev);
     toggleRealTimeMode();
-  }, [isLiveMode, toggleRealTimeMode]);
+  }, [toggleRealTimeMode]);
 
   const getConnectionStatus = useCallback(() => {
     if (connectionHealth.backend && connectionHealth.database) {
@@ -154,7 +126,35 @@ const LiveFeed = () => {
     } else {
       return { status: 'Demo Mode', color: 'bg-cyan-400/10 text-cyan-300 border-cyan-400/30' };
     }
-  }, [connectionHealth]);
+  }, [connectionHealth.backend, connectionHealth.database]);
+
+  // Simplified detection effect with proper dependencies
+  useEffect(() => {
+    if (!isRecording || !isLiveMode) return;
+
+    const interval = setInterval(() => {
+      const currentIndex = processingSteps.indexOf(processingStep);
+      const nextIndex = (currentIndex + 1) % processingSteps.length;
+      setProcessingStep(processingSteps[nextIndex]);
+
+      // Simple detection probability
+      if (Math.random() < 0.15) {
+        processAIDetection(selectedCamera).then(aiData => {
+          if (aiData) {
+            setDetectedPlate(aiData.plateNumber);
+            setConfidence(aiData.confidence);
+            
+            setTimeout(() => {
+              setDetectedPlate(null);
+              setConfidence(0);
+            }, 3000);
+          }
+        });
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [isRecording, isLiveMode, processingStep, selectedCamera]); // Removed processAIDetection from deps
 
   const connectionStatus = getConnectionStatus();
 
